@@ -4,32 +4,31 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const SLIDES = [
     {
         title: "Každodenní elegance z Itálie",
-        description: "Kabelky, které doplní váš den a podtrhnou vaši jedinečnost.",
+        description: "Kabelky, které doplní váš den – stylové, lehké a vždy připravené vyrazit s vámi.",
         button: "Prohlédnout kabelky",
         link: "/kabelky",
         bg: "/assets/bg/hero-slider-1.webp",
-        overlayImage: "/assets/products/elis-bezova.webp" // Placeholder until actual cutouts are available
+        overlayImage: "/assets/products/cutout-1.webp"
     },
     {
         title: "Lehkost v pohybu",
-        description: "Pro chвіle, kdy potřebujete mít styl і pohodlí. Objevte naše batohy.",
+        description: "Pro chvíle, kdy potřebujete mít styl i pohodlí. Italské kabelky a batohy pro váš volný den.",
         button: "Objevte batohy",
         link: "/batohy",
         bg: "/assets/bg/hero-slider-2.webp",
-        overlayImage: "/assets/products/viko-cerna.webp" // Placeholder
+        overlayImage: "/assets/products/cutout-2.png"
     },
     {
         title: "Síla elegance",
-        description: "Klasický design, pravá kůže, dokonalé zpracování. To je Lumera.",
+        description: "Klasický design, pravá kůže, dokonalé zpracování. Kabelky, které podtrhnou vaši sebedůvěru.",
         button: "Vyberte si svůj styl",
         link: "/shop",
         bg: "/assets/bg/hero-slider-3.webp",
-        overlayImage: "/assets/products/elis-taupe.webp" // Placeholder
+        overlayImage: "/assets/products/cutout-3.png"
     }
 ];
 
@@ -40,7 +39,7 @@ const MarketingSlider = () => {
     useEffect(() => {
         const timer = setInterval(() => {
             paginate(1);
-        }, 5000);
+        }, 7000); // Increased duration to match live site better
         return () => clearInterval(timer);
     }, [current]);
 
@@ -49,10 +48,10 @@ const MarketingSlider = () => {
         setCurrent((prev) => (prev + newDirection + SLIDES.length) % SLIDES.length);
     };
 
-    const variants = {
+    const slideVariants = {
         enter: (direction: number) => ({
-            x: direction > 0 ? '100%' : '-100%',
-            opacity: 1
+            opacity: 0,
+            x: direction > 0 ? '10%' : '-10%'
         }),
         center: {
             zIndex: 1,
@@ -61,84 +60,82 @@ const MarketingSlider = () => {
         },
         exit: (direction: number) => ({
             zIndex: 0,
-            x: direction < 0 ? '100%' : '-100%',
-            opacity: 1
+            x: direction < 0 ? '10%' : '-10%',
+            opacity: 0
         })
     };
 
     return (
         <section className="bg-white overflow-hidden py-0" id="block-4">
-            <div className="max-w-[1140px] mx-auto relative h-[666px] overflow-hidden bg-[#111111]">
+            <div className="max-w-[1140px] mx-auto relative h-[644px] overflow-hidden bg-[#111111]">
+                {/* Slides Container */}
                 <div className="relative h-full w-full">
                     <AnimatePresence initial={false} custom={direction}>
                         <motion.div
                             key={current}
                             custom={direction}
-                            variants={variants}
+                            variants={slideVariants}
                             initial="enter"
                             animate="center"
                             exit="exit"
                             transition={{
-                                x: { type: "tween", duration: 0.6, ease: [0.4, 0, 0.2, 1] },
-                                opacity: { duration: 0.2 }
+                                x: { type: "tween", duration: 0.8, ease: "easeOut" },
+                                opacity: { duration: 0.4 }
                             }}
                             className="absolute inset-0 w-full h-full"
-                            style={{ willChange: 'transform' }}
                         >
+                            {/* Background Image */}
                             <Image
                                 src={SLIDES[current].bg}
-                                alt={SLIDES[current].title}
+                                alt=""
                                 fill
                                 className="object-cover"
-                                priority={current === 0}
+                                priority
                             />
-                            <div className="absolute inset-0 bg-black/20" />
+                            {/* Overlay Shading */}
+                            <div className="absolute inset-0 bg-black/30" />
 
+                            {/* Content Layout */}
                             <div className="absolute inset-0 flex items-center">
-                                <div className="grid grid-cols-1 lg:grid-cols-2 w-full px-[50px] items-center">
+                                <div className="max-w-[1140px] mx-auto w-full px-[50px] grid grid-cols-1 lg:grid-cols-2 items-center">
                                     {/* Left Content */}
-                                    <div className="text-left text-white max-w-[616px] z-10">
+                                    <div className="text-left text-white z-10">
                                         <motion.h2
-                                            initial={{ x: -25, opacity: 0 }}
-                                            animate={{ x: 0, opacity: 1 }}
-                                            transition={{ delay: 0.2, duration: 1 }}
-                                            className="text-[48px] font-serif font-bold mb-6"
+                                            initial={{ opacity: 0, y: 15 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 0.3, duration: 0.8 }}
+                                            className="text-[48px] font-serif font-bold leading-[1.1] mb-6"
                                             style={{
-                                                maxWidth: '538px',
-                                                textShadow: '2px 2px 8px rgba(0,0,0,0.4)',
                                                 fontFamily: '"Cormorant Garamond", serif',
-                                                lineHeight: '1.1'
+                                                maxWidth: '540px'
                                             }}
                                         >
                                             {SLIDES[current].title}
                                         </motion.h2>
                                         <motion.p
-                                            initial={{ x: -25, opacity: 0 }}
-                                            animate={{ x: 0, opacity: 1 }}
-                                            transition={{ delay: 0.4, duration: 1 }}
-                                            className="text-[16px] font-sans font-light mb-0"
+                                            initial={{ opacity: 0, y: 15 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 0.5, duration: 0.8 }}
+                                            className="text-[16px] font-sans font-normal leading-[1.6] mb-0"
                                             style={{
-                                                maxWidth: '616px',
-                                                textShadow: '2px 2px 8px rgba(0,0,0,0.4)',
                                                 fontFamily: '"Work Sans", sans-serif',
-                                                lineHeight: '1.6'
+                                                maxWidth: '430px'
                                             }}
                                         >
                                             {SLIDES[current].description}
                                         </motion.p>
                                         <motion.div
-                                            initial={{ x: -25, opacity: 0 }}
-                                            animate={{ x: 0, opacity: 1 }}
-                                            transition={{ delay: 0.6, duration: 1 }}
+                                            initial={{ opacity: 0, y: 15 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 0.7, duration: 0.8 }}
                                             className="mt-[40px]"
                                         >
                                             <Link
                                                 href={SLIDES[current].link}
-                                                className="inline-block bg-white text-black text-[16px] font-medium hover:bg-[#111111] hover:text-white transition-colors duration-300"
+                                                className="inline-block bg-white text-black text-[16px] font-normal hover:bg-[#111111] hover:text-white transition-all duration-300"
                                                 style={{
                                                     padding: '10px 30px',
                                                     borderRadius: '0px',
-                                                    boxShadow: 'none',
                                                     fontFamily: '"Work Sans", sans-serif'
                                                 }}
                                             >
@@ -148,19 +145,19 @@ const MarketingSlider = () => {
                                     </div>
 
                                     {/* Right Overlay Image */}
-                                    <div className="hidden lg:flex justify-end pr-[20px]">
+                                    <div className="hidden lg:flex justify-end pr-0">
                                         <motion.div
-                                            initial={{ opacity: 0, scale: 0.95, x: 20 }}
-                                            animate={{ opacity: 1, scale: 1, x: 0 }}
-                                            transition={{ delay: 0.1, duration: 1 }}
-                                            className="relative w-[450px] h-[550px]"
+                                            initial={{ opacity: 0, x: 50 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: 0.2, duration: 1 }}
+                                            className="relative w-[480px] h-[580px]"
                                         >
                                             <Image
                                                 src={SLIDES[current].overlayImage}
                                                 alt=""
                                                 fill
                                                 className="object-contain"
-                                                sizes="450px"
+                                                priority
                                             />
                                         </motion.div>
                                     </div>
@@ -169,33 +166,42 @@ const MarketingSlider = () => {
                         </motion.div>
                     </AnimatePresence>
 
-                    {/* Navigation Arrows */}
+                    {/* Custom Navigation Arrows */}
                     <button
                         onClick={() => paginate(-1)}
-                        className="absolute left-[10px] top-1/2 -translate-y-1/2 z-[20] w-[36px] h-[36px] border-[1.6px] border-white flex items-center justify-center rounded-full text-white hover:bg-white hover:text-black transition-all duration-300"
+                        className="absolute left-[10px] top-1/2 -translate-y-1/2 z-20 w-[36px] h-[36px] rounded-full border-[1.6px] border-white/50 flex items-center justify-center text-white hover:border-white hover:bg-white/10 transition-all group"
+                        aria-label="Previous"
                     >
-                        <ChevronLeft size={20} strokeWidth={1.5} />
+                        <svg className="w-[18px] h-[18px] fill-current" viewBox="0 0 477.175 477.175">
+                            <path d="M145.188,238.575l215.5-215.5c5.3-5.3,5.3-13.8,0-19.1s-13.8-5.3-19.1,0l-225.1,225.1c-5.3,5.3-5.3,13.8,0,19.1l225.1,225
+                            c2.6,2.6,6.1,4,9.5,4s6.9-1.3,9.5-4c5.3-5.3,5.3-13.8,0-19.1L145.188,238.575z"></path>
+                        </svg>
                     </button>
                     <button
                         onClick={() => paginate(1)}
-                        className="absolute right-[10px] top-1/2 -translate-y-1/2 z-[20] w-[36px] h-[36px] border-[1.6px] border-white flex items-center justify-center rounded-full text-white hover:bg-white hover:text-black transition-all duration-300"
+                        className="absolute right-[10px] top-1/2 -translate-y-1/2 z-20 w-[36px] h-[36px] rounded-full border-[1.6px] border-white/50 flex items-center justify-center text-white hover:border-white hover:bg-white/10 transition-all group"
+                        aria-label="Next"
                     >
-                        <ChevronRight size={20} strokeWidth={1.5} />
+                        <svg className="w-[18px] h-[18px] fill-current" viewBox="0 0 477.175 477.175">
+                            <path d="M360.731,229.075l-225.1-225.1c-5.3-5.3-13.8-5.3-19.1,0s-5.3,13.8,0,19.1l215.5,215.5l-215.5,215.5
+                            c-5.3,5.3-5.3,13.8,0,19.1c2.6,2.6,6.1,4,9.5,4c3.4,0,6.9-1.3,9.5-4l225.1-225.1C365.931,242.875,365.931,234.275,360.731,229.075z"></path>
+                        </svg>
                     </button>
-                </div>
 
-                {/* Dots */}
-                <div className="absolute bottom-[10px] left-1/2 -translate-x-1/2 flex gap-[6px] z-[15]">
-                    {SLIDES.map((_, idx) => (
-                        <button
-                            key={idx}
-                            onClick={() => {
-                                setDirection(idx > current ? 1 : -1);
-                                setCurrent(idx);
-                            }}
-                            className={`w-[10px] h-[10px] rounded-full transition-all ${current === idx ? 'bg-white' : 'bg-[#b3b3b3]'}`}
-                        />
-                    ))}
+                    {/* Pagination Dots */}
+                    <div className="absolute bottom-[20px] left-1/2 -translate-x-1/2 flex gap-[6px] z-20">
+                        {SLIDES.map((_, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => {
+                                    setDirection(idx > current ? 1 : -1);
+                                    setCurrent(idx);
+                                }}
+                                className={`w-[10px] h-[10px] rounded-full transition-all duration-300 ${current === idx ? 'bg-white scale-110' : 'bg-white/40 hover:bg-white/60'}`}
+                                aria-label={`Go to slide ${idx + 1}`}
+                            />
+                        ))}
+                    </div>
                 </div>
             </div>
         </section>
@@ -203,3 +209,4 @@ const MarketingSlider = () => {
 };
 
 export default MarketingSlider;
+
