@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Lato } from "next/font/google";
+import { Cormorant_Garamond, Work_Sans } from "next/font/google";
 import "./globals.css";
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
+const cormorantGaramond = Cormorant_Garamond({
+  variable: "--font-serif",
+  subsets: ["latin", "latin-ext"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
-const lato = Lato({
-  variable: "--font-lato",
-  weight: ["100", "300", "400", "700", "900"],
-  subsets: ["latin"],
+const workSans = Work_Sans({
+  variable: "--font-sans",
+  subsets: ["latin", "latin-ext"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
@@ -26,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="cs">
       <body
-        className={`${playfair.variable} ${lato.variable} antialiased font-sans`}
+        className={`${cormorantGaramond.variable} ${workSans.variable} antialiased font-sans`}
       >
         {children}
       </body>

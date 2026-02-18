@@ -1,79 +1,89 @@
 import Link from 'next/link';
-import { Facebook, Instagram, Mail, Phone, MapPin } from 'lucide-react';
+import Image from 'next/image';
+import { Facebook, Instagram, Mail, Phone } from 'lucide-react';
 
 const Footer = () => {
     return (
-        <footer className="bg-neutral-50 pt-16 pb-8 border-t border-neutral-200">
-            <div className="container mx-auto px-4">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+        <footer className="bg-white border-t border-gray-100 pt-24 pb-12">
+            <div className="max-w-[1140px] mx-auto px-4 lg:px-0">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20 text-[#111111]">
                     {/* Brand Column */}
-                    <div className="flex flex-col space-y-4">
-                        <Link href="/" className="text-2xl font-serif font-bold tracking-widest text-gray-900">
-                            LUMERA
-                        </Link>
-                        <p className="text-gray-500 text-sm leading-relaxed">
-                            Elegantní kožené kabelky, peněženky a doplňky z Itálie. Pravá kůže, nadčasový styl a kvalita.
+                    <div className="flex flex-col space-y-8">
+                        <div className="relative w-[145px] h-[97px]">
+                            <Image
+                                src="/assets/logo.webp"
+                                alt="LUMERA"
+                                fill
+                                className="object-contain"
+                            />
+                        </div>
+                        <p className="text-gray-500 text-[15px] leading-relaxed font-light">
+                            LumeraShop.cz – obchod s italskými koženými kabelkami, peněženkami a doplňky. Pravá kůže, nadčasový styl a výběr modelů pro ženy, které hledají kvalitu.
                         </p>
-                        <div className="flex space-x-4 mt-4">
-                            <a href="#" className="text-gray-400 hover:text-black transition-colors">
-                                <Facebook size={20} />
-                            </a>
-                            <a href="#" className="text-gray-400 hover:text-black transition-colors">
-                                <Instagram size={20} />
-                            </a>
+                        <div className="flex space-x-6">
+                            <Link href="#" className="text-[#111111] hover:text-amber-800 transition-colors">
+                                <Facebook size={20} strokeWidth={1.5} />
+                            </Link>
+                            <Link href="#" className="text-[#111111] hover:text-amber-800 transition-colors">
+                                <Instagram size={20} strokeWidth={1.5} />
+                            </Link>
                         </div>
                     </div>
 
-                    {/* Quick Links */}
+                    {/* Shop Categories */}
                     <div>
-                        <h3 className="text-sm font-bold uppercase tracking-wider mb-4 text-gray-900">Obchod</h3>
-                        <ul className="space-y-2 text-sm text-gray-500">
-                            <li><Link href="/kabelky" className="hover:text-black transition-colors">Kabelky</Link></li>
-                            <li><Link href="/batohy" className="hover:text-black transition-colors">Batohy</Link></li>
-                            <li><Link href="/pasky" className="hover:text-black transition-colors">Pásky</Link></li>
-                            <li><Link href="/novinky" className="hover:text-black transition-colors">Novinky</Link></li>
-                            <li><Link href="/sale" className="hover:text-black transition-colors text-red-600">Výprodej</Link></li>
+                        <h3 className="text-[20px] font-serif font-bold mb-10">Nákup</h3>
+                        <ul className="space-y-4 text-[16px] text-[#111111] font-normal">
+                            <li><Link href="/kabelky" className="hover:text-amber-800 transition-colors">Doprava a platba</Link></li>
+                            <li><Link href="/panske-tasky" className="hover:text-amber-800 transition-colors">Reklamace a vrácení</Link></li>
+                            <li><Link href="/obchodni-podminky" className="hover:text-amber-800 transition-colors">Obchodní podmínky</Link></li>
+                            <li><Link href="/privacy" className="hover:text-amber-800 transition-colors">Ochrana soukromí</Link></li>
+                            <li><Link href="/terms" className="hover:text-amber-800 transition-colors">Cookies</Link></li>
                         </ul>
                     </div>
 
                     {/* Information */}
                     <div>
-                        <h3 className="text-sm font-bold uppercase tracking-wider mb-4 text-gray-900">Informace</h3>
-                        <ul className="space-y-2 text-sm text-gray-500">
-                            <li><Link href="/o-nas" className="hover:text-black transition-colors">O nás</Link></li>
-                            <li><Link href="/doprava-a-platba" className="hover:text-black transition-colors">Doprava a platba</Link></li>
-                            <li><Link href="/obchodni-podminky" className="hover:text-black transition-colors">Obchodní podmínky</Link></li>
-                            <li><Link href="/kontakt" className="hover:text-black transition-colors">Kontakt</Link></li>
-                            <li><Link href="/blog" className="hover:text-black transition-colors">Blog</Link></li>
-                        </ul>
+                        <h3 className="text-[20px] font-serif font-bold mb-10">Platby & Doprava</h3>
+                        <div className="flex flex-wrap gap-4 opacity-70 grayscale">
+                            {/* Payment/Shipping Icons would go here */}
+                            <div className="bg-gray-100 px-4 py-2 rounded-sm text-[12px] font-bold">VISA</div>
+                            <div className="bg-gray-100 px-4 py-2 rounded-sm text-[12px] font-bold">MasterCard</div>
+                            <div className="bg-gray-100 px-4 py-2 rounded-sm text-[12px] font-bold">DPD</div>
+                            <div className="bg-gray-100 px-4 py-2 rounded-sm text-[12px] font-bold">Packeta</div>
+                        </div>
                     </div>
 
                     {/* Contact */}
                     <div>
-                        <h3 className="text-sm font-bold uppercase tracking-wider mb-4 text-gray-900">Kontakt</h3>
-                        <ul className="space-y-3 text-sm text-gray-500">
-                            <li className="flex items-start space-x-3">
-                                <MapPin size={18} className="mt-0.5 flex-shrink-0" />
-                                <span>Praha, Česká republika</span>
+                        <h3 className="text-[20px] font-serif font-bold mb-10">Kontakt</h3>
+                        <ul className="space-y-5 text-[16px] text-[#111111] font-normal">
+                            <li className="flex items-center space-x-4">
+                                <Mail size={18} className="text-gray-400" />
+                                <a href="mailto:info@lumerashop.cz" className="hover:text-amber-800 transition-colors">info@lumerashop.cz</a>
                             </li>
-                            <li className="flex items-center space-x-3">
-                                <Phone size={18} className="flex-shrink-0" />
-                                <a href="tel:+420123456789" className="hover:text-black transition-colors">+420 123 456 789</a>
+                            <li className="flex items-center space-x-4">
+                                <Phone size={18} className="text-gray-400" />
+                                <a href="tel:+420775123456" className="hover:text-amber-800 transition-colors">+420 775 123 456</a>
                             </li>
-                            <li className="flex items-center space-x-3">
-                                <Mail size={18} className="flex-shrink-0" />
-                                <a href="mailto:info@lumerashop.cz" className="hover:text-black transition-colors">info@lumerashop.cz</a>
+                            <li className="text-gray-500 text-[14px] leading-relaxed italic mt-4">
+                                Adresa: Praha, Česká republika
                             </li>
                         </ul>
+                        <div className="mt-12">
+                            <h4 className="text-[12px] font-bold uppercase tracking-[0.2em] mb-4">Sledujte nás</h4>
+                            <p className="text-[13px] text-gray-400 leading-relaxed italic">
+                                Přidejte se k nám a objevujte svět italské módy každý den.
+                            </p>
+                        </div>
                     </div>
                 </div>
 
-                <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-400">
+                <div className="border-t border-gray-100 pt-12 flex flex-col md:flex-row justify-between items-center text-[13px] text-gray-400 font-light">
                     <p>&copy; {new Date().getFullYear()} LumeraShop.cz. Všechna práva vyhrazena.</p>
-                    <div className="flex space-x-4 mt-4 md:mt-0">
-                        <span>Visa</span>
-                        <span>Mastercard</span>
-                        <span>Apple Pay</span>
+                    <div className="flex space-x-8 mt-6 md:mt-0">
+                        <Link href="/privacy" className="hover:text-black transition-colors">Ochrana soukromí</Link>
+                        <Link href="/terms" className="hover:text-black transition-colors">Cookies</Link>
                     </div>
                 </div>
             </div>

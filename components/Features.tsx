@@ -1,55 +1,49 @@
-import { Truck, Award, Leaf, Heart } from 'lucide-react';
+'use client';
+import { Truck, ShieldCheck, Palette, Lock, Award, Heart } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Feature } from '../types/site';
+import { FEATURES_DATA } from '../data/site-data';
 
 const icons = {
-    italian: Award,
-    quality: Leaf, // Metaphor for natural leather
-    shipping: Truck,
-    personal: Heart,
+    Truck,
+    ShieldCheck,
+    Palette,
+    Lock,
+    Award,
+    Heart,
 };
 
-const FeatureItem = ({ title, description, iconKey }: { title: string, description: string, iconKey: keyof typeof icons }) => {
-    const Icon = icons[iconKey];
+const FeatureItem = ({ feature, index }: { feature: Feature, index: number }) => {
+    const Icon = icons[feature.icon as keyof typeof icons] || Truck;
     return (
-        <div className="text-center p-6 bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-amber-50 rounded-full text-amber-800 mb-4">
-                <Icon size={24} />
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+            className="text-center p-12 bg-white flex flex-col items-center border border-neutral-100 shadow-sm hover:shadow-md transition-shadow"
+        >
+            <div className="w-16 h-16 flex items-center justify-center text-gray-900 mb-6">
+                <Icon size={40} strokeWidth={1} />
             </div>
-            <h3 className="text-lg font-bold mb-2 text-gray-900">{title}</h3>
-            <p className="text-gray-500 text-sm leading-relaxed">{description}</p>
-        </div>
+            <h3 className="text-[18px] font-sans font-bold mb-3 text-[#111111]">{feature.title}</h3>
+            <p className="text-gray-500 text-[14px] leading-relaxed font-light">{feature.description}</p>
+        </motion.div>
     );
 };
 
 const Features = () => {
     return (
-        <section className="py-20 bg-white">
-            <div className="container mx-auto px-4">
-                <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-4">O obchodě Lumera</h2>
-                    <p className="text-gray-500 max-w-2xl mx-auto">Malý obchod, velká vášeň pro krásu a design.</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <FeatureItem
-                        title="Italský původ"
-                        description="Kabelky přímo od menších výrobců z Itálie."
-                        iconKey="italian"
-                    />
-                    <FeatureItem
-                        title="Pečlivý výběr"
-                        description="Každý model vybíráme osobně s důrazem na kvalitu a styl."
-                        iconKey="quality"
-                    />
-                    <FeatureItem
-                        title="Doprava zdarma"
-                        description="Pro objednávky nad 1500 Kč doprava zdarma. Rychlé doručení."
-                        iconKey="shipping"
-                    />
-                    <FeatureItem
-                        title="Osobní přístup"
-                        description="Jsme tu pro vás s radou i pomocí při výběru."
-                        iconKey="personal"
-                    />
+        <section className="py-24 bg-white relative overflow-hidden">
+            <div className="max-w-[1140px] mx-auto px-4 lg:px-0 relative z-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                    {FEATURES_DATA.map((feature, idx) => (
+                        <FeatureItem
+                            key={feature.id}
+                            feature={feature}
+                            index={idx}
+                        />
+                    ))}
                 </div>
             </div>
         </section>
