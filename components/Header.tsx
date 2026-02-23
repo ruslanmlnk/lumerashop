@@ -74,9 +74,9 @@ const Header = () => {
 
             {/* Icons (Right) */}
             <div className="flex items-center space-x-3 md:space-x-4 flex-1 justify-end">
-              <button className="flex items-center justify-center w-[40px] h-[40px] md:w-[48px] md:h-[48px] bg-[#1a1a1a] rounded-full hover:opacity-90 transition-opacity">
+              <Link href="/my-account" className="flex items-center justify-center w-[40px] h-[40px] md:w-[48px] md:h-[48px] bg-[#1a1a1a] rounded-full hover:opacity-90 transition-opacity">
                 <User size={22} className="text-white" strokeWidth={1.5} />
-              </button>
+              </Link>
 
               <button
                 onClick={() => setIsCartOpen(true)}

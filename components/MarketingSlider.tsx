@@ -10,7 +10,7 @@ const SLIDES = [
         title: "Každodenní elegance z Itálie",
         description: "Kabelky, které doplní váš den – stylové, lehké a vždy připravené vyrazit s vámi.",
         button: "Prohlédnout kabelky",
-        link: "/kabelky",
+        link: "/product-category/kabelky",
         bg: "/assets/bg/hero-slider-1.webp",
         overlayImage: "/assets/products/cutout-1.webp"
     },
@@ -18,7 +18,7 @@ const SLIDES = [
         title: "Lehkost v pohybu",
         description: "Pro chvíle, kdy potřebujete mít styl i pohodlí. Italské kabelky a batohy pro váš volný den.",
         button: "Objevte batohy",
-        link: "/batohy",
+        link: "/product-category/batohy",
         bg: "/assets/bg/hero-slider-2.webp",
         overlayImage: "/assets/products/cutout-2.png"
     },

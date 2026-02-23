@@ -5,6 +5,10 @@ export interface Product {
     image: string;
     slug: string;
     category: string;
+    sku?: string;
+    description?: string;
+    gallery?: string[];
+    specifications?: Record<string, string>;
 }
 
 export interface NavItem {

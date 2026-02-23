@@ -2,22 +2,22 @@ import { NavItem, Category, Product, Feature, Testimonial, BlogPost } from '../t
 
 export const NAV_ITEMS: NavItem[] = [
     { label: 'Domů', href: '/' },
-    { label: 'Dámské kabelky', href: '/kabelky' },
-    { label: 'Pánské tašky', href: '/panske-tasky' },
+    { label: 'Dámské kabelky', href: '/product-category/kabelky' },
+    { label: 'Pánské tašky', href: '/product-category/panske-tasky' },
     {
         label: 'Batohy',
-        href: '/batohy',
+        href: '/product-category/batohy',
         dropdown: [
-            { label: 'Kožené batohy', href: '/batohy/kozene' },
-            { label: 'Městské batohy', href: '/batohy/mestske' }
+            { label: 'Kožené batohy', href: '/product-category/batohy?type=kozene' },
+            { label: 'Městské batohy', href: '/product-category/batohy?type=mestske' }
         ]
     },
     {
         label: 'Doplňky',
-        href: '/doplnky',
+        href: '/product-category/doplnky',
         dropdown: [
-            { label: 'Peněženky', href: '/doplnky/penezenky' },
-            { label: 'Pásky', href: '/doplnky/pasky' }
+            { label: 'Peněženky', href: '/product-category/doplnky?type=penezenky' },
+            { label: 'Pásky', href: '/product-category/doplnky?type=pasky' }
         ]
     },
     { label: 'O nás', href: '/o-nas' },
@@ -26,14 +26,38 @@ export const NAV_ITEMS: NavItem[] = [
 ];
 
 export const HERO_CATEGORIES: Category[] = [
-    { name: 'Dámské Kabelky', bg: '/assets/bg/damske-kabelky.webp', product: '/assets/icons/cat-kabelky.webp', href: '/kabelky' },
-    { name: 'Pánské tašky', bg: '/assets/bg/panske-tasky.webp', product: '/assets/icons/cat-tasky.webp', href: '/panske-tasky' },
-    { name: 'Batohy', bg: '/assets/bg/batohynew.webp', product: '/assets/icons/cat-batohy.webp', href: '/batohy' },
-    { name: 'Doplňky', bg: '/assets/bg/doplnky.webp', product: '/assets/icons/cat-doplnky.webp', href: '/doplnky' }
+    { name: 'Dámské Kabelky', bg: '/assets/bg/damske-kabelky.webp', product: '/assets/icons/cat-kabelky.webp', href: '/product-category/kabelky' },
+    { name: 'Pánské tašky', bg: '/assets/bg/panske-tasky.webp', product: '/assets/icons/cat-tasky.webp', href: '/product-category/panske-tasky' },
+    { name: 'Batohy', bg: '/assets/bg/batohynew.webp', product: '/assets/icons/cat-batohy.webp', href: '/product-category/batohy' },
+    { name: 'Doplňky', bg: '/assets/bg/doplnky.webp', product: '/assets/icons/cat-doplnky.webp', href: '/product-category/doplnky' }
 ];
 
 export const FEATURED_PRODUCTS: Product[] = [
-    { id: '1', name: 'Olivia růžová', price: '2 890 Kč', image: '/assets/products/olivia-ruzova.webp', slug: 'olivia-ruzova', category: 'Kabelky' },
+    {
+        id: '1',
+        name: 'Italská shopper kabelka z pravé kuže Olivia růžová',
+        price: '2 199 Kč',
+        image: 'https://lumerashop.cz/wp-content/uploads/2026/02/%D0%94%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD-%D0%B1%D0%B5%D0%B7-%D0%BD%D0%B0%D0%B7%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F-72.webp',
+        slug: 'olivia-ruzova',
+        category: 'Kabelky',
+        sku: '00044rz',
+        description: 'Italská kabelka z pravé kůže Olivia v růžové barvě spojuje moderní eleganci a vysoce praktický design. Tato praktická, damská kabelka je vybavena dvojitými uchy, která umožňují pohodlné nošení v ruce i přes rameno. Díky vnitřnímu zapínání můžete snadno měnit její tvar podle aktuálního obsahu či nálady. Hlavní prostor se bezpečně uzavírá na zip a obsahuje jednu velkou kapsu na zip a tři menší kapsičky. Do kabelky se pohodlně vejdou i dokumenty formátu A4.',
+        gallery: [
+            'https://lumerashop.cz/wp-content/uploads/2026/02/%D0%94%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD-%D0%B1%D0%B5%D0%B7-%D0%BD%D0%B0%D0%B7%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F-72.webp',
+            'https://lumerashop.cz/wp-content/uploads/2026/02/%D0%94%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD-%D0%B1%D0%B5%D0%B7-%D0%BD%D0%B0%D0%B7%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F-73.webp',
+            'https://lumerashop.cz/wp-content/uploads/2026/02/%D0%94%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD-%D0%B1%D0%B5%D0%B7-%D0%BD%D0%B0%D0%B7%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F-75.webp',
+            'https://lumerashop.cz/wp-content/uploads/2026/02/%D0%94%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD-%D0%B1%D0%B5%D0%B7-%D0%BD%D0%B0%D0%B7%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F-76.webp'
+        ],
+        specifications: {
+            'Rozměry': 'Š 45 cm x V 30 cm x H 14 cm',
+            'Materiál': 'Kůže',
+            'Barva': 'Růžová',
+            'Délka uší': '2x 35 cm, 2x 70 cm',
+            'Kování': 'Stříbrná barva',
+            'Vyrobeno v': 'Itálii',
+            'A4': 'Ano'
+        }
+    },
     { id: '2', name: 'Pásek tmavo hnědý', price: '890 Kč', image: '/assets/products/pasek-tmavo-hnedy.webp', slug: 'pasek-tmavo-hnedy', category: 'Doplňky' },
     { id: '3', name: 'Pásek hnědý', price: '890 Kč', image: '/assets/products/pasek-hnedy.webp', slug: 'pasek-hnedy', category: 'Doplňky' },
     { id: '4', name: 'Pásek černý', price: '890 Kč', image: '/assets/products/pasek-cerny.webp', slug: 'pasek-cerny', category: 'Doplňky' }
@@ -48,6 +72,13 @@ export const RECOMMENDED_PRODUCTS: Product[] = [
     { id: '10', name: 'Elis béžova II', price: '2 490 Kč', image: '/assets/products/elis-bezova.webp', slug: 'elis-bezova-2', category: 'Kabelky' },
     { id: '11', name: 'Olivia růžová II', price: '2 890 Kč', image: '/assets/products/olivia-ruzova.webp', slug: 'olivia-ruzova-2', category: 'Kabelky' },
     { id: '12', name: 'Viko černá II', price: '2 190 Kč', image: '/assets/products/viko-cerna.webp', slug: 'viko-cerna-2', category: 'Kabelky' }
+];
+
+export const ALL_PRODUCTS: Product[] = [
+    ...FEATURED_PRODUCTS,
+    ...RECOMMENDED_PRODUCTS,
+    { id: '13', name: 'Batoh City', price: '3 290 Kč', image: '/assets/products/elis-bezova.webp', slug: 'batoh-city', category: 'Batohy' },
+    { id: '14', name: 'Pánská taška Blue', price: '4 190 Kč', image: '/assets/products/viko-cerna.webp', slug: 'panska-taska-blue', category: 'Pánské tašky' }
 ];
 
 export const FEATURES_DATA: Feature[] = [

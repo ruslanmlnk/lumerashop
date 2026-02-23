@@ -34,11 +34,11 @@ const Footer = () => {
                     <div>
                         <h3 className="text-[20px] font-serif font-bold mb-10">Nákup</h3>
                         <ul className="space-y-4 text-[16px] text-[#111111] font-normal">
-                            <li><Link href="/kabelky" className="hover:text-amber-800 transition-colors">Doprava a platba</Link></li>
-                            <li><Link href="/panske-tasky" className="hover:text-amber-800 transition-colors">Reklamace a vrácení</Link></li>
+                            <li><Link href="/doprava-a-platba" className="hover:text-amber-800 transition-colors">Doprava a platba</Link></li>
+                            <li><Link href="/reklamace-a-vraceni" className="hover:text-amber-800 transition-colors">Reklamace a vrácení</Link></li>
                             <li><Link href="/obchodni-podminky" className="hover:text-amber-800 transition-colors">Obchodní podmínky</Link></li>
-                            <li><Link href="/privacy" className="hover:text-amber-800 transition-colors">Ochrana soukromí</Link></li>
-                            <li><Link href="/terms" className="hover:text-amber-800 transition-colors">Cookies</Link></li>
+                            <li><Link href="/ochrana-osobnich-udaju" className="hover:text-amber-800 transition-colors">Ochrana osobních údajů</Link></li>
+                            <li><Link href="/cookies" className="hover:text-amber-800 transition-colors">Cookies</Link></li>
                         </ul>
                     </div>
 
@@ -82,8 +82,8 @@ const Footer = () => {
                 <div className="border-t border-gray-100 pt-12 flex flex-col md:flex-row justify-between items-center text-[13px] text-gray-400 font-light">
                     <p>&copy; {new Date().getFullYear()} LumeraShop.cz. Všechna práva vyhrazena.</p>
                     <div className="flex space-x-8 mt-6 md:mt-0">
-                        <Link href="/privacy" className="hover:text-black transition-colors">Ochrana soukromí</Link>
-                        <Link href="/terms" className="hover:text-black transition-colors">Cookies</Link>
+                        <Link href="/ochrana-osobnich-udaju" className="hover:text-black transition-colors">Ochrana soukromí</Link>
+                        <Link href="/cookies" className="hover:text-black transition-colors">Cookies</Link>
                     </div>
                 </div>
             </div>
