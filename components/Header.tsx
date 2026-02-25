@@ -6,6 +6,9 @@ import { Menu, X, ShoppingCart, Search, User, ChevronDown, ArrowRight } from 'lu
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import { NAV_ITEMS } from '../data/site-data';
 
+const MENU_ARROW_DOWN_BG =
+  'url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHdpZHRoPSIxNnB4IiBoZWlnaHQ9IjE2cHgiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgMTYgMTYiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPHBhdGggZmlsbD0iIzgwODA4MCIgZD0iTTIuMSw1LjJMMi4xLDUuMmMwLjMtMC4zLDAuOC0wLjMsMS4xLDBMOCwxMC4zbDQuNy01QzEzLDUsMTMuNSw1LDEzLjksNS4zbDAsMGMwLjMsMC4zLDAuMSwwLjctMC4yLDENCglsLTUsNS40Yy0wLjMsMC4zLTAuOCwwLjMtMS4xLDBMMi40LDYuNEMyLjEsNi4xLDEuOCw1LjUsMi4xLDUuMnoiLz4NCjwvc3ZnPg0K)';
+
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -111,19 +114,20 @@ const Header = () => {
         </div>
 
         {/* Navigation Row (Desktop only) */}
-        <nav className="hidden md:block max-w-[1140px] mx-auto px-4 lg:px-0 h-[54px]">
-          <ul className="flex justify-center items-center h-full font-sans font-normal text-[#111111]">
+        <nav className="hidden md:block max-w-[1140px] mx-auto px-4 lg:px-0 h-[53px]">
+          <ul className="flex justify-center items-center h-full font-sans text-[#111111]">
             {NAV_ITEMS.map((item, idx) => (
               <li key={idx} className="group relative h-full flex items-center">
                 <Link
                   href={item.href}
-                  className="px-[20px] text-[16px] leading-[1] hover:text-[#C8A16A] transition-colors whitespace-nowrap flex items-center h-full"
+                  className="px-[20px] py-[10px] text-[16px] font-[400] leading-[1] tracking-[0] normal-case hover:text-[#C8A16A] transition-colors whitespace-nowrap flex items-center h-full"
                 >
                   {item.label}
                   {item.dropdown && (
-                    <ChevronDown
-                      size={14}
-                      className="ml-1.5 opacity-60 group-hover:rotate-180 transition-transform"
+                    <span
+                      aria-hidden="true"
+                      className="ml-1 inline-block h-4 w-4 shrink-0 bg-center bg-no-repeat bg-contain"
+                      style={{ backgroundImage: MENU_ARROW_DOWN_BG }}
                     />
                   )}
                 </Link>
@@ -181,7 +185,13 @@ const Header = () => {
                         <Link href={item.href} onClick={() => setIsOpen(false)} className="text-[16px] font-normal uppercase tracking-wider">
                           {item.label}
                         </Link>
-                        {item.dropdown && <ChevronDown size={18} className="opacity-60" />}
+                        {item.dropdown && (
+                          <span
+                            aria-hidden="true"
+                            className="inline-block h-4 w-4 shrink-0 bg-center bg-no-repeat bg-contain"
+                            style={{ backgroundImage: MENU_ARROW_DOWN_BG }}
+                          />
+                        )}
                       </div>
                       {item.dropdown && (
                         <div className="pl-4 pb-4 space-y-3">
