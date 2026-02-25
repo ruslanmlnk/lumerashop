@@ -7,14 +7,14 @@ import { HERO_CATEGORIES } from '../data/site-data';
 const Hero = () => {
     return (
         <section
-            className="mt-[120px] pt-0 pb-0 bg-white overflow-hidden relative"
+            className="mt-[134px] md:mt-[120px] pt-0 pb-0 bg-[#f2f2f2] overflow-hidden relative"
             id="block-12"
         >
-            <div className="max-w-[1140px] mx-auto px-4 lg:px-0">
-                <div className="flex flex-col lg:flex-row gap-[24px] items-start">
+            <div className="lumera-container">
+                <div className="flex flex-col lg:flex-row gap-5 lg:gap-6 items-start">
                     {/* Left Column (Video/Main content) - 810.2px (+ 24px gap = 834.2px equivalent) */}
                     <div
-                        className="w-full lg:w-[810.2px] relative group overflow-hidden h-[567px] bg-[#111111]"
+                        className="w-full lg:w-[810.2px] relative group overflow-hidden h-[560px] md:h-[567px] bg-[#111111]"
                     >
                         {/* Video Layer */}
                         <div className="absolute inset-0 z-0">
@@ -32,7 +32,7 @@ const Hero = () => {
                         </div>
 
                         {/* Content Layer - Align H1 to 59px relative top as per audit */}
-                        <div className="absolute inset-x-0 top-0 flex flex-col z-10 text-white pt-[59px] pl-[40px]">
+                        <div className="absolute inset-x-0 top-0 flex flex-col z-10 text-white pt-10 md:pt-[59px] pl-6 md:pl-[40px] pr-6 md:pr-0">
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -41,9 +41,8 @@ const Hero = () => {
                             >
                                 {/* H1: Cormorant Garamond, 72px, 700, LH 1.1, Margin-right 234px */}
                                 <h1
-                                    className="font-serif font-bold text-[72px] leading-[1.1] text-white"
+                                    className="font-serif font-bold text-[72px] leading-[1.1] text-white md:mr-[210px]"
                                     style={{
-                                        marginRight: '210px',
                                         fontFamily: '"Cormorant Garamond", serif',
                                         textShadow: 'rgb(64, 64, 64) 0px 0px 8px'
                                     }}
@@ -53,9 +52,8 @@ const Hero = () => {
 
                                 {/* P: Work Sans, 16px, LH 1.6, Margin: 20px top, 113px right */}
                                 <p
-                                    className="font-sans font-light text-[16px] leading-[1.6] text-white mt-[20px]"
+                                    className="font-sans font-light text-[16px] leading-[1.6] text-white mt-4 md:mt-[20px] md:mr-[113px]"
                                     style={{
-                                        marginRight: '113px',
                                         fontFamily: '"Work Sans", sans-serif'
                                     }}
                                 >
@@ -63,18 +61,10 @@ const Hero = () => {
                                 </p>
 
                                 {/* Button: White BG, Black Text, No shadow, Flat */}
-                                <div className="mt-[39px]">
+                                <div className="mt-8 md:mt-[39px]">
                                     <Link
                                         href="/shop"
-                                        className="inline-block bg-white text-black hover:bg-[#111111] hover:text-white transition-colors duration-300"
-                                        style={{
-                                            padding: '10px 30px',
-                                            fontSize: '16px',
-                                            fontWeight: 500,
-                                            fontFamily: '"Work Sans", sans-serif',
-                                            borderRadius: '0px',
-                                            boxShadow: 'none'
-                                        }}
+                                        className="lumera-btn lumera-btn--light"
                                     >
                                         Prohlédnout kolekci
                                     </Link>
@@ -84,7 +74,7 @@ const Hero = () => {
                     </div>
 
                     {/* Right Column (Category Tiles) - 305.8px */}
-                    <div className="w-full lg:w-[305.8px] flex flex-col gap-[20px] h-[567px]">
+                    <div className="w-full lg:w-[305.8px] flex flex-col gap-4 lg:gap-[20px] h-auto lg:h-[567px]">
                         {HERO_CATEGORIES.map((cat, idx) => {
                             // Proportional heights for 567px total including 3 x 20px gaps: 
                             // 135 + 20 + 135 + 20 + 120 + 20 + 117 = 567
@@ -134,3 +124,4 @@ const Hero = () => {
 };
 
 export default Hero;
+

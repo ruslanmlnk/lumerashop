@@ -2,12 +2,18 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
-import { Menu, X, ShoppingCart, Search, User, ChevronDown, ArrowRight } from 'lucide-react';
+import { Menu, X, Search, ChevronDown, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import { NAV_ITEMS } from '../data/site-data';
 
 const MENU_ARROW_DOWN_BG =
   'url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHdpZHRoPSIxNnB4IiBoZWlnaHQ9IjE2cHgiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgMTYgMTYiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPHBhdGggZmlsbD0iIzgwODA4MCIgZD0iTTIuMSw1LjJMMi4xLDUuMmMwLjMtMC4zLDAuOC0wLjMsMS4xLDBMOCwxMC4zbDQuNy01QzEzLDUsMTMuNSw1LDEzLjksNS4zbDAsMGMwLjMsMC4zLDAuMSwwLjctMC4yLDENCglsLTUsNS40Yy0wLjMsMC4zLTAuOCwwLjMtMS4xLDBMMi40LDYuNEMyLjEsNi4xLDEuOCw1LjUsMi4xLDUuMnoiLz4NCjwvc3ZnPg0K)';
+
+const MOBILE_QUICK_LINKS = [
+  { label: 'Pánské tašky', href: '/product-category/panske-tasky', hasArrow: false },
+  { label: 'Batohy', href: '/product-category/batohy', hasArrow: true },
+  { label: 'Doplňky', href: '/product-category/doplnky', hasArrow: true },
+];
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -40,7 +46,7 @@ const Header = () => {
       >
         {/* Top Row: Search (Desk) / Menu (Mob) | Logo | Icons */}
         <div className="border-b border-gray-100">
-          <div className="max-w-[1140px] mx-auto px-4 lg:px-0 flex justify-between items-center md:items-start h-[70px] md:h-[81px] relative">
+          <div className="max-w-[1140px] mx-auto px-4 lg:px-0 flex justify-between items-center md:items-start h-[82px] md:h-[81px] relative">
 
             {/* Left: Search (Desktop only) or Menu Button (Mobile only) */}
             <div className="flex-1 flex items-center md:items-start">
@@ -66,7 +72,7 @@ const Header = () => {
             </div>
 
             {/* Logo (Centered) */}
-            <Link href="/" className="absolute left-1/2 -translate-x-1/2 top-[24px]">
+            <Link href="/" className="absolute left-1/2 -translate-x-1/2 top-[14px] md:top-[24px]">
               <div className="relative w-[80px] h-[53px]">
                 <Image
                   src="/assets/logo.webp"
@@ -101,16 +107,26 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Search Row (Mobile only) */}
-        <div className="md:hidden border-b border-gray-100 py-[20px] px-4 flex justify-center h-[74px]">
-          <div className="relative w-full max-w-[280px]">
-            <input
-              type="text"
-              placeholder="Hledat"
-              className="w-full bg-white border-[0.8px] border-[#808080] h-[36px] pl-3 pr-8 text-[14px] placeholder:text-[#808080] focus:outline-none rounded-none font-sans text-center"
-            />
-            <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-black" />
-          </div>
+        {/* Mobile Quick Navigation */}
+        <div className="md:hidden border-b border-gray-100 h-[52px]">
+          <nav className="h-full">
+            <ul className="h-full flex items-center justify-center gap-8 font-sans text-[16px] text-[#111111]">
+              {MOBILE_QUICK_LINKS.map((item) => (
+                <li key={item.label}>
+                  <Link href={item.href} className="inline-flex items-center gap-1 hover:text-[#C8A16A] transition-colors">
+                    {item.label}
+                    {item.hasArrow && (
+                      <span
+                        aria-hidden="true"
+                        className="inline-block h-3.5 w-3.5 shrink-0 bg-center bg-no-repeat bg-contain"
+                        style={{ backgroundImage: MENU_ARROW_DOWN_BG }}
+                      />
+                    )}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
 
         {/* Navigation Row (Desktop only) */}
@@ -132,10 +148,14 @@ const Header = () => {
                   )}
                 </Link>
                 {item.dropdown && (
-                  <div className="absolute top-full left-0 w-[200px] bg-white opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
-                    <div className="py-2">
+                  <div className="absolute top-full left-0 w-[170px] bg-[#C8A16A] border border-[#e8d0ab] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                    <div className="py-1">
                       {item.dropdown?.map((sub, sIdx) => (
-                        <Link key={sIdx} href={sub.href} className="block px-5 py-2.5 text-[16px] hover:text-[#C8A16A] transition-colors">
+                        <Link
+                          key={sIdx}
+                          href={sub.href}
+                          className="block px-4 py-2.5 text-[16px] font-medium text-white hover:bg-[#b99159] transition-colors"
+                        >
                           {sub.label}
                         </Link>
                       ))}
@@ -156,47 +176,52 @@ const Header = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setIsOpen(false)}
-                className="fixed inset-0 bg-black/40 z-[60]"
+                className="fixed inset-0 bg-black/70 z-[60]"
               />
               <motion.div
                 initial={{ x: '-100%' }}
                 animate={{ x: 0 }}
                 exit={{ x: '-100%' }}
                 transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className="md:hidden fixed top-0 left-0 w-[85%] h-full bg-black z-[70] p-6 shadow-2xl overflow-y-auto text-white"
+                className="md:hidden fixed top-0 left-0 w-[280px] max-w-[85vw] h-full bg-black/95 z-[70] px-6 pt-8 pb-6 shadow-2xl overflow-y-auto text-white"
               >
-                <div className="flex justify-between items-center mb-10">
-                  <Link href="/" onClick={() => setIsOpen(false)} className="text-[20px] font-sans tracking-[0.2em] flex items-center">
+                <div className="flex justify-between items-center mb-9">
+                  <Link href="/" onClick={() => setIsOpen(false)} className="text-[20px] font-sans tracking-[0.18em] flex items-center">
                     <span className="font-semibold text-white">LUMERA</span>
                     <span className="ml-[6px] text-[#c8a16a]">SHOP</span>
                   </Link>
                   <button
-                    className="p-2 text-white"
+                    className="w-[22px] h-[28px] flex items-center justify-end text-white"
                     onClick={() => setIsOpen(false)}
                   >
-                    <X size={28} strokeWidth={1.5} />
+                    <X size={24} strokeWidth={1.4} />
                   </button>
                 </div>
 
-                <nav className="flex flex-col space-y-0 text-white">
+                <nav className="flex flex-col text-white">
                   {NAV_ITEMS.map((item, idx) => (
-                    <div key={idx} className="border-b border-white/10">
-                      <div className="flex justify-between items-center py-4">
-                        <Link href={item.href} onClick={() => setIsOpen(false)} className="text-[16px] font-normal uppercase tracking-wider">
+                    <div key={idx} className="border-b border-white/15">
+                      <div className="flex justify-between items-center py-[15px]">
+                        <Link href={item.href} onClick={() => setIsOpen(false)} className="text-[16px] font-light">
                           {item.label}
                         </Link>
                         {item.dropdown && (
                           <span
                             aria-hidden="true"
-                            className="inline-block h-4 w-4 shrink-0 bg-center bg-no-repeat bg-contain"
+                            className="inline-block h-[18px] w-[18px] shrink-0 bg-center bg-no-repeat bg-contain"
                             style={{ backgroundImage: MENU_ARROW_DOWN_BG }}
                           />
                         )}
                       </div>
                       {item.dropdown && (
-                        <div className="pl-4 pb-4 space-y-3">
+                        <div className="pb-4 space-y-2">
                           {item.dropdown.map((sub, sIdx) => (
-                            <Link key={sIdx} href={sub.href} onClick={() => setIsOpen(false)} className="block text-sm text-white/70 hover:text-white transition-colors">
+                            <Link
+                              key={sIdx}
+                              href={sub.href}
+                              onClick={() => setIsOpen(false)}
+                              className="block bg-[#C8A16A] text-white px-4 py-3 text-[16px] leading-none hover:bg-[#b48d56] transition-colors"
+                            >
                               {sub.label}
                             </Link>
                           ))}
@@ -239,7 +264,7 @@ const Header = () => {
                     </div>
                   </button>
                   <h2 className="text-[16px] font-semibold text-gray-900 absolute left-1/2 -translate-x-1/2 whitespace-nowrap">
-                    {cartItems.length > 0 ? 'Zkontrolujte svůj košíк' : 'Váš košík je prázdný'}
+                    {cartItems.length > 0 ? 'Zkontrolujte svůj košík' : 'Váš košík je prázdný'}
                   </h2>
                   <div className="w-6 h-6 bg-gray-100 rounded flex items-center justify-center text-xs font-medium text-gray-500">
                     {cartItems.length}
@@ -304,7 +329,7 @@ const Header = () => {
                 ) : (
                   <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
                     <p className="text-gray-600 text-[15px] leading-relaxed max-w-[280px]">
-                      Podívejte se do našeho obchodu a zjistěте, co je k dispozici.
+                      Podívejte se do našeho obchodu a zjistěte, co je k dispozici.
                     </p>
                   </div>
                 )}
