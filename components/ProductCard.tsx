@@ -9,49 +9,43 @@ type ProductCardProps = {
 };
 
 const ProductCard = ({ product, variant = 'default' }: ProductCardProps) => {
-    const isFeatured = variant === 'featured';
-
     return (
-        <div className="group h-full flex flex-col bg-transparent">
+        <div className="group h-full flex flex-col bg-transparent md:p-[10px]">
             <Link
                 href={`/product/${product.slug}`}
-                className={`block relative overflow-hidden group ${
-                    isFeatured
-                        ? 'aspect-square bg-[#f6f6f7] mb-4 md:mb-5'
-                        : 'aspect-[14/17] mb-2 md:mb-3'
-                }`}
+                className="block relative overflow-hidden group aspect-[1/1] md:h-[216px] bg-transparent"
             >
                 <Image
                     src={product.image}
                     alt={product.name}
                     fill
-                    className={`object-contain ${isFeatured ? 'p-2.5 md:p-4' : 'p-1 md:p-2'} group-hover:scale-105 transition-transform duration-[1000ms]`}
+                    className="object-contain p-2 md:p-0 group-hover:scale-105 transition-transform duration-[1000ms]"
                 />
             </Link>
-            <div className="text-center px-1 md:px-2 flex flex-col items-center">
+            <div className="text-center px-1 flex flex-col items-center flex-grow">
                 <h3
-                    className={`${isFeatured ? 'text-[15px] md:text-[20px] min-h-[38px] md:min-h-[52px]' : 'text-[11px] md:text-[20px]'} font-serif font-medium text-[#3b2f2f] mb-1 leading-[1.15]`}
+                    className="text-[16px] md:text-[20px] font-serif font-normal text-[#111111] mt-[10px] md:mt-[20px] mb-0 leading-[1.2]"
                     style={{
                         fontFamily: '"Cormorant Garamond", serif',
-                        display: '-webkit-box',
-                        WebkitBoxOrient: 'vertical',
-                        WebkitLineClamp: isFeatured ? 2 : 3,
-                        overflow: 'hidden',
                     }}
                 >
-                    <Link href={`/product/${product.slug}`} className="hover:text-[#3b2f2f] transition-colors">
+                    <Link href={`/product/${product.slug}`} className="hover:text-[#111111] transition-colors">
                         {product.name}
                     </Link>
                 </h3>
-                <p
-                    className={`${isFeatured ? 'text-[13px] md:text-[16px] mt-0.5' : 'text-[10px] md:text-[16px]'} font-normal text-[rgb(59,47,47)]`}
+
+                <div
+                    className="mt-[10px] md:mt-[20px] mb-0"
                     style={{ fontFamily: '"Work Sans", sans-serif' }}
                 >
-                    {product.price}
-                </p>
+                    <p className="text-[18px] md:text-[24px] font-normal text-[#111111] m-0 leading-[1.2]">
+                        {product.price}
+                    </p>
+                </div>
             </div>
         </div>
     );
 };
 
 export default ProductCard;
+

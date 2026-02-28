@@ -7,7 +7,7 @@ import { HERO_CATEGORIES } from '../data/site-data';
 const Hero = () => {
     return (
         <section
-            className="mt-[134px] md:mt-[120px] pt-0 pb-0 bg-[#f2f2f2] overflow-hidden relative"
+            className="mt-[134px] md:mt-[120px] pt-0 pb-0 bg-white overflow-hidden relative"
             id="block-12"
         >
             <div className="lumera-container">

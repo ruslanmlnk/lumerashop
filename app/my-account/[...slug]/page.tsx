@@ -1,39 +1,47 @@
-'use client';
-import { useParams } from 'next/navigation';
+import { redirect } from 'next/navigation';
+import type { ReactNode } from 'react';
 import ProfileLayout from '@/components/profile/ProfileLayout';
 import Orders from '@/components/profile/Orders';
 import Downloads from '@/components/profile/Downloads';
 import Addresses from '@/components/profile/Addresses';
 import AccountDetails from '@/components/profile/AccountDetails';
+import { getCurrentUser } from '@/lib/auth';
 
-export default function MyAccountSubPage() {
-    const params = useParams();
-    const slug = params?.slug as string[];
-    const section = slug ? slug[0] : '';
+type ParamsShape = {
+  slug?: string[];
+};
 
-    let content = null;
-    let activeSection = section;
+type PageProps = {
+  params: ParamsShape | Promise<ParamsShape>;
+};
 
-    switch (section) {
-        case 'orders':
-            content = <Orders />;
-            break;
-        case 'downloads':
-            content = <Downloads />;
-            break;
-        case 'edit-address':
-            content = <Addresses />;
-            break;
-        case 'edit-account':
-            content = <AccountDetails />;
-            break;
-        default:
-            content = <div>Sekce nenalezena.</div>;
-    }
+export default async function MyAccountSubPage({ params }: PageProps) {
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect('/my-account');
+  }
 
-    return (
-        <ProfileLayout activeSection={activeSection}>
-            {content}
-        </ProfileLayout>
-    );
+  const resolvedParams = await Promise.resolve(params);
+  const section = resolvedParams.slug?.[0] || '';
+
+  let content: ReactNode = <div className="text-[16px] text-gray-600">Sekce nenalezena.</div>;
+
+  switch (section) {
+    case 'orders':
+      content = <Orders />;
+      break;
+    case 'downloads':
+      content = <Downloads />;
+      break;
+    case 'edit-address':
+      content = <Addresses />;
+      break;
+    case 'edit-account':
+      content = <AccountDetails />;
+      break;
+    default:
+      content = <div className="text-[16px] text-gray-600">Sekce nenalezena.</div>;
+  }
+
+  return <ProfileLayout activeSection={section}>{content}</ProfileLayout>;
 }

@@ -82,10 +82,10 @@ export const ALL_PRODUCTS: Product[] = [
 ];
 
 export const FEATURES_DATA: Feature[] = [
-    { id: '1', title: 'Italský původ', description: 'Kabelky přímo od výrobců z Itálie.', icon: 'Award' },
-    { id: '2', title: 'Pečlivý výběr', description: 'Každý model vybíráme osobně.', icon: 'ShieldCheck' },
-    { id: '3', title: 'Doprava zdarma', description: 'U objednávek nad 2 500 Kč.', icon: 'Truck' },
-    { id: '4', title: 'Osobní přístup', description: 'Rádi vám poradíme s výběrem.', icon: 'Heart' }
+    { id: '1', title: 'Italský původ', description: 'Kabelky přímo od menších výrobců z Itálie.', icon: 'https://lumerashop.cz/wp-content/uploads/2025/11/d07f3e43-5.png' },
+    { id: '2', title: 'Pečlivý výběr', description: 'Každý model vybíráme osobně s důrazem na kvalitu a styl.', icon: 'https://lumerashop.cz/wp-content/uploads/2025/11/d58217d5-5.png' },
+    { id: '3', title: 'Doprava zdarma', description: 'Pro objednávky nad 1500 Kč doprava zdarma. Rychlé a bezpečné doručení po celé ČR.', icon: 'https://lumerashop.cz/wp-content/uploads/2025/11/70e46ca5-5.png' },
+    { id: '4', title: 'Osobní přístup', description: 'Malý obchod, velká vášeň pro krásu a design.', icon: 'https://lumerashop.cz/wp-content/uploads/2025/11/eab46acd-5.png' }
 ];
 
 export const TESTIMONIALS: Testimonial[] = [

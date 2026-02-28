@@ -20,7 +20,7 @@ const ProfileLayout = ({ children, activeSection }: ProfileLayoutProps) => {
                     breadcrumbs={[{ label: 'Můj účet' }]}
                 />
 
-                <div className="max-w-[1140px] mx-auto px-4 lg:px-0 py-16">
+                <div className="max-w-[1140px] mx-auto px-4 lg:px-0 py-16" data-active-section={activeSection}>
                     <div className="flex flex-col lg:flex-row gap-12">
                         <ProfileNavigation />
 
