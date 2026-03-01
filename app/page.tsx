@@ -158,7 +158,7 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="text-center md:text-left mt-[30px]">
+            <div className="text-center mt-[30px]">
               <Link
                 href="/blog"
                 className="lumera-btn"
@@ -170,9 +170,9 @@ export default function Home() {
         </section>
 
         {/* Block 10: CTA */}
-        <section className="mt-[20px] py-0 bg-white" id="block-10">
+        <section className="mt-[30px] py-0 bg-white" id="block-10">
           <div className="lumera-container">
-            <div className="relative h-[300px] md:h-[400px] flex flex-col justify-center px-[30px] items-start md:items-center text-left md:text-center w-full">
+            <div className="relative h-[220px] md:h-[340px] flex flex-col justify-center px-[20px] md:px-[40px] lg:px-[40px] lg:pr-[129.1px] w-full">
               {/* Background gradient image logic */}
               <div className="absolute inset-0 z-0">
                 <Image
@@ -181,38 +181,29 @@ export default function Home() {
                   fill
                   className="object-cover object-center"
                 />
-                <div className="absolute inset-0 bg-black/75" />
+                <div className="absolute inset-0 bg-black/50" />
               </div>
 
-              <div className="relative z-10 w-full max-w-[1140px] px-0 md:px-[30px]">
-                <h2
-                  className="text-[30px] md:text-[36px] font-serif font-bold text-white mb-[0px] leading-[1.1]"
-                  style={{ fontFamily: '"Cormorant Garamond", serif', textShadow: '2px 2px 8px rgba(0,0,0,0.4)' }}
-                >
-                  Objevte eleganci s Lumera
-                </h2>
-
-                <div className="mt-[40px]">
-                  <Link
-                    href="/shop"
-                    className="lumera-btn lumera-btn--light hidden md:inline-flex"
-                    style={{ margin: '0' }}
+              <div className="relative z-10 w-full flex flex-col md:flex-row md:justify-between md:items-center">
+                <div className="text-left max-w-2xl">
+                  <h2
+                    className="text-[30px] md:text-[40px] lg:text-[48px] font-serif font-bold text-white mb-[0px] leading-[1.1]"
+                    style={{ fontFamily: '"Cormorant Garamond", serif', textShadow: '2px 2px 8px rgba(0,0,0,0.4)' }}
                   >
-                    Prohlédnout kolekci
-                  </Link>
+                    Objevte eleganci s Lumera
+                  </h2>
+                  <p
+                    className="text-[14px] md:text-[16px] lg:text-[18px] font-normal text-white mt-[15px] md:mt-[20px] mb-0"
+                    style={{ fontFamily: '"Work Sans", sans-serif', textShadow: '2px 2px 8px rgba(0,0,0,0.4)' }}
+                  >
+                    Najděte svůj dokonalý doplněk ještě dnes.
+                  </p>
                 </div>
 
-                <p
-                  className="text-[14px] md:text-[16px] font-normal text-white mt-[20px] mb-0"
-                  style={{ fontFamily: '"Work Sans", sans-serif', textShadow: '2px 2px 8px rgba(0,0,0,0.4)' }}
-                >
-                  Najděte svůj dokonalý doplněk ještě dnes.
-                </p>
-
-                <div className="mt-[40px] md:hidden block">
+                <div className="mt-[30px] md:mt-0 flex-shrink-0">
                   <Link
                     href="/shop"
-                    className="lumera-btn lumera-btn--light block w-max"
+                    className="lumera-btn lumera-btn--light inline-flex"
                   >
                     Prohlédnout kolekci
                   </Link>
