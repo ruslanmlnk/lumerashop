@@ -83,6 +83,7 @@ const Hero = () => {
                             // Total = 470 + 72 + 25 = 567px
                             const heights = ["126.5px", "126.5px", "110px", "107px"];
                             const bgScales = ["115%", "115%", "130%", "110%"];
+                            const bgPositions = ["100% 18.4%", "56.06% 54.68%", "100% 71.16%", "86.39% 0%"];
                             return (
                                 <Link
                                     key={idx}
@@ -92,10 +93,11 @@ const Hero = () => {
                                 >
                                     <div className="absolute inset-0 z-0 overflow-hidden">
                                         <div
-                                            className="absolute inset-0 group-hover:scale-105 transition-transform duration-700 bg-center bg-no-repeat"
+                                            className="absolute inset-0 group-hover:scale-105 transition-transform duration-700 bg-no-repeat"
                                             style={{
                                                 backgroundImage: `url(${cat.bg})`,
-                                                backgroundSize: bgScales[idx]
+                                                backgroundSize: bgScales[idx],
+                                                backgroundPosition: bgPositions[idx]
                                             }}
                                         />
                                     </div>
