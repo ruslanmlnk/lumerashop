@@ -12,7 +12,13 @@ const SLIDES = [
         button: "Prohlédnout kabelky",
         link: "/product-category/kabelky",
         bg: "/assets/bg/hero-slider-1.webp",
-        overlayImage: "/assets/products/cutout-1.webp"
+        overlayImage: "/assets/products/cutout-1.webp",
+        layout: {
+            paddingTop: 160,
+            titleMaxWidth: 540,
+            descMaxWidth: 600,
+            img: { w: 269, h: 565, top: 105, right: 64 }
+        }
     },
     {
         title: "Lehkost v pohybu",
@@ -20,7 +26,13 @@ const SLIDES = [
         button: "Objevte batohy",
         link: "/product-category/batohy",
         bg: "/assets/bg/hero-slider-2.webp",
-        overlayImage: "/assets/products/cutout-2.png"
+        overlayImage: "/assets/products/cutout-2.png",
+        layout: {
+            paddingTop: 219,
+            titleMaxWidth: 335,
+            descMaxWidth: 453,
+            img: { w: 343, h: 561, top: 83, right: 120 }
+        }
     },
     {
         title: "Síla elegance",
@@ -28,7 +40,13 @@ const SLIDES = [
         button: "Vyberte si svůj styl",
         link: "/shop",
         bg: "/assets/bg/hero-slider-3.webp",
-        overlayImage: "/assets/products/cutout-3.png"
+        overlayImage: "/assets/products/cutout-3.png",
+        layout: {
+            paddingTop: 136,
+            titleMaxWidth: 300,
+            descMaxWidth: 453,
+            img: { w: 177, h: 467, top: 160, right: 151 }
+        }
     }
 ];
 
@@ -66,7 +84,7 @@ const MarketingSlider = () => {
     };
 
     return (
-        <section className="bg-white overflow-hidden py-0" id="block-4">
+        <section className="hidden lg:block bg-white overflow-hidden py-0" id="block-4">
             <div className="lumera-container">
                 <div className="relative h-[380px] md:h-[644px] overflow-hidden bg-[#111111]">
                     {/* Slides Container */}
@@ -97,66 +115,74 @@ const MarketingSlider = () => {
                                 <div className="absolute inset-0 bg-black/30" />
 
                                 {/* Content Layout */}
-                                <div className="absolute inset-0 flex items-center">
-                                    <div className="max-w-[1140px] mx-auto w-full px-6 md:px-[50px] grid grid-cols-1 lg:grid-cols-2 items-center gap-8">
-                                        {/* Left Content */}
-                                        <div className="text-left text-white z-10">
-                                            <motion.h2
-                                                initial={{ opacity: 0, y: 15 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ delay: 0.3, duration: 0.8 }}
-                                                className="text-[34px] md:text-[48px] font-serif font-bold leading-[1.1] mb-4 md:mb-6"
-                                                style={{
-                                                    fontFamily: '"Cormorant Garamond", serif',
-                                                    maxWidth: '540px'
-                                                }}
+                                <div className="absolute inset-x-0 inset-y-0 w-full max-w-[1140px] mx-auto px-6 md:px-[50px] z-10 flex flex-col justify-center lg:block">
+                                    {/* Left Content (Flows normally to prevent overlap) */}
+                                    <div
+                                        className="text-left text-white relative flex flex-col w-full lg:w-[60%] z-20"
+                                        style={{
+                                            paddingTop: typeof window !== 'undefined' && window.innerWidth >= 1024 ? `${SLIDES[current].layout.paddingTop}px` : undefined
+                                        }}
+                                    >
+                                        <motion.h2
+                                            initial={{ opacity: 0, y: 15 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 0.3, duration: 0.8 }}
+                                            className="text-[34px] md:text-[48px] font-serif font-bold leading-[1.1] mb-5"
+                                            style={{
+                                                fontFamily: '"Cormorant Garamond", serif',
+                                                maxWidth: `${SLIDES[current].layout.titleMaxWidth}px`
+                                            }}
+                                        >
+                                            {SLIDES[current].title}
+                                        </motion.h2>
+                                        <motion.p
+                                            initial={{ opacity: 0, y: 15 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 0.5, duration: 0.8 }}
+                                            className="text-[14px] md:text-[16px] font-sans font-normal leading-[1.6] mb-8"
+                                            style={{
+                                                fontFamily: '"Work Sans", sans-serif',
+                                                maxWidth: `${SLIDES[current].layout.descMaxWidth}px`
+                                            }}
+                                        >
+                                            {SLIDES[current].description}
+                                        </motion.p>
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 15 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 0.7, duration: 0.8 }}
+                                        >
+                                            <Link
+                                                href={SLIDES[current].link}
+                                                className="lumera-btn lumera-btn--light w-fit"
                                             >
-                                                {SLIDES[current].title}
-                                            </motion.h2>
-                                            <motion.p
-                                                initial={{ opacity: 0, y: 15 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ delay: 0.5, duration: 0.8 }}
-                                                className="text-[14px] md:text-[16px] font-sans font-normal leading-[1.6] mb-0"
-                                                style={{
-                                                    fontFamily: '"Work Sans", sans-serif',
-                                                    maxWidth: '430px'
-                                                }}
-                                            >
-                                                {SLIDES[current].description}
-                                            </motion.p>
-                                            <motion.div
-                                                initial={{ opacity: 0, y: 15 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ delay: 0.7, duration: 0.8 }}
-                                                className="mt-6 md:mt-[40px]"
-                                            >
-                                                <Link
-                                                    href={SLIDES[current].link}
-                                                    className="lumera-btn lumera-btn--light"
-                                                >
-                                                    {SLIDES[current].button}
-                                                </Link>
-                                            </motion.div>
-                                        </div>
+                                                {SLIDES[current].button}
+                                            </Link>
+                                        </motion.div>
+                                    </div>
 
-                                        {/* Right Overlay Image */}
-                                        <div className="hidden lg:flex justify-end pr-0">
-                                            <motion.div
-                                                initial={{ opacity: 0, x: 50 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: 0.2, duration: 1 }}
-                                                className="relative w-[420px] h-[520px] xl:w-[480px] xl:h-[580px]"
-                                            >
-                                                <Image
-                                                    src={SLIDES[current].overlayImage}
-                                                    alt=""
-                                                    fill
-                                                    className="object-contain"
-                                                    priority
-                                                />
-                                            </motion.div>
-                                        </div>
+                                    {/* Right Overlay Image (Desktop only) */}
+                                    <div className="hidden lg:block">
+                                        <motion.div
+                                            initial={{ opacity: 0, x: 50 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: 0.2, duration: 1 }}
+                                            className="absolute z-10"
+                                            style={{
+                                                width: `${SLIDES[current].layout.img.w}px`,
+                                                height: `${SLIDES[current].layout.img.h}px`,
+                                                top: `${SLIDES[current].layout.img.top}px`,
+                                                right: `${SLIDES[current].layout.img.right}px`
+                                            }}
+                                        >
+                                            <Image
+                                                src={SLIDES[current].overlayImage}
+                                                alt=""
+                                                fill
+                                                className="object-contain"
+                                                priority
+                                            />
+                                        </motion.div>
                                     </div>
                                 </div>
                             </motion.div>

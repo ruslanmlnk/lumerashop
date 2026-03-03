@@ -74,11 +74,15 @@ const Hero = () => {
                     </div>
 
                     {/* Right Column (Category Tiles) - 305.8px */}
-                    <div className="w-full lg:w-[305.8px] flex flex-col gap-4 lg:gap-[20px] h-auto lg:h-[567px]">
+                    <div className="w-full lg:w-[305.8px] flex flex-col gap-4 lg:gap-[24px] h-auto lg:h-[567px] lg:py-[12.5px]">
                         {HERO_CATEGORIES.map((cat, idx) => {
-                            // Proportional heights for 567px total including 3 x 20px gaps: 
-                            // 135 + 20 + 135 + 20 + 120 + 20 + 117 = 567
-                            const heights = ["135px", "135px", "120px", "117px"];
+                            // Exact visual inner heights per subagent bounding box analysis:
+                            // 126.5 + 126.5 + 110 + 107 = 470px
+                            // Gaps: 3 * 24 = 72px
+                            // Padding top/bottom: 12.5 * 2 = 25px
+                            // Total = 470 + 72 + 25 = 567px
+                            const heights = ["126.5px", "126.5px", "110px", "107px"];
+                            const bgScales = ["115%", "115%", "130%", "110%"];
                             return (
                                 <Link
                                     key={idx}
@@ -86,28 +90,42 @@ const Hero = () => {
                                     className="group relative overflow-hidden bg-[#F5F5F5] block w-full border-l border-white/5"
                                     style={{ height: heights[idx] }}
                                 >
-                                    <div className="absolute inset-0 z-0">
-                                        <Image
-                                            src={cat.bg}
-                                            alt=""
-                                            fill
-                                            className="object-cover"
-                                            sizes="306px"
+                                    <div className="absolute inset-0 z-0 overflow-hidden">
+                                        <div
+                                            className="absolute inset-0 group-hover:scale-105 transition-transform duration-700 bg-center bg-no-repeat"
+                                            style={{
+                                                backgroundImage: `url(${cat.bg})`,
+                                                backgroundSize: bgScales[idx]
+                                            }}
                                         />
                                     </div>
-                                    <div className="absolute inset-0 pt-[25px] pb-[10px] pl-[25px] pr-[10px] flex items-center z-10">
+                                    <div className="absolute inset-0 z-10 pointer-events-none">
+                                        {/* Exact text positioning */}
                                         <h2
-                                            className="font-serif font-bold text-[30px] text-[#111111] leading-[1.0] max-w-[140px]"
-                                            style={{ fontFamily: '"Cormorant Garamond", serif' }}
+                                            className="absolute left-[30px] lg:left-[60px] font-serif font-bold text-[30px] text-[#111111] leading-[1.1] whitespace-pre-line"
+                                            style={{
+                                                fontFamily: '"Cormorant Garamond", serif',
+                                                top: ["25px", "25px", "38.5px", "44px"][idx]
+                                            }}
                                         >
-                                            {cat.name}
+                                            {idx < 2 ? cat.name.replace(' ', '\n') : cat.name}
                                         </h2>
+                                        {/* Exact product image sizing & positioning */}
                                         {cat.product && (
-                                            <div className="absolute right-[15px] top-1/2 -translate-y-1/2 w-[110px] h-[110px] group-hover:scale-110 transition-transform duration-700">
+                                            <div
+                                                className="absolute group-hover:scale-110 transition-transform duration-700"
+                                                style={{
+                                                    width: ["80px", "88px", "89px", "90px"][idx],
+                                                    height: ["80px", "80px", "80px", "50px"][idx],
+                                                    top: ["18px", "18px", "14.5px", "35px"][idx],
+                                                    right: ["30px", "26px", "26px", "25px"][idx]
+                                                }}
+                                            >
                                                 <Image
                                                     src={cat.product}
                                                     alt={cat.name}
                                                     fill
+                                                    sizes="90px"
                                                     className="object-contain"
                                                 />
                                             </div>
