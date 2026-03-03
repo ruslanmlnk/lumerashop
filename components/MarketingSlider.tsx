@@ -62,26 +62,51 @@ const MarketingSlider = () => {
     useEffect(() => {
         const timer = setInterval(() => {
             paginate(1);
-        }, 7000); // Increased duration to match live site better
+        }, 7000);
         return () => clearInterval(timer);
     }, [current]);
 
-    const slideVariants = {
+    const slideVariants: any = {
         enter: (direction: number) => ({
-            opacity: 0,
-            x: direction > 0 ? '10%' : '-10%'
+            x: direction > 0 ? '100%' : '-100%',
+            opacity: 1,
+            zIndex: 1
         }),
         center: {
-            zIndex: 1,
             x: 0,
-            opacity: 1
+            opacity: 1,
+            zIndex: 1
         },
         exit: (direction: number) => ({
-            zIndex: 0,
-            x: direction < 0 ? '10%' : '-10%',
-            opacity: 0
+            x: direction > 0 ? '-100%' : '100%',
+            opacity: 1,
+            zIndex: 0
         })
     };
+
+    const getVariants = (enterX: number, centerDelay: number, exitDuration: number = 0.5): any => ({
+        enter: {
+            opacity: 0,
+            x: enterX
+        },
+        center: {
+            opacity: 1,
+            x: 0,
+            transition: {
+                duration: 1.0,
+                delay: centerDelay,
+                ease: [0.33, 1, 0.68, 1]
+            }
+        },
+        exit: {
+            opacity: 0,
+            x: enterX,
+            transition: {
+                duration: exitDuration,
+                ease: "easeIn"
+            }
+        }
+    });
 
     return (
         <section className="hidden lg:block bg-white overflow-hidden py-0" id="block-4">
@@ -89,7 +114,7 @@ const MarketingSlider = () => {
                 <div className="relative h-[380px] md:h-[644px] overflow-hidden bg-[#111111]">
                     {/* Slides Container */}
                     <div className="relative h-full w-full">
-                        <AnimatePresence initial={false} custom={direction}>
+                        <AnimatePresence custom={direction}>
                             <motion.div
                                 key={current}
                                 custom={direction}
@@ -98,8 +123,7 @@ const MarketingSlider = () => {
                                 animate="center"
                                 exit="exit"
                                 transition={{
-                                    x: { type: "tween", duration: 0.8, ease: "easeOut" },
-                                    opacity: { duration: 0.4 }
+                                    x: { type: "tween", duration: 1.2, ease: [0.4, 0, 0.2, 1], delay: 0.3 }
                                 }}
                                 className="absolute inset-0 w-full h-full"
                             >
@@ -112,21 +136,19 @@ const MarketingSlider = () => {
                                     priority
                                 />
                                 {/* Overlay Shading */}
-                                <div className="absolute inset-0 bg-black/30" />
+                                <div className="absolute inset-0 bg-black/25" />
 
                                 {/* Content Layout */}
                                 <div className="absolute inset-x-0 inset-y-0 w-full max-w-[1140px] mx-auto px-6 md:px-[50px] z-10 flex flex-col justify-center lg:block">
-                                    {/* Left Content (Flows normally to prevent overlap) */}
                                     <div
                                         className="text-left text-white relative flex flex-col w-full lg:w-[60%] z-20"
                                         style={{
-                                            paddingTop: typeof window !== 'undefined' && window.innerWidth >= 1024 ? `${SLIDES[current].layout.paddingTop}px` : undefined
+                                            marginTop: `${SLIDES[current].layout.paddingTop}px`,
+                                            textShadow: '0 2px 10px rgba(0,0,0,0.2)' // Subtle shadow for readability without darkening the image
                                         }}
                                     >
                                         <motion.h2
-                                            initial={{ opacity: 0, y: 15 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: 0.3, duration: 0.8 }}
+                                            variants={getVariants(-200, 1.0)}
                                             className="text-[34px] md:text-[48px] font-serif font-bold leading-[1.1] mb-5"
                                             style={{
                                                 fontFamily: '"Cormorant Garamond", serif',
@@ -136,9 +158,7 @@ const MarketingSlider = () => {
                                             {SLIDES[current].title}
                                         </motion.h2>
                                         <motion.p
-                                            initial={{ opacity: 0, y: 15 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: 0.5, duration: 0.8 }}
+                                            variants={getVariants(-200, 1.2)}
                                             className="text-[14px] md:text-[16px] font-sans font-normal leading-[1.6] mb-8"
                                             style={{
                                                 fontFamily: '"Work Sans", sans-serif',
@@ -148,25 +168,21 @@ const MarketingSlider = () => {
                                             {SLIDES[current].description}
                                         </motion.p>
                                         <motion.div
-                                            initial={{ opacity: 0, y: 15 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: 0.7, duration: 0.8 }}
+                                            variants={getVariants(-200, 1.4)}
                                         >
                                             <Link
                                                 href={SLIDES[current].link}
-                                                className="lumera-btn lumera-btn--light w-fit"
+                                                className="lumera-btn lumera-btn--light w-fit shadow-lg shadow-black/10"
                                             >
                                                 {SLIDES[current].button}
                                             </Link>
                                         </motion.div>
                                     </div>
 
-                                    {/* Right Overlay Image (Desktop only) */}
+                                    {/* Right Overlay Image */}
                                     <div className="hidden lg:block">
                                         <motion.div
-                                            initial={{ opacity: 0, x: 50 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: 0.2, duration: 1 }}
+                                            variants={getVariants(300, 0.8, 0.7)}
                                             className="absolute z-10"
                                             style={{
                                                 width: `${SLIDES[current].layout.img.w}px`,
@@ -187,6 +203,10 @@ const MarketingSlider = () => {
                                 </div>
                             </motion.div>
                         </AnimatePresence>
+
+
+
+
 
                         {/* Custom Navigation Arrows */}
                         <button

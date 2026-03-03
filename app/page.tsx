@@ -184,7 +184,7 @@ export default async function Home() {
         </section>
 
         {/* Block 10: CTA */}
-        <section className="mt-[30px] py-0 bg-white" id="block-10">
+        <section className="mt-[30px] mb-[40px] py-0 bg-white" id="block-10">
           <div className="lumera-container">
             <div className="relative h-[220px] md:h-[340px] flex flex-col justify-center px-[20px] md:px-[40px] lg:px-[40px] lg:pr-[129.1px] w-full">
               {/* Background gradient image logic */}

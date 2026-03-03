@@ -49,7 +49,7 @@ const ProductGrid = ({ title, products, description, isSlider = false }: { title
     }, [isSlider, nextSlide]);
 
     const gridHeader = (
-        <div className="text-left mb-0">
+        <div className="text-center mb-0">
             <h2
                 className="text-[30px] md:text-[36px] font-serif font-bold text-[#111111] mb-0 leading-[1.1]"
                 style={{ fontFamily: '"Cormorant Garamond", serif', marginTop: 0 }}
@@ -58,7 +58,7 @@ const ProductGrid = ({ title, products, description, isSlider = false }: { title
             </h2>
             {description && (
                 <p
-                    className="text-[#111111] max-w-[578px] mt-[20px] mb-0 text-[14px] md:text-[16px] font-sans font-normal leading-[1.6]"
+                    className="text-[#111111] max-w-[578px] mx-auto mt-[20px] mb-0 text-[14px] md:text-[16px] font-sans font-normal leading-[1.6]"
                     style={{ fontFamily: '"Work Sans", sans-serif' }}
                 >
                     {description}
