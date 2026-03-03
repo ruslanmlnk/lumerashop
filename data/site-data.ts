@@ -95,7 +95,49 @@ export const TESTIMONIALS: Testimonial[] = [
 ];
 
 export const BLOG_POSTS: BlogPost[] = [
-    { title: "Jak vybrat tu pravou kabelku?", excerpt: "Průvodce světem stylů, materiálů a velikostí.", image: "/assets/blog/vybrat-kabelku.jpg", slug: "jak-vybrat-kabelku" },
-    { title: "Péče o kožené výrobky", excerpt: "Jak udržet vaše doplňky dlouho jako nové.", image: "/assets/blog/pece-o-kuzi.jpg", slug: "pece-o-kozi" },
-    { title: "Barvy, které ovládnou sezónu", excerpt: "Inspirujte se nejnovějšími trendy z Itálie.", image: "/assets/blog/barvy.jpg", slug: "trendy-barvy" }
+    {
+        title: "Jak vybrat tu pravou kabelku?",
+        excerpt: "Průvodce světem stylů, materiálů a velikostí.",
+        date: "14. února 2026",
+        content: `
+            <p>Výběr kabelky je pro každou ženu důležitým rozhodnutím. Nejde jen o praktický doplněk, ale o součást vyjádření vaší osobnosti a stylu. V tomto průvodci vám pomůžeme orientovat se v široké nabídce materiálů a tvarů.</p>
+            <h3>1. Zvažte příležitost</h3>
+            <p>Pro každodenní nošení do práce je ideální prostorná shopper taška nebo elegantní kabelka do ruky, do které se vejdou dokumenty formátu A4 i osobní věci. Pro večerní akce sáhněte po menším psaníčku nebo crossbody kabelce.</p>
+            <h3>2. Kvalita materiálu</h3>
+            <p>V Lumeře sázíme na pravou italskou kůži. Je to investice, která se vyplatí – kůže s časem získává na kráse a při správné péči vám vydrží desítky let.</p>
+            <p>Nezapomeňte také na barvu. Černá a hnědá jsou klasiky, ale nebojte se experimentovat s pastelovými tóny pro oživení vašeho outfitu.</p>
+        `,
+        image: "/assets/blog/vybrat-kabelku.jpg",
+        slug: "jak-vybrat-kabelku"
+    },
+    {
+        title: "Péče o kožené výrobky",
+        excerpt: "Jak udržet vaše doplňky dlouho jako nové.",
+        date: "20. ledna 2026",
+        content: `
+            <p>Kožené výrobky jsou přírodní materiál, který vyžaduje specifickou péči. Správným zacházením zajistíte, že vaše oblíbená kabelka bude vypadat skvěle i po letech používání.</p>
+            <h3>Základní pravidla péče:</h3>
+            <ul>
+                <li><strong>Impregnace:</strong> Před prvním použitím doporučujeme kabelku naimpregnovat vhodným přípravkem na kůži.</li>
+                <li><strong>Čištění:</strong> Vyhněte se agresivním chemikáliím. Používejte pouze speciální mýdla na kůži nebo lehce navlhčený hadřík.</li>
+                <li><strong>Skladování:</strong> Pokud kabelku delší dobu nenosíte, vycpěte ji papírem, aby si zachovala svůj tvar, a uložte ji do prachového sáčku.</li>
+            </ul>
+        `,
+        image: "/assets/blog/pece-o-kuzi.jpg",
+        slug: "pece-o-kozi"
+    },
+    {
+        title: "Barvy, které ovládnou sezónu",
+        excerpt: "Inspirujte se nejnovějšími trendy z Itálie.",
+        date: "5. ledna 2026",
+        content: `
+            <p>Nová sezóna přináší svěží pohled na barevné kombinace. V Itálii, kolébce módy, se letos vsází na harmonii přírodních tónů s odvážnými akcenty.</p>
+            <h3>Trendy tóny pro tento rok:</h3>
+            <p><strong>Zemitá hnědá a taupe:</strong> Tyto barvy jsou symbolem elegance a klidu. Skvěle se kombinují s bílou nebo krémovou barvou.</p>
+            <p><strong>Pastelově růžová:</strong> Dodává outfitu jemnost a ženskost. Je ideální volbou pro jarní a letní měsíce.</p>
+            <p><strong>Olivově zelená:</strong> Netradiční, ale velmi stylová barva, která vynikne zejména na hladké kůži.</p>
+        `,
+        image: "/assets/blog/barvy.jpg",
+        slug: "trendy-barvy"
+    }
 ];

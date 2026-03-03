@@ -1,100 +1,127 @@
 'use client';
 import { useState } from 'react';
+import { Truck, RotateCcw, ShieldCheck, Heart } from 'lucide-react';
 
 interface ProductInfoProps {
     name: string;
     price: string;
+    oldPrice?: string;
     sku: string;
     category: string;
     shortDescription?: string;
+    stockStatus?: 'in-stock' | 'low-stock' | 'out-of-stock';
+    variants?: { id: string, image: string, slug: string }[];
 }
 
-const ProductInfo = ({ name, price, sku, category, shortDescription }: ProductInfoProps) => {
+const ProductInfo = ({ name, price, oldPrice, sku, category, shortDescription, stockStatus = 'in-stock', variants }: ProductInfoProps) => {
     const [quantity, setQuantity] = useState(1);
+
+    const getStockLabel = () => {
+        switch (stockStatus) {
+            case 'low-stock': return { label: 'Poslední kus', color: 'text-orange-500', dot: 'bg-orange-500' };
+            case 'out-of-stock': return { label: 'Vyprodáno', color: 'text-red-500', dot: 'bg-red-500' };
+            default: return { label: 'Skladem', color: 'text-green-600', dot: 'bg-green-600' };
+        }
+    };
+
+    const stock = getStockLabel();
 
     return (
         <div className="flex flex-col">
-            <h1
-                className="text-[42px] font-serif font-bold text-[#111111] mb-4 leading-tight"
-                style={{ fontFamily: '"Cormorant Garamond", serif' }}
-            >
+            <h1 className="text-[32px] md:text-[42px] font-serif font-bold text-[#111111] mb-2 leading-tight tracking-tight">
                 {name}
             </h1>
 
-            <div className="flex items-center gap-4 mb-8">
-                <span className="text-[28px] font-medium text-amber-800">{price}</span>
-                <span className="px-3 py-1 bg-green-50 text-green-600 text-[12px] font-bold uppercase tracking-wider rounded-full">
-                    Skladem
+            <p className="text-[12px] text-gray-400 font-sans tracking-[0.2em] mb-6 uppercase">Ref. {sku}</p>
+
+            <div className="flex items-baseline gap-4 mb-8">
+                <span className="text-[32px] font-sans font-black text-[#111111]">{price}</span>
+                {oldPrice && (
+                    <span className="text-[20px] font-sans text-gray-300 line-through">{oldPrice}</span>
+                )}
+            </div>
+
+            <div className="flex items-center gap-2 mb-8">
+                <span className={`w-2 h-2 rounded-full ${stock.dot} animate-pulse`}></span>
+                <span className={`text-[14px] font-bold uppercase tracking-wider ${stock.color}`}>
+                    {stock.label}
                 </span>
             </div>
 
-            {shortDescription && (
-                <p className="text-gray-500 text-[16px] leading-relaxed mb-8 font-light italic">
-                    {shortDescription}
-                </p>
-            )}
-
-            <div className="space-y-6 pb-10 border-b border-gray-100">
-                <div className="flex flex-col gap-2">
-                    <span className="text-[12px] font-bold uppercase tracking-wider text-[#111111]">Množství</span>
-                    <div className="flex items-center w-32 border border-gray-200">
-                        <button
-                            onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                            className="px-4 py-2 hover:bg-gray-50 transition-colors"
-                        >
-                            -
-                        </button>
-                        <input
-                            type="number"
-                            value={quantity}
-                            readOnly
-                            className="w-full text-center text-[15px] font-medium outline-none"
-                        />
-                        <button
-                            onClick={() => setQuantity(quantity + 1)}
-                            className="px-4 py-2 hover:bg-gray-50 transition-colors"
-                        >
-                            +
-                        </button>
+            {/* Variations / Upsells */}
+            {variants && variants.length > 0 && (
+                <div className="mb-10">
+                    <p className="text-[14px] font-bold text-[#111] mb-4 uppercase tracking-wider">Barevné varianty:</p>
+                    <div className="flex flex-wrap gap-3">
+                        {variants.map((v) => (
+                            <button
+                                key={v.id}
+                                className="w-16 h-16 border border-gray-100 hover:border-[#c8a16a] transition-all p-1 bg-white shadow-sm overflow-hidden"
+                            >
+                                <img src={v.image} alt="variant" className="w-full h-full object-cover" />
+                            </button>
+                        ))}
                     </div>
                 </div>
+            )}
 
-                <button className="w-full py-5 bg-black text-white text-[14px] font-bold uppercase tracking-[0.2em] hover:bg-neutral-800 transition-all shadow-lg">
+            <div className="flex flex-col sm:flex-row gap-4 mb-10">
+                <div className="flex items-center border border-gray-200 h-14 bg-white">
+                    <button
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        className="px-5 h-full hover:bg-gray-50 text-gray-400 hover:text-black transition-colors"
+                    >
+                        -
+                    </button>
+                    <input
+                        type="text"
+                        value={quantity}
+                        readOnly
+                        className="w-12 text-center font-bold text-[16px] outline-none"
+                    />
+                    <button
+                        onClick={() => setQuantity(quantity + 1)}
+                        className="px-5 h-full hover:bg-gray-50 text-gray-400 hover:text-black transition-colors"
+                    >
+                        +
+                    </button>
+                </div>
+
+                <button className="flex-1 h-14 bg-[#111] text-white text-[13px] font-bold uppercase tracking-[0.2em] hover:bg-[#c8a16a] transition-all duration-300 shadow-xl flex items-center justify-center gap-3">
                     Přidat do košíku
+                </button>
+
+                <button className="h-14 w-14 border border-gray-200 flex items-center justify-center hover:bg-red-50 hover:border-red-100 group transition-all">
+                    <Heart size={20} className="text-gray-400 group-hover:text-red-500 transition-colors" />
                 </button>
             </div>
 
-            <div className="pt-8 space-y-3">
-                <div className="flex items-center gap-2 text-[14px]">
-                    <span className="font-bold text-[#111111]">SKU:</span>
-                    <span className="text-gray-500 uppercase">{sku}</span>
+            <div className="space-y-4 mb-10 pt-8 border-t border-gray-50">
+                <div className="flex items-center gap-4 text-[13px] text-gray-500 font-sans">
+                    <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center shrink-0">
+                        <Truck size={18} className="text-[#c8a16a]" />
+                    </div>
+                    <span>Doprava zdarma při nákupu nad 1500 Kč</span>
                 </div>
-                <div className="flex items-center gap-2 text-[14px]">
-                    <span className="font-bold text-[#111111]">Kategorie:</span>
-                    <span className="text-gray-500 underline hover:text-black cursor-pointer transition-colors">{category}</span>
+                <div className="flex items-center gap-4 text-[13px] text-gray-500 font-sans">
+                    <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center shrink-0">
+                        <RotateCcw size={18} className="text-[#c8a16a]" />
+                    </div>
+                    <span>14 dní na vrácení</span>
+                </div>
+                <div className="flex items-center gap-4 text-[13px] text-gray-500 font-sans">
+                    <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center shrink-0">
+                        <ShieldCheck size={18} className="text-[#c8a16a]" />
+                    </div>
+                    <span>Garantujeme 100% kvalitu a italský původ</span>
                 </div>
             </div>
 
-            <div className="mt-10 p-6 bg-[#f9f9f9] border border-gray-100 space-y-4">
-                <div className="flex items-center gap-3 text-[14px] text-gray-600">
-                    <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Doprava zdarma při nákupu nad 1500 Kč
+            {shortDescription && (
+                <div className="text-gray-500 text-[15px] leading-relaxed font-sans border-l-2 border-[#c8a16a] pl-6 py-2 italic font-light">
+                    {shortDescription}
                 </div>
-                <div className="flex items-center gap-3 text-[14px] text-gray-600">
-                    <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    14 dní na vrácení
-                </div>
-                <div className="flex items-center gap-3 text-[14px] text-gray-600">
-                    <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Vyrobeno v Itálii
-                </div>
-            </div>
+            )}
         </div>
     );
 };

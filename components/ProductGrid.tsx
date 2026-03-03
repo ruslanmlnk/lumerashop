@@ -80,7 +80,7 @@ const ProductGrid = ({ title, products, description, isSlider = false }: { title
 
     if (isSlider) {
         return (
-            <section className="mt-[20px] py-[30px] md:py-[40px] bg-white text-center overflow-hidden" id="block-5">
+            <section className="py-12 md:py-20 bg-white text-center overflow-hidden" id="block-5">
                 <div className="lumera-container relative">
                     {gridHeader}
 
@@ -131,7 +131,7 @@ const ProductGrid = ({ title, products, description, isSlider = false }: { title
     }
 
     return (
-        <section className="mt-[20px] py-[30px] md:py-[40px] bg-white text-center" id="block-5">
+        <section className="py-12 md:py-20 bg-white text-center" id="block-5">
             <div className="lumera-container">
                 {gridHeader}
 

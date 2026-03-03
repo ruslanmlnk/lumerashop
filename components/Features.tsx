@@ -34,7 +34,7 @@ const FeatureItem = ({ feature }: { feature: Feature }) => {
 
 const Features = () => {
     return (
-        <section className="mt-[20px] bg-transparent relative overflow-hidden" id="block-7">
+        <section className="bg-transparent relative overflow-hidden" id="block-7">
             <div className="lumera-container relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[10px]">
                     {FEATURES_DATA.map((feature) => (

@@ -2,17 +2,14 @@
 
 const BlogHero = () => {
     return (
-        <section className="bg-[#f9f9f9] py-20 border-b border-neutral-100">
+        <section className="bg-[#c8a16a] py-16 md:py-20 flex items-center justify-center">
             <div className="max-w-[1140px] mx-auto px-4 lg:px-0 text-center">
                 <h1
-                    className="text-[48px] md:text-[64px] font-serif font-bold text-[#111111] mb-6"
+                    className="text-[36px] md:text-[48px] font-serif font-bold text-white tracking-tight"
                     style={{ fontFamily: '"Cormorant Garamond", serif' }}
                 >
-                    Blog Lumera
+                    Blog
                 </h1>
-                <p className="text-[18px] text-gray-500 italic max-w-2xl mx-auto leading-relaxed">
-                    Inspirace ze světa italské módy, rady pro péči o kůži a novinky z naší dílny.
-                </p>
             </div>
         </section>
     );

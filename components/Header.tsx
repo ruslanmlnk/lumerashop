@@ -1,7 +1,8 @@
 'use client';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useCart } from '@/context/CartContext';
 import { Menu, X, Search, ChevronDown, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import { NAV_ITEMS } from '../data/site-data';
@@ -18,15 +19,7 @@ const MOBILE_QUICK_LINKS = [
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: 'Italská shopper kabelka z pravé kůže Olivia modrá',
-      price: 2199,
-      image: '/assets/products/bag-olivia.webp',
-      quantity: 1
-    }
-  ]);
+  const { cartItems, removeFromCart, updateQuantity, totalPrice, totalItems } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const { scrollY } = useScroll();
 
@@ -131,18 +124,18 @@ const Header = () => {
 
         {/* Navigation Row (Desktop only) */}
         <nav className="hidden md:block max-w-[1140px] mx-auto px-4 lg:px-0 h-[53px]">
-          <ul className="flex justify-center items-center h-full font-sans text-[#111111]">
+          <ul className="flex justify-center items-center h-full font-sans text-[#111111] gap-[52px]">
             {NAV_ITEMS.map((item, idx) => (
               <li key={idx} className="group relative h-full flex items-center">
                 <Link
                   href={item.href}
-                  className="px-[20px] py-[10px] text-[16px] font-[400] leading-[1] tracking-[0] normal-case hover:text-[#C8A16A] transition-colors whitespace-nowrap flex items-center h-full"
+                  className="py-[10px] text-[15px] font-[400] leading-[1] tracking-[0.04em] normal-case hover:text-[#C8A16A] transition-colors whitespace-nowrap flex items-center h-full"
                 >
                   {item.label}
                   {item.dropdown && (
                     <span
                       aria-hidden="true"
-                      className="ml-1 inline-block h-4 w-4 shrink-0 bg-center bg-no-repeat bg-contain"
+                      className="inline-block h-4 w-4 shrink-0 bg-center bg-no-repeat bg-contain"
                       style={{ backgroundImage: MENU_ARROW_DOWN_BG }}
                     />
                   )}
@@ -267,7 +260,7 @@ const Header = () => {
                     {cartItems.length > 0 ? 'Zkontrolujte svůj košík' : 'Váš košík je prázdný'}
                   </h2>
                   <div className="w-6 h-6 bg-gray-100 rounded flex items-center justify-center text-xs font-medium text-gray-500">
-                    {cartItems.length}
+                    {totalItems}
                   </div>
                 </div>
 
@@ -278,7 +271,7 @@ const Header = () => {
                       <div key={item.id} className="flex gap-4 mb-6 pb-6 border-b border-gray-50 last:border-0 last:pb-0 last:mb-0 relative group">
                         {/* Remove Button */}
                         <button
-                          onClick={() => setCartItems(items => items.filter(i => i.id !== item.id))}
+                          onClick={() => removeFromCart(item.id)}
                           className="absolute top-0 right-0 p-1 text-gray-400 hover:text-red-500 transition-colors"
                         >
                           <X size={16} />
@@ -305,14 +298,24 @@ const Header = () => {
 
                           {/* Quantity */}
                           <div className="flex items-center border border-gray-200 rounded-sm w-fit max-w-[100px]">
-                            <button className="px-3 py-1 text-gray-500 hover:text-gray-900 text-lg leading-none">-</button>
+                            <button
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              className="px-3 py-1 text-gray-500 hover:text-gray-900 text-lg leading-none"
+                            >
+                              -
+                            </button>
                             <input
                               type="text"
                               value={item.quantity}
                               readOnly
                               className="w-8 text-center text-[13px] text-gray-900 font-medium focus:outline-none"
                             />
-                            <button className="px-3 py-1 text-gray-500 hover:text-gray-900 text-lg leading-none">+</button>
+                            <button
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              className="px-3 py-1 text-gray-500 hover:text-gray-900 text-lg leading-none"
+                            >
+                              +
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -340,19 +343,19 @@ const Header = () => {
                     <div className="space-y-3 mb-6">
                       <div className="flex justify-between items-center text-[14px] text-gray-600">
                         <span>Cena za zboží</span>
-                        <span>2 199,00 Kč</span>
+                        <span>{totalPrice.toLocaleString('cs-CZ')} Kč</span>
                       </div>
                       <div className="flex justify-between items-center text-[14px] text-gray-600">
                         <span>Včetně DPH</span>
-                        <span>381,64 Kč</span>
+                        <span>{(totalPrice * 0.21).toLocaleString('cs-CZ', { maximumFractionDigits: 2 })} Kč</span>
                       </div>
                       <div className="flex justify-between items-center text-[14px] text-gray-600">
                         <span>Doprava</span>
-                        <span className="font-semibold text-gray-900">Zdarma!</span>
+                        <span className="font-semibold text-gray-900 text-[#2196F3]">Zdarma!</span>
                       </div>
                       <div className="flex justify-between items-center pt-3 border-t border-gray-200">
                         <span className="text-[16px] font-bold text-gray-900">Celkem</span>
-                        <span className="text-[16px] font-bold text-gray-900">2 199,00 Kč</span>
+                        <span className="text-[16px] font-bold text-gray-900">{totalPrice.toLocaleString('cs-CZ')} Kč</span>
                       </div>
                     </div>
                   ) : (
@@ -363,8 +366,17 @@ const Header = () => {
                   )}
 
                   {cartItems.length > 0 ? (
+                    <Link
+                      href="/cart"
+                      onClick={() => setIsCartOpen(false)}
+                      className="w-full h-[48px] bg-[#c78d02] hover:bg-[#b07c02] text-white text-[15px] font-semibold rounded-md transition-colors flex items-center justify-center gap-2 mb-2"
+                    >
+                      Zobrazit košík
+                    </Link>
+                  ) : null}
+                  {cartItems.length > 0 ? (
                     <button
-                      className="w-full h-[48px] bg-[#c78d02] hover:bg-[#b07c02] text-white text-[15px] font-semibold rounded-md transition-colors flex items-center justify-center gap-2"
+                      className="w-full h-[48px] border border-[#c78d02] text-[#c78d02] hover:bg-gray-50 text-[15px] font-semibold rounded-md transition-colors flex items-center justify-center gap-2"
                     >
                       Pokračovat k pokladně <ArrowRight size={18} />
                     </button>

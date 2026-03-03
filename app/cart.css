@@ -1,0 +1,48 @@
+/* Refined Cart Styles - Tailwind 4 compatible (no @apply to avoid build issues in separate files) */
+
+.u-section-cart {
+  font-variant-numeric: lining-nums;
+}
+
+/* Custom Scrollbar for the table */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #c8a16a;
+  border-radius: 2px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cart-item-row {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+/* Sticky Summary adjustments */
+.sticky-summary {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 140px;
+}
+
+/* Button transitions */
+.cart-btn-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}

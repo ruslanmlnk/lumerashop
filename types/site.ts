@@ -40,6 +40,8 @@ export interface Testimonial {
 export interface BlogPost {
     title: string;
     excerpt: string;
+    content?: string;
+    date?: string;
     image: string;
     slug: string;
 }
