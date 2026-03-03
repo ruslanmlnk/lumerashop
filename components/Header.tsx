@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
-import { Menu, X, Search, ChevronDown, ArrowRight } from 'lucide-react';
+import { Menu, X, Search, ChevronDown, ArrowRight, Phone, Mail, Facebook, Instagram } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import { NAV_ITEMS } from '../data/site-data';
 
@@ -22,6 +22,13 @@ const Header = () => {
   const { cartItems, removeFromCart, updateQuantity, totalPrice, totalItems } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const { scrollY } = useScroll();
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
+
+  const toggleExpand = (label: string) => {
+    setExpandedItems(prev =>
+      prev.includes(label) ? prev.filter(i => i !== label) : [...prev, label]
+    );
+  };
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     if (latest > 20 && !scrolled) {
@@ -100,26 +107,16 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Quick Navigation */}
-        <div className="md:hidden border-b border-gray-100 h-[52px]">
-          <nav className="h-full">
-            <ul className="h-full flex items-center justify-center gap-8 font-sans text-[16px] text-[#111111]">
-              {MOBILE_QUICK_LINKS.map((item) => (
-                <li key={item.label}>
-                  <Link href={item.href} className="inline-flex items-center gap-1 hover:text-[#C8A16A] transition-colors">
-                    {item.label}
-                    {item.hasArrow && (
-                      <span
-                        aria-hidden="true"
-                        className="inline-block h-3.5 w-3.5 shrink-0 bg-center bg-no-repeat bg-contain"
-                        style={{ backgroundImage: MENU_ARROW_DOWN_BG }}
-                      />
-                    )}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+        {/* Mobile Search Bar Row */}
+        <div className="md:hidden border-b border-gray-100 py-3 px-4 bg-white">
+          <div className="relative flex items-center w-full h-[44px] bg-white border-[0.8px] border-[#B3B3B3]">
+            <input
+              type="text"
+              placeholder="Hledat"
+              className="w-full h-full pl-[15px] pr-[40px] text-[16px] placeholder:text-[#808080] focus:outline-none bg-transparent font-sans text-[#111111]"
+            />
+            <Search size={20} className="absolute right-[12px] text-[#111111] pointer-events-none" />
+          </div>
         </div>
 
         {/* Navigation Row (Desktop only) */}
@@ -169,60 +166,124 @@ const Header = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setIsOpen(false)}
-                className="fixed inset-0 bg-black/70 z-[60]"
+                className="fixed inset-0 bg-black/60 z-[60]"
               />
               <motion.div
                 initial={{ x: '-100%' }}
                 animate={{ x: 0 }}
                 exit={{ x: '-100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className="md:hidden fixed top-0 left-0 w-[280px] max-w-[85vw] h-full bg-black/95 z-[70] px-6 pt-8 pb-6 shadow-2xl overflow-y-auto text-white"
+                transition={{ type: 'tween', duration: 0.3, ease: 'easeOut' }}
+                className="md:hidden fixed top-0 left-0 w-[280px] h-full bg-[#111111] z-[70] flex flex-col shadow-2xl overflow-y-auto no-scrollbar pb-10"
+                style={{ fontFamily: '"Work Sans", sans-serif' }}
               >
-                <div className="flex justify-between items-center mb-9">
-                  <Link href="/" onClick={() => setIsOpen(false)} className="text-[20px] font-sans tracking-[0.18em] flex items-center">
-                    <span className="font-semibold text-white">LUMERA</span>
-                    <span className="ml-[6px] text-[#c8a16a]">SHOP</span>
+                {/* Header / Logo / Close */}
+                <div className="flex justify-between items-center px-[30px] pt-[30px] mb-8">
+                  <Link href="/" onClick={() => setIsOpen(false)} className="text-[20px] tracking-[0.1em] flex items-center leading-none">
+                    <span className="font-bold text-white">LUMERA</span>
+                    <span className="ml-[6px] text-[#c8a16a]">Shop</span>
                   </Link>
                   <button
-                    className="w-[22px] h-[28px] flex items-center justify-end text-white"
+                    className="text-white hover:text-[#c8a16a] transition-colors p-1"
                     onClick={() => setIsOpen(false)}
+                    aria-label="Close menu"
                   >
-                    <X size={24} strokeWidth={1.4} />
+                    <X size={28} strokeWidth={1} />
                   </button>
                 </div>
 
-                <nav className="flex flex-col text-white">
-                  {NAV_ITEMS.map((item, idx) => (
-                    <div key={idx} className="border-b border-white/15">
-                      <div className="flex justify-between items-center py-[15px]">
-                        <Link href={item.href} onClick={() => setIsOpen(false)} className="text-[16px] font-light">
-                          {item.label}
-                        </Link>
-                        {item.dropdown && (
-                          <span
-                            aria-hidden="true"
-                            className="inline-block h-[18px] w-[18px] shrink-0 bg-center bg-no-repeat bg-contain"
-                            style={{ backgroundImage: MENU_ARROW_DOWN_BG }}
-                          />
+                {/* Navigation Items */}
+                <nav className="flex flex-col px-[30px] mb-10 space-y-1">
+                  {NAV_ITEMS.map((item, idx) => {
+                    const isExpanded = expandedItems.includes(item.label);
+                    return (
+                      <div key={idx} className="group border-b border-white/5 last:border-0">
+                        <div className="flex justify-between items-center py-[10px]">
+                          <Link
+                            href={item.href}
+                            onClick={() => setIsOpen(false)}
+                            className="text-[22px] font-normal text-[#F2F2F2] hover:text-[#c8a16a] transition-colors leading-[1.3] flex-1"
+                          >
+                            {item.label}
+                          </Link>
+                          {item.dropdown && (
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                toggleExpand(item.label);
+                              }}
+                              className="w-12 h-10 flex items-center justify-end text-white/40 hover:text-white transition-colors"
+                            >
+                              <ChevronDown size={20} className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                            </button>
+                          )}
+                        </div>
+
+                        {item.dropdown && isExpanded && (
+                          <div className="pl-4 pb-4 space-y-4 pt-2">
+                            {item.dropdown.map((sub, sIdx) => (
+                              <Link
+                                key={sIdx}
+                                href={sub.href}
+                                onClick={() => setIsOpen(false)}
+                                className="block text-[18px] font-light text-white/60 hover:text-[#c8a16a] transition-colors"
+                              >
+                                {sub.label}
+                              </Link>
+                            ))}
+                          </div>
                         )}
                       </div>
-                      {item.dropdown && (
-                        <div className="pb-4 space-y-2">
-                          {item.dropdown.map((sub, sIdx) => (
-                            <Link
-                              key={sIdx}
-                              href={sub.href}
-                              onClick={() => setIsOpen(false)}
-                              className="block bg-[#C8A16A] text-white px-4 py-3 text-[16px] leading-none hover:bg-[#b48d56] transition-colors"
-                            >
-                              {sub.label}
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </nav>
+
+                {/* Search Bar - Replicated from lumerashop.cz */}
+                <div className="px-[30px] mb-10">
+                  <div className="relative group">
+                    <input
+                      type="text"
+                      placeholder="Search"
+                      className="w-full h-10 bg-transparent border border-white/20 rounded-full pl-5 pr-12 text-[14px] text-white placeholder:text-white/40 focus:outline-none focus:border-[#c8a16a] transition-colors"
+                    />
+                    <Search size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-[#c8a16a] transition-colors" />
+                  </div>
+                </div>
+
+                {/* Contact Info */}
+                <div className="px-[30px] space-y-5 mb-12">
+                  <a href="tel:+420606731316" className="flex items-center gap-3 text-[16px] font-normal text-[#F2F2F2] hover:text-[#c8a16a] transition-colors">
+                    <Phone size={18} strokeWidth={1.5} className="text-white/60" />
+                    <span>+420 606 731 316</span>
+                  </a>
+                  <a href="mailto:info@lumerashop.cz" className="flex items-center gap-3 text-[16px] font-normal text-[#F2F2F2] hover:text-[#c8a16a] transition-colors">
+                    <Mail size={18} strokeWidth={1.5} className="text-white/60" />
+                    <span>info@lumerashop.cz</span>
+                  </a>
+                  <a href="https://wa.me/420606731316" className="flex items-center gap-3 text-[16px] font-normal text-[#F2F2F2] hover:text-[#c8a16a] transition-colors">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="text-white/60">
+                      <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.284l-.582 2.126 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.766-5.764-5.766zm3.392 8.221c-.142-.072-.843-.416-.973-.463-.13-.047-.225-.072-.319.072-.095.143-.367.462-.449.546-.083.084-.131.096-.273.023-.142-.072-.601-.221-1.144-.705-.423-.377-.709-.842-.792-.985-.083-.143-.009-.22.063-.291.065-.064.142-.165.213-.248.071-.083.095-.143.142-.238.047-.095.024-.179-.012-.25-.036-.071-.314-.757-.43-.104-.113-.034-.234-.142-.32-.271z" opacity=".2" />
+                      <path d="M19.057 4.93C17.18 3.053 14.688 2 12.033 2 6.633 2 2.245 6.39 2.243 11.79c0 1.727.451 3.412 1.308 4.899L2 22l5.33-1.4c1.426.776 3.033 1.185 4.673 1.187h.004c5.399 0 9.789-4.39 9.791-9.79 0-2.617-1.017-5.077-2.895-6.957zm-7.024 14.75h-.003c-1.528 0-3.027-.41-4.336-1.186l-.311-.184-3.221.845.859-3.137-.203-.322c-.852-1.355-1.301-2.922-1.301-4.533 0-4.647 3.781-8.428 8.432-8.428 2.25 0 4.366.877 5.959 2.472s2.47 3.709 2.47 5.958c-.001 4.648-3.784 8.427-8.431 8.427zm4.629-6.319c-.253-.127-1.5-.741-1.732-.826-.233-.085-.403-.127-.572.127-.169.254-.656.826-.804.995-.148.169-.296.19-.549.063-.254-.127-1.072-.395-2.042-1.26-.754-.672-1.263-1.503-1.411-1.757-.148-.254-.016-.392.111-.518.114-.114.254-.296.381-.444.127-.148.17-.254.254-.423.085-.169.042-.317-.021-.444-.063-.127-.572-1.376-.783-1.884-.206-.411-.43-.45-.572-.45h-.486c-.169 0-.444.063-.677.317s-.89.868-.89 2.114 1.545 2.455 1.757 2.751c.212.296 3.041 4.643 7.365 6.513.844.364 1.574.625 2.112.796.848.269 1.621.231 2.232.131.681-.111 2.063-.844 2.353-1.659.29-.815.29-1.513.203-1.659-.088-.146-.324-.229-.623-.356z" />
+                    </svg>
+                    <span>WhatsApp</span>
+                  </a>
+                </div>
+
+                {/* Social Media Footer */}
+                <div className="mt-auto px-[30px] pt-10 flex gap-6">
+                  <a href="#" className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-white hover:text-[#c8a16a] hover:border-[#c8a16a] transition-all">
+                    <Facebook size={24} />
+                  </a>
+                  <a href="#" className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-white hover:text-[#c8a16a] hover:border-[#c8a16a] transition-all">
+                    <Instagram size={24} />
+                  </a>
+                  <a href="#" className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-white hover:text-[#c8a16a] hover:border-[#c8a16a] transition-all">
+                    {/* TikTok Custom SVG */}
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                      <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.17-2.89-.6-4.09-1.47-.15-.1-.3-.21-.45-.32-.01 1.03-.02 2.06-.03 3.09 0 .59-.04 1.18-.12 1.77-.14 1.11-.46 2.19-1.04 3.16-.9 1.58-2.43 2.87-4.18 3.48-1.74.61-3.69.69-5.48.24-1.7-.44-3.23-1.52-4.27-2.92-1.04-1.4-1.56-3.15-1.51-4.89.06-1.74.65-3.46 1.75-4.8 1.11-1.36 2.7-2.31 4.45-2.65 1.48-.28 3.02-.19 4.45.27.01 1.43.01 2.86.02 4.29-.86-.41-1.84-.57-2.79-.44-.95.12-1.87.58-2.5 1.3-.63.72-.94 1.7-.86 2.65.07.95.53 1.84 1.25 2.47.72.63 1.7.94 2.65.86.95-.07 1.84-.53 2.47-1.25.13-.15.25-.3.35-.46.3-.53.44-1.13.43-1.74-.01-4.96-.02-9.92-.03-14.88z" />
+                    </svg>
+                  </a>
+                </div>
               </motion.div>
             </>
           )}

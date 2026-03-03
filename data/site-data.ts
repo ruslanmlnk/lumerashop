@@ -9,7 +9,7 @@ export const NAV_ITEMS: NavItem[] = [
         href: '/product-category/batohy',
         dropdown: [
             { label: 'Kožené batohy', href: '/product-category/batohy?type=kozene' },
-            { label: 'Městské batohy', href: '/product-category/batohy?type=mestske' }
+            { label: 'Mestske batohy', href: '/product-category/batohy?type=mestske' }
         ]
     },
     {
@@ -17,10 +17,10 @@ export const NAV_ITEMS: NavItem[] = [
         href: '/product-category/doplnky',
         dropdown: [
             { label: 'Peněženky', href: '/product-category/doplnky?type=penezenky' },
-            { label: 'Pásky', href: '/product-category/doplnky?type=pasky' }
+            { label: 'Pasky', href: '/product-category/doplnky?type=pasky' }
         ]
     },
-    { label: 'O nás', href: '/o-nas' },
+    { label: 'O obchodě', href: '/o-nas' },
     { label: 'Blog', href: '/blog' },
     { label: 'Kontakt', href: '/kontakt' }
 ];

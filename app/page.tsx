@@ -7,8 +7,22 @@ import Footer from '@/components/Footer';
 import Link from 'next/link';
 import Image from 'next/image';
 import { FEATURED_PRODUCTS, RECOMMENDED_PRODUCTS, TESTIMONIALS, BLOG_POSTS } from '@/data/site-data';
+import { getGlobal } from '@/lib/payload-data';
+import type { Metadata } from 'next';
 
-export default function Home() {
+export async function generateMetadata(): Promise<Metadata> {
+  const homePageData = await getGlobal('home-page');
+
+  return {
+    title: homePageData?.seo?.title || 'Lumera Shop | Italské kožené kabelky',
+    description: homePageData?.seo?.description || 'Objevte eleganci s Lumera. Italské kožené kabelky a doplňky přímo od výrobců.',
+  }
+}
+
+export default async function Home() {
+  const homePageData = await getGlobal('home-page');
+  const mainTitle = homePageData?.title || 'O obchodě Lumera';
+
   return (
     <div className="min-h-screen font-sans text-[#111111] bg-white selection:bg-amber-100 italic-selection">
       <Header />
@@ -40,7 +54,7 @@ export default function Home() {
                   className="text-[30px] md:text-[36px] lg:text-[48px] font-serif font-normal mb-0 text-[#111111] leading-[1.1]"
                   style={{ fontFamily: '"Cormorant Garamond", serif' }}
                 >
-                  O obchodě Lumera
+                  {mainTitle}
                 </h2>
                 <p className="text-[#111111] text-[14px] md:text-[16px] font-normal leading-[1.6] mt-[20px] mb-0" style={{ fontFamily: '"Work Sans", sans-serif' }}>
                   Lumera je český obchod s italskými koženými kabelkami a doplňky.<br />
