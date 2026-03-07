@@ -12,7 +12,7 @@ export default function KontaktPage() {
             <main>
                 <ContactHero
                     title="Kontakt"
-                    bgImage="https://lumerashop.cz/wp-content/uploads/2025/11/contact-bg-4.webp"
+                    bgImage="/assets/bg/contact-hero.webp"
                 />
 
                 <ContactInfo />

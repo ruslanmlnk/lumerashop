@@ -1,9 +1,23 @@
 import 'server-only';
 import { ALL_PRODUCTS } from '@/data/site-data';
-import type { Product, ProductFilterValue } from '@/types/site';
+import {
+    DEFAULT_LOCAL_ASSET_FALLBACK,
+    getLocalAssetPath,
+    getRenderableAssetPath,
+} from '@/lib/local-assets';
+import type { Product, ProductFilterValue, ProductVariant } from '@/types/site';
 
 type PayloadListResponse<T> = {
     docs?: T[];
+};
+
+type PayloadMediaDoc = {
+    url?: unknown;
+};
+
+type PayloadGalleryItem = {
+    imageUrl?: unknown;
+    image?: PayloadMediaDoc | number | null;
 };
 
 type PayloadFilterOption = {
@@ -15,33 +29,38 @@ type PayloadFilterOption = {
     } | null;
 };
 
-type PayloadProductDoc = {
+type PayloadVariantDoc = {
     id?: unknown;
     name?: unknown;
-    price?: unknown;
-    imageUrl?: unknown;
     slug?: unknown;
+    imageUrl?: unknown;
+    mainImage?: PayloadMediaDoc | number | null;
+    gallery?: PayloadGalleryItem[] | null;
+};
+
+type PayloadProductDoc = PayloadVariantDoc & {
+    price?: unknown;
+    oldPrice?: unknown;
+    purchaseCount?: unknown;
     sku?: unknown;
     description?: unknown;
+    shortDescription?: unknown;
     category?: {
         name?: unknown;
     } | number | null;
-    mainImage?: {
-        url?: unknown;
-    } | number | null;
-    gallery?: Array<{
-        imageUrl?: unknown;
-        image?: {
-            url?: unknown;
-        } | number | null;
-    }> | null;
     specifications?: Array<{
         key?: unknown;
         value?: unknown;
     }> | null;
     filterOptions?: Array<PayloadFilterOption | number> | null;
+    highlights?: Array<{
+        text?: unknown;
+    }> | null;
+    variantProducts?: Array<PayloadVariantDoc | number> | null;
     isFeatured?: unknown;
     isRecommended?: unknown;
+    stockQuantity?: unknown;
+    stockStatus?: unknown;
 };
 
 const DEFAULT_PAYLOAD_API_URL = 'http://127.0.0.1:3001';
@@ -53,15 +72,69 @@ const resolveUrl = (value: unknown, baseUrl: string): string | null => {
         return null;
     }
 
-    if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('/assets/')) {
+    const normalizedValue = getLocalAssetPath(value);
+    if (!normalizedValue) {
+        return null;
+    }
+
+    if (normalizedValue.startsWith('/assets/')) {
+        return normalizedValue;
+    }
+
+    if (normalizedValue.startsWith('http://') || normalizedValue.startsWith('https://')) {
+        if (normalizedValue.startsWith(baseUrl)) {
+            return normalizedValue;
+        }
+
+        return getRenderableAssetPath(normalizedValue, DEFAULT_LOCAL_ASSET_FALLBACK);
+    }
+
+    if (normalizedValue.startsWith('/')) {
+        return `${baseUrl}${normalizedValue}`;
+    }
+
+    return `${baseUrl}/${normalizedValue}`;
+};
+
+const resolveGallery = (gallery: PayloadGalleryItem[] | null | undefined, baseUrl: string): string[] => {
+    if (!Array.isArray(gallery)) {
+        return [];
+    }
+
+    return gallery
+        .map((item) => {
+            const uploaded =
+                typeof item?.image === 'object' && item.image ? resolveUrl(item.image.url, baseUrl) : null;
+            const linked = resolveUrl(item?.imageUrl, baseUrl);
+            return uploaded || linked;
+        })
+        .filter((value): value is string => Boolean(value));
+};
+
+const resolvePrimaryImage = (doc: PayloadVariantDoc, baseUrl: string): string => {
+    const mainUploadUrl =
+        typeof doc.mainImage === 'object' && doc.mainImage ? resolveUrl(doc.mainImage.url, baseUrl) : null;
+    const imageUrl = resolveUrl(doc.imageUrl, baseUrl);
+    const galleryImage = resolveGallery(doc.gallery, baseUrl)[0];
+
+    return mainUploadUrl || imageUrl || galleryImage || DEFAULT_LOCAL_ASSET_FALLBACK;
+};
+
+const normalizeStockStatus = (
+    value: unknown,
+    quantity: unknown,
+): Product['stockStatus'] => {
+    if (value === 'in-stock' || value === 'low-stock' || value === 'out-of-stock') {
         return value;
     }
 
-    if (value.startsWith('/')) {
-        return `${baseUrl}${value}`;
+    const numericQuantity = typeof quantity === 'number' ? quantity : Number(quantity);
+    if (Number.isFinite(numericQuantity)) {
+        if (numericQuantity <= 0) return 'out-of-stock';
+        if (numericQuantity <= 3) return 'low-stock';
     }
 
-    return `${baseUrl}/${value}`;
+    return 'in-stock';
 };
 
 const toSpecificationsObject = (specs: PayloadProductDoc['specifications']): Record<string, string> | undefined => {
@@ -102,9 +175,38 @@ const toFilterValues = (options: PayloadProductDoc['filterOptions']): ProductFil
     return result.length ? result : undefined;
 };
 
+const toHighlights = (highlights: PayloadProductDoc['highlights']): string[] | undefined => {
+    if (!Array.isArray(highlights) || highlights.length === 0) {
+        return undefined;
+    }
+
+    const result = highlights
+        .map((entry) => (typeof entry?.text === 'string' ? entry.text.trim() : ''))
+        .filter((value): value is string => Boolean(value));
+
+    return result.length ? result : undefined;
+};
+
+const mapVariantProduct = (doc: PayloadVariantDoc, baseUrl: string): ProductVariant | null => {
+    const id = doc.id != null ? String(doc.id) : '';
+    const name = typeof doc.name === 'string' ? doc.name.trim() : '';
+    const slug = typeof doc.slug === 'string' ? doc.slug.trim() : '';
+
+    if (!id || !name || !slug) {
+        return null;
+    }
+
+    return {
+        id,
+        name,
+        slug,
+        image: resolvePrimaryImage(doc, baseUrl),
+    };
+};
+
 const mapPayloadProduct = (doc: PayloadProductDoc, baseUrl: string): Product | null => {
-    const name = typeof doc.name === 'string' ? doc.name : '';
-    const slug = typeof doc.slug === 'string' ? doc.slug : '';
+    const name = typeof doc.name === 'string' ? doc.name.trim() : '';
+    const slug = typeof doc.slug === 'string' ? doc.slug.trim() : '';
     const id = doc.id != null ? String(doc.id) : '';
     const category =
         typeof doc.category === 'object' && doc.category && typeof doc.category.name === 'string'
@@ -118,36 +220,44 @@ const mapPayloadProduct = (doc: PayloadProductDoc, baseUrl: string): Product | n
     const numericPrice = typeof doc.price === 'number' ? doc.price : Number(doc.price);
     const price = Number.isFinite(numericPrice) ? formatPrice(Math.round(numericPrice)) : '0 Kč';
 
-    const mainUploadUrl =
-        typeof doc.mainImage === 'object' && doc.mainImage ? resolveUrl(doc.mainImage.url, baseUrl) : null;
-    const imageUrl = resolveUrl(doc.imageUrl, baseUrl);
-    const image = mainUploadUrl || imageUrl || '/assets/products/placeholder.webp';
+    const numericOldPrice = typeof doc.oldPrice === 'number' ? doc.oldPrice : Number(doc.oldPrice);
+    const oldPrice = Number.isFinite(numericOldPrice) && numericOldPrice > 0
+        ? formatPrice(Math.round(numericOldPrice))
+        : undefined;
+    const numericPurchaseCount =
+        typeof doc.purchaseCount === 'number' ? doc.purchaseCount : Number(doc.purchaseCount);
 
-    const galleryUrls = Array.isArray(doc.gallery)
-        ? doc.gallery
-              .map((item) => {
-                  const uploaded =
-                      typeof item?.image === 'object' && item.image ? resolveUrl(item.image.url, baseUrl) : null;
-                  const linked = resolveUrl(item?.imageUrl, baseUrl);
-                  return uploaded || linked;
-              })
-              .filter((value): value is string => Boolean(value))
-        : [];
+    const image = resolvePrimaryImage(doc, baseUrl);
+    const gallery = resolveGallery(doc.gallery, baseUrl);
 
-    const gallery = galleryUrls.length ? galleryUrls : [image];
+    const variants = Array.isArray(doc.variantProducts)
+        ? doc.variantProducts
+              .map((variant) =>
+                  variant && typeof variant === 'object' ? mapVariantProduct(variant, baseUrl) : null,
+              )
+              .filter((variant): variant is ProductVariant => Boolean(variant))
+        : undefined;
 
     return {
         id,
         name,
         price,
+        oldPrice,
+        purchaseCount: Number.isFinite(numericPurchaseCount) && numericPurchaseCount > 0
+            ? Math.max(0, Math.floor(numericPurchaseCount))
+            : 0,
         image,
         slug,
         category,
         sku: typeof doc.sku === 'string' ? doc.sku : undefined,
         description: typeof doc.description === 'string' ? doc.description : undefined,
-        gallery,
+        shortDescription: typeof doc.shortDescription === 'string' ? doc.shortDescription : undefined,
+        gallery: gallery.length ? gallery : [image],
         specifications: toSpecificationsObject(doc.specifications),
         filterValues: toFilterValues(doc.filterOptions),
+        highlights: toHighlights(doc.highlights),
+        stockStatus: normalizeStockStatus(doc.stockStatus, doc.stockQuantity),
+        variants: variants?.length ? variants : undefined,
         isFeatured: doc.isFeatured === true,
         isRecommended: doc.isRecommended === true,
     };

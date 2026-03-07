@@ -8,7 +8,7 @@ const AboutValues = () => {
                 <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
                     <div className="w-full lg:w-1/3 relative aspect-[3/4] shadow-xl">
                         <Image
-                            src="https://lumerashop.cz/wp-content/uploads/2025/11/o-lumerashop-2-4.jpg"
+                            src="/assets/about/values.jpg"
                             alt="Naše hodnoty"
                             fill
                             className="object-cover"

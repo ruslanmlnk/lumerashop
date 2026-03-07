@@ -37,16 +37,16 @@ export const FEATURED_PRODUCTS: Product[] = [
         id: '1',
         name: 'Italská shopper kabelka z pravé kuže Olivia růžová',
         price: '2 199 Kč',
-        image: 'https://lumerashop.cz/wp-content/uploads/2026/02/%D0%94%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD-%D0%B1%D0%B5%D0%B7-%D0%BD%D0%B0%D0%B7%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F-72.webp',
+        image: '/assets/products/olivia-ruzova-1.webp',
         slug: 'olivia-ruzova',
         category: 'Kabelky',
         sku: '00044rz',
         description: 'Italská kabelka z pravé kůže Olivia v růžové barvě spojuje moderní eleganci a vysoce praktický design. Tato praktická, damská kabelka je vybavena dvojitými uchy, která umožňují pohodlné nošení v ruce i přes rameno. Díky vnitřnímu zapínání můžete snadno měnit její tvar podle aktuálního obsahu či nálady. Hlavní prostor se bezpečně uzavírá na zip a obsahuje jednu velkou kapsu na zip a tři menší kapsičky. Do kabelky se pohodlně vejdou i dokumenty formátu A4.',
         gallery: [
-            'https://lumerashop.cz/wp-content/uploads/2026/02/%D0%94%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD-%D0%B1%D0%B5%D0%B7-%D0%BD%D0%B0%D0%B7%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F-72.webp',
-            'https://lumerashop.cz/wp-content/uploads/2026/02/%D0%94%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD-%D0%B1%D0%B5%D0%B7-%D0%BD%D0%B0%D0%B7%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F-73.webp',
-            'https://lumerashop.cz/wp-content/uploads/2026/02/%D0%94%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD-%D0%B1%D0%B5%D0%B7-%D0%BD%D0%B0%D0%B7%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F-75.webp',
-            'https://lumerashop.cz/wp-content/uploads/2026/02/%D0%94%D0%B8%D0%B7%D0%B0%D0%B9%D0%BD-%D0%B1%D0%B5%D0%B7-%D0%BD%D0%B0%D0%B7%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F-76.webp'
+            '/assets/products/olivia-ruzova-1.webp',
+            '/assets/products/olivia-ruzova-2.webp',
+            '/assets/products/olivia-ruzova-3.webp',
+            '/assets/products/olivia-ruzova-4.webp'
         ],
         specifications: {
             'Rozměry': 'Š 45 cm x V 30 cm x H 14 cm',
@@ -82,10 +82,10 @@ export const ALL_PRODUCTS: Product[] = [
 ];
 
 export const FEATURES_DATA: Feature[] = [
-    { id: '1', title: 'Italský původ', description: 'Kabelky přímo od menších výrobců z Itálie.', icon: 'https://lumerashop.cz/wp-content/uploads/2025/11/d07f3e43-5.png' },
-    { id: '2', title: 'Pečlivý výběr', description: 'Každý model vybíráme osobně s důrazem na kvalitu a styl.', icon: 'https://lumerashop.cz/wp-content/uploads/2025/11/d58217d5-5.png' },
-    { id: '3', title: 'Doprava zdarma', description: 'Pro objednávky nad 1500 Kč doprava zdarma. Rychlé a bezpečné doručení po celé ČR.', icon: 'https://lumerashop.cz/wp-content/uploads/2025/11/70e46ca5-5.png' },
-    { id: '4', title: 'Osobní přístup', description: 'Malý obchod, velká vášeň pro krásu a design.', icon: 'https://lumerashop.cz/wp-content/uploads/2025/11/eab46acd-5.png' }
+    { id: '1', title: 'Italský původ', description: 'Kabelky přímo od menších výrobců z Itálie.', icon: '/assets/icons/features/italian-origin.png' },
+    { id: '2', title: 'Pečlivý výběr', description: 'Každý model vybíráme osobně s důrazem na kvalitu a styl.', icon: '/assets/icons/features/curated-selection.png' },
+    { id: '3', title: 'Doprava zdarma', description: 'Pro objednávky nad 1500 Kč doprava zdarma. Rychlé a bezpečné doručení po celé ČR.', icon: '/assets/icons/features/free-delivery.png' },
+    { id: '4', title: 'Osobní přístup', description: 'Malý obchod, velká vášeň pro krásu a design.', icon: '/assets/icons/features/personal-touch.png' }
 ];
 
 export const TESTIMONIALS: Testimonial[] = [

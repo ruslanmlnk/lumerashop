@@ -4,19 +4,19 @@ import Image from 'next/image';
 const ContactInfo = () => {
     const contactItems = [
         {
-            icon: 'https://lumerashop.cz/wp-content/uploads/2025/11/1151429-4.png',
+            icon: '/assets/contact/phone.png',
             label: 'Zavolejte nám',
             value: '+420 606 731 316',
             subValue: 'Po-Pá: 9:00-17:00'
         },
         {
-            icon: 'https://lumerashop.cz/wp-content/uploads/2025/11/15356610-4.png',
+            icon: '/assets/contact/email.png',
             label: 'Napište nám',
             value: 'info@lumerashop.cz',
             subValue: 'Odpovíme co nejdříve'
         },
         {
-            icon: 'https://lumerashop.cz/wp-content/uploads/2025/11/15356639-4.png',
+            icon: '/assets/contact/social.png',
             label: 'Sledujte nás',
             value: 'Lumera Shop',
             subValue: 'Instagram & Facebook'

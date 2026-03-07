@@ -6,15 +6,21 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import { DEFAULT_MARKETING_SLIDES, type MarketingSlide } from '@/data/marketing-slides';
+import { getLocalAssetPath } from '@/lib/local-assets';
 
 interface MarketingSliderProps {
     slides?: MarketingSlide[];
 }
 
 const MarketingSlider = ({ slides }: MarketingSliderProps) => {
-    const sliderSlides = slides && slides.length > 0 ? slides : DEFAULT_MARKETING_SLIDES;
+    const sliderSlides = (slides && slides.length > 0 ? slides : DEFAULT_MARKETING_SLIDES).map((slide) => ({
+        ...slide,
+        bg: getLocalAssetPath(slide.bg) ?? slide.bg,
+        overlayImage: getLocalAssetPath(slide.overlayImage) ?? slide.overlayImage,
+    }));
     const [current, setCurrent] = useState(0);
     const [direction, setDirection] = useState(0);
+    const [isInitialSlideReady, setIsInitialSlideReady] = useState(false);
     const activeIndex = current % sliderSlides.length;
 
     const paginate = (newDirection: number) => {
@@ -75,10 +81,19 @@ const MarketingSlider = ({ slides }: MarketingSliderProps) => {
     return (
         <section className="hidden lg:block bg-white overflow-hidden py-0" id="block-4">
             <div className="lumera-container">
-                <div className="relative h-[380px] md:h-[644px] overflow-hidden bg-[#111111]">
+                <div className="relative h-[380px] md:h-[644px] overflow-hidden bg-[#dcc7b9]">
+                    {!isInitialSlideReady && (
+                        <div
+                            className="absolute inset-0 z-0 bg-cover bg-center"
+                            style={{
+                                backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.25)), url(${sliderSlides[0].bg})`,
+                            }}
+                        />
+                    )}
+
                     {/* Slides Container */}
                     <div className="relative h-full w-full">
-                        <AnimatePresence custom={direction}>
+                        <AnimatePresence custom={direction} initial={false}>
                             <motion.div
                                 key={current}
                                 custom={direction}
@@ -97,7 +112,13 @@ const MarketingSlider = ({ slides }: MarketingSliderProps) => {
                                     alt=""
                                     fill
                                     className="object-cover"
-                                    priority
+                                    priority={activeIndex === 0}
+                                    sizes="(min-width: 1024px) 1140px, 100vw"
+                                    onLoad={() => {
+                                        if (activeIndex === 0) {
+                                            setIsInitialSlideReady(true);
+                                        }
+                                    }}
                                 />
                                 {/* Overlay Shading */}
                                 <div className="absolute inset-0 bg-black/25" />
@@ -160,7 +181,8 @@ const MarketingSlider = ({ slides }: MarketingSliderProps) => {
                                                 alt=""
                                                 fill
                                                 className="object-contain"
-                                                priority
+                                                priority={activeIndex === 0}
+                                                sizes="(min-width: 1024px) 343px, 0px"
                                             />
                                         </motion.div>
                                     </div>

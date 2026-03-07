@@ -5,18 +5,31 @@ export interface ProductFilterValue {
     optionSlug?: string;
 }
 
+export interface ProductVariant {
+    id: string;
+    image: string;
+    slug: string;
+    name: string;
+}
+
 export interface Product {
     id: string;
     name: string;
     price: string;
+    oldPrice?: string;
+    purchaseCount?: number;
     image: string;
     slug: string;
     category: string;
     sku?: string;
     description?: string;
+    shortDescription?: string;
     gallery?: string[];
     specifications?: Record<string, string>;
     filterValues?: ProductFilterValue[];
+    highlights?: string[];
+    stockStatus?: 'in-stock' | 'low-stock' | 'out-of-stock';
+    variants?: ProductVariant[];
     isFeatured?: boolean;
     isRecommended?: boolean;
 }

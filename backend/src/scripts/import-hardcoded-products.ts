@@ -28,6 +28,11 @@ const toSpecificationsArray = (product: StaticProduct) =>
     value: String(val),
   }))
 
+const toShortDescription = (product: StaticProduct) => {
+  const raw = product.description?.split('.').find((part) => part.trim())
+  return raw ? `${raw.trim()}.` : undefined
+}
+
 async function main() {
   const payload = await getPayload({ config })
 
@@ -172,7 +177,9 @@ async function main() {
       name: product.name,
       slug: product.slug,
       price: parsePrice(product.price),
+      purchaseCount: 0,
       sku: product.sku ?? undefined,
+      shortDescription: toShortDescription(product),
       description: product.description ?? undefined,
       category: categoryId,
       imageUrl: product.image,
@@ -183,6 +190,7 @@ async function main() {
       isFeatured: featuredSlugs.has(product.slug),
       isRecommended: recommendedSlugs.has(product.slug),
       stockQuantity: 10,
+      stockStatus: 'in-stock' as const,
     }
 
     if (existing.docs[0]) {

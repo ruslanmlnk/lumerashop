@@ -15,7 +15,7 @@ export default function AboutPage() {
                 <AboutHero
                     title="O obchodě Lumera"
                     subtitle="Nadčasová elegance a poctivé italské řemeslo u vás doma."
-                    bgImage="https://lumerashop.cz/wp-content/uploads/2025/11/o-nas-bg-4.webp"
+                    bgImage="/assets/bg/about-hero.webp"
                 />
 
                 <OurJourney />

@@ -1,23 +1,26 @@
-import Header from '@/components/Header';
-import Hero from '@/components/Hero';
-import MarketingSlider from '@/components/MarketingSlider';
-import ProductGrid from '@/components/ProductGrid';
+import Image from 'next/image';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+
 import Features from '@/components/Features';
 import Footer from '@/components/Footer';
-import Link from 'next/link';
-import Image from 'next/image';
-import { FEATURED_PRODUCTS, RECOMMENDED_PRODUCTS, TESTIMONIALS, BLOG_POSTS } from '@/data/site-data';
+import Header from '@/components/Header';
+import Hero from '@/components/Hero';
+import LazyAutoplayVideo from '@/components/LazyAutoplayVideo';
+import MarketingSlider from '@/components/MarketingSlider';
+import ProductGrid from '@/components/ProductGrid';
+import { BLOG_POSTS, FEATURED_PRODUCTS, RECOMMENDED_PRODUCTS, TESTIMONIALS } from '@/data/site-data';
 import { getGlobal } from '@/lib/payload-data';
 import { fetchPayloadProducts } from '@/lib/payload-products';
-import type { Metadata } from 'next';
+import { getProductPurchaseCount, sortProductsByPopularity } from '@/lib/product-sorting';
 
 export async function generateMetadata(): Promise<Metadata> {
   const homePageData = await getGlobal('home-page');
 
   return {
-    title: homePageData?.seo?.title || 'Lumera Shop | ItalskГ© koЕѕenГ© kabelky',
-    description: homePageData?.seo?.description || 'Objevte eleganci s Lumera. ItalskГ© koЕѕenГ© kabelky a doplЕ€ky pЕ™Г­mo od vГЅrobcЕЇ.',
-  }
+    title: homePageData?.seo?.title || 'Lumera Shop | ItalskР“В© koР•С•enР“В© kabelky',
+    description: homePageData?.seo?.description || 'Objevte eleganci s Lumera. ItalskР“В© koР•С•enР“В© kabelky a doplР•в‚¬ky pР•в„ўР“В­mo od vР“Р…robcР•Р‡.',
+  };
 }
 
 export default async function Home() {
@@ -25,84 +28,91 @@ export default async function Home() {
   const products = await fetchPayloadProducts();
   const featuredProducts = products.filter((product) => product.isFeatured);
   const recommendedProducts = products.filter((product) => product.isRecommended);
-  const featuredForView = featuredProducts.length ? featuredProducts : FEATURED_PRODUCTS;
+  const popularProducts = sortProductsByPopularity(products);
+  const productsWithPurchases = popularProducts.filter((product) => getProductPurchaseCount(product) > 0);
+  const featuredForView = (
+    productsWithPurchases.length
+      ? productsWithPurchases
+      : featuredProducts.length
+        ? featuredProducts
+        : FEATURED_PRODUCTS
+  ).slice(0, 8);
   const recommendedForView = recommendedProducts.length ? recommendedProducts : RECOMMENDED_PRODUCTS;
 
   const aboutSection = homePageData?.aboutSection;
   const aboutTitle =
     typeof aboutSection?.title === 'string' && aboutSection.title.length > 0
       ? aboutSection.title
-      : 'O obchodě Lumera';
+      : 'O obchodД› Lumera';
   const aboutDescription =
     typeof aboutSection?.description === 'string' && aboutSection.description.length > 0
       ? aboutSection.description
-      : 'Lumera je český obchod s italskými koženými kabelkami a doplňky.\nSpolupracujeme s menšími výrobci z Itálie, kteří si zakládají na kvalitě a ručním zpracování. Každý model pečlivě vybíráme tak, aby spojoval eleganci, praktičnost a originalitu. Věříme, že krása je v detailu - stejně jako v každé kabelce, kterou nabízíme.';
+      : 'Lumera je ДЌeskГЅ obchod s italskГЅmi koЕѕenГЅmi kabelkami a doplЕ€ky.\nSpolupracujeme s menЕЎГ­mi vГЅrobci z ItГЎlie, kteЕ™Г­ si zaklГЎdajГ­ na kvalitД› a ruДЌnГ­m zpracovГЎnГ­. KaЕѕdГЅ model peДЌlivД› vybГ­rГЎme tak, aby spojoval eleganci, praktiДЌnost a originalitu. VД›Е™Г­me, Еѕe krГЎsa je v detailu - stejnД› jako v kaЕѕdГ© kabelce, kterou nabГ­zГ­me.';
   const aboutButtonText =
     typeof aboutSection?.buttonText === 'string' && aboutSection.buttonText.length > 0
       ? aboutSection.buttonText
-      : 'Zjistit více o obchodě';
+      : 'Zjistit vГ­ce o obchodД›';
   const aboutButtonLink =
     typeof aboutSection?.buttonLink === 'string' && aboutSection.buttonLink.length > 0
       ? aboutSection.buttonLink
       : '/o-nas';
 
   return (
-    <div className="min-h-screen font-sans text-[#111111] bg-white selection:bg-amber-100 italic-selection">
+    <div className="min-h-screen bg-white font-sans text-[#111111] selection:bg-amber-100 italic-selection">
       <Header />
       <main>
         <Hero />
 
-        {/* Gap 20px created by mt-[20px] on block-4 */}
         <div className="mt-[20px]">
           <MarketingSlider slides={homePageData?.marketingSlides} />
         </div>
 
-        {/* Gap 20px created by mt-[20px] on block-5 */}
         <div className="mt-[20px]">
           <ProductGrid
-            title="OblГ­benГ© modely"
+            title={'Obl\u00edben\u00e9 modely'}
             products={featuredForView}
-            description="NejoblГ­benД›jЕЎГ­ koЕѕenГ© kabelky, penД›Еѕenky a doplЕ€ky od italskГЅch vГЅrobcЕЇ."
+            description={'Nejobl\u00edben\u011bj\u0161\u00ed produkty z administrace se\u0159azen\u00e9 podle po\u010dtu n\u00e1kup\u016f.'}
             isSlider={true}
+            autoPlay={false}
+            cardVariant="featured"
+            arrowTheme="gold"
+            showShopButton={true}
           />
         </div>
 
-        {/* Block 6: O obchodД› Lumera */}
-        <section className="mt-[20px] bg-white overflow-hidden flex justify-center" id="block-6">
+        <section className="mt-[20px] flex justify-center overflow-hidden bg-white" id="block-6">
           <div className="lumera-container">
-            <div className="flex flex-col lg:flex-row mt-[20px] mb-0 relative">
-              {/* Left Column: Text */}
-              <div className="w-full lg:w-1/2 flex flex-col p-[10px] md:p-[30px] min-h-[100px] md:min-h-[396px]">
+            <div className="relative mt-[20px] mb-0 flex flex-col lg:flex-row">
+              <div className="flex min-h-[100px] w-full flex-col p-[10px] md:min-h-[396px] md:p-[30px] lg:w-1/2">
                 <h2
-                  className="text-[30px] md:text-[36px] lg:text-[48px] font-serif font-normal mb-0 text-[#111111] leading-[1.1]"
+                  className="mb-0 font-serif text-[30px] leading-[1.1] text-[#111111] font-normal md:text-[36px] lg:text-[48px]"
                   style={{ fontFamily: '"Cormorant Garamond", serif' }}
                 >
                   {aboutTitle}
                 </h2>
-                <p className="mt-[20px] mb-0 whitespace-pre-line text-[14px] font-normal leading-[1.6] text-[#111111] md:text-[16px]" style={{ fontFamily: '"Work Sans", sans-serif' }}>
+                <p
+                  className="mt-[20px] mb-0 whitespace-pre-line text-[14px] font-normal leading-[1.6] text-[#111111] md:text-[16px]"
+                  style={{ fontFamily: '"Work Sans", sans-serif' }}
+                >
                   {aboutDescription}
                 </p>
                 <div className="mt-[30px]">
-                  <Link
-                    href={aboutButtonLink}
-                    className="lumera-btn"
-                  >
+                  <Link href={aboutButtonLink} className="lumera-btn">
                     {aboutButtonText}
                   </Link>
                 </div>
               </div>
 
-              {/* Right Column: Video */}
-              <div className="w-full lg:w-1/2 relative min-h-[100px] md:min-h-[396px] p-0 md:p-[30px] flex items-end md:items-center justify-center">
-                <div className="w-full h-[275px] md:h-[336px] relative overflow-hidden bg-transparent">
-                  <video
-                    className="w-full h-full object-contain md:object-cover"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    src="https://lumerashop.cz/wp-content/uploads/2025/11/OobchodeLumera-5.mp4"
-                    style={{ willChange: 'transform' }}
+              <div className="relative flex min-h-[100px] w-full items-end justify-center p-0 md:min-h-[396px] md:items-center md:p-[30px] lg:w-1/2">
+                <div className="relative h-[275px] w-full overflow-hidden bg-transparent md:h-[336px]">
+                  <LazyAutoplayVideo
+                    src="/assets/videos/about.mp4"
+                    className="h-full w-full object-contain md:object-cover"
+                    placeholderClassName="h-full w-full bg-[#f6f3ef]"
+                    posterSrc="/assets/bg/about-hero.webp"
+                    posterClassName="object-cover"
+                    posterSizes="(min-width: 1024px) 570px, 100vw"
+                    preload="metadata"
                   />
                 </div>
               </div>
@@ -116,100 +126,98 @@ export default async function Home() {
 
         <div className="mt-[20px]">
           <ProductGrid
-            title="NaЕЎe doporuДЌenГ­"
+            title="NaР•РЋe doporuР”РЊenР“В­"
             products={recommendedForView}
-            description="Vybrali jsme pro vГЎs nД›kolik oblГ­benГЅch modelЕЇ z ItГЎlie. KaЕѕdГЅ z nich spojuje kvalitu, styl a poctivou ruДЌnГ­ prГЎci."
+            description="Vybrali jsme pro vР“РЋs nР”вЂєkolik oblР“В­benР“Р…ch modelР•Р‡ z ItР“РЋlie. KaР•С•dР“Р… z nich spojuje kvalitu, styl a poctivou ruР”РЊnР“В­ prР“РЋci."
           />
         </div>
 
-        {/* Block 8: Testimonials */}
-        <section className="mt-[20px] py-[30px] md:py-[40px] bg-white text-center" id="block-8">
+        <section className="mt-[20px] bg-white py-[30px] text-center md:py-[40px]" id="block-8">
           <div className="lumera-container">
             <h2
-              className="text-[30px] md:text-[36px] font-serif font-bold mb-[30px] text-[#111111] leading-[1.1]"
+              className="mb-[30px] font-serif text-[30px] leading-[1.1] text-[#111111] font-bold md:text-[36px]"
               style={{ fontFamily: '"Cormorant Garamond", serif' }}
             >
-              Co o nГЎs Е™Г­kajГ­ naЕЎe zГЎkaznice
+              Co o nР“РЋs Р•в„ўР“В­kajР“В­ naР•РЋe zР“РЋkaznice
             </h2>
 
-            <div className="max-w-[1140px] mx-auto relative group pt-2 pb-6">
+            <div className="group relative mx-auto max-w-[1140px] pt-2 pb-6">
               <div className="flex justify-center transition-transform duration-500">
-                <div className="w-full flex-shrink-0 px-4 md:px-0 flex flex-col items-center">
-                  <div className="w-[66px] h-[66px] rounded-full bg-transparent flex items-center justify-center text-[#b3b3b3] mb-4">
-                    <svg viewBox="0 0 409.294 409.294" className="w-[33px] h-[33px] fill-current">
-                      <path d="m233.882 29.235v175.412h116.941c0 64.48-52.461 116.941-116.941 116.941v58.471c96.728 0 175.412-78.684 175.412-175.412v-175.412z"></path>
-                      <path d="m0 204.647h116.941c0 64.48-52.461 116.941-116.941 116.941v58.471c96.728 0 175.412-78.684 175.412-175.412v-175.412h-175.412z"></path>
+                <div className="flex w-full flex-shrink-0 flex-col items-center px-4 md:px-0">
+                  <div className="mb-4 flex h-[66px] w-[66px] items-center justify-center rounded-full bg-transparent text-[#b3b3b3]">
+                    <svg viewBox="0 0 409.294 409.294" className="h-[33px] w-[33px] fill-current">
+                      <path d="m233.882 29.235v175.412h116.941c0 64.48-52.461 116.941-116.941 116.941v58.471c96.728 0 175.412-78.684 175.412-175.412v-175.412z" />
+                      <path d="m0 204.647h116.941c0 64.48-52.461 116.941-116.941 116.941v58.471c96.728 0 175.412-78.684 175.412-175.412v-175.412h-175.412z" />
                     </svg>
                   </div>
-                  <p className="text-[#111111] text-[18px] md:text-[24px] mb-[20px] max-w-3xl mx-auto leading-[1.6]" style={{ fontFamily: '"Work Sans", sans-serif' }}>
+                  <p
+                    className="mb-[20px] max-w-3xl text-[18px] leading-[1.6] text-[#111111] md:text-[24px]"
+                    style={{ fontFamily: '"Work Sans", sans-serif' }}
+                  >
                     &quot;{TESTIMONIALS[0].text}&quot;
                   </p>
-                  <p className="font-bold font-sans text-[20px] text-[#111111] m-0" style={{ fontFamily: '"Work Sans", sans-serif' }}>
+                  <p className="m-0 font-sans text-[20px] text-[#111111] font-bold" style={{ fontFamily: '"Work Sans", sans-serif' }}>
                     {TESTIMONIALS[0].author}
                   </p>
                 </div>
               </div>
 
-              {/* Navigation dots */}
-              <div className="flex justify-center mt-[10px] gap-[10px] absolute left-1/2 -translate-x-1/2 bottom-[-10px]">
-                <button className="w-[10px] h-[10px] rounded-full bg-[#404040]" aria-label="1"></button>
-                <button className="w-[10px] h-[10px] rounded-full bg-[#cccccc]" aria-label="2"></button>
-                <button className="w-[10px] h-[10px] rounded-full bg-[#cccccc]" aria-label="3"></button>
+              <div className="absolute bottom-[-10px] left-1/2 mt-[10px] flex -translate-x-1/2 gap-[10px]">
+                <button className="h-[10px] w-[10px] rounded-full bg-[#404040]" aria-label="1" />
+                <button className="h-[10px] w-[10px] rounded-full bg-[#cccccc]" aria-label="2" />
+                <button className="h-[10px] w-[10px] rounded-full bg-[#cccccc]" aria-label="3" />
               </div>
             </div>
-
           </div>
         </section>
 
-        {/* Block 9: Z blogu Lumera */}
-        <section className="mt-[20px] py-[30px] md:py-[40px] bg-white" id="block-9">
+        <section className="mt-[20px] bg-white py-[30px] md:py-[40px]" id="block-9">
           <div className="lumera-container">
-            <h2 className="text-[30px] md:text-[36px] font-serif font-bold mb-[20px] text-[#111111] leading-[1.1]" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
+            <h2
+              className="mb-[20px] font-serif text-[30px] leading-[1.1] text-[#111111] font-bold md:text-[36px]"
+              style={{ fontFamily: '"Cormorant Garamond", serif' }}
+            >
               Z blogu Lumera
             </h2>
-            <p className="text-[#111111] mb-[30px] text-[14px] md:text-[16px] leading-[1.6]" style={{ fontFamily: '"Work Sans", sans-serif' }}>
-              Styl, inspirace a pГ©ДЌe o vaЕЎe koЕѕenГ© doplЕ€ky.
+            <p
+              className="mb-[30px] text-[14px] leading-[1.6] text-[#111111] md:text-[16px]"
+              style={{ fontFamily: '"Work Sans", sans-serif' }}
+            >
+              Styl, inspirace a pР“В©Р”РЊe o vaР•РЋe koР•С•enР“В© doplР•в‚¬ky.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-[10px] mb-[40px]">
+            <div className="mb-[40px] grid grid-cols-1 gap-[10px] md:grid-cols-3">
               {BLOG_POSTS.map((post, idx) => (
                 <div key={idx} className="flex flex-col">
-                  <h3 className="text-[20px] md:text-[24px] font-serif font-normal mb-[20px] leading-[1.2]">
+                  <h3 className="mb-[20px] font-serif text-[20px] leading-[1.2] font-normal md:text-[24px]">
                     <Link href={`/blog/${post.slug}`} className="text-[#111111] hover:text-[#111111]">
                       {post.title}
                     </Link>
                   </h3>
-                  <Link href={`/blog/${post.slug}`} className="block relative w-full h-[240px] mb-[20px]">
-                    <Image
-                      src={post.image}
-                      alt={post.title}
-                      fill
-                      className="object-cover"
-                    />
+                  <Link href={`/blog/${post.slug}`} className="relative mb-[20px] block h-[240px] w-full">
+                    <Image src={post.image} alt={post.title} fill className="object-cover" />
                   </Link>
-                  <p className="text-[#111111] text-[14px] md:text-[16px] leading-[1.6]" style={{ fontFamily: '"Work Sans", sans-serif' }}>
+                  <p
+                    className="text-[14px] leading-[1.6] text-[#111111] md:text-[16px]"
+                    style={{ fontFamily: '"Work Sans", sans-serif' }}
+                  >
                     {post.excerpt}
                   </p>
                 </div>
               ))}
             </div>
 
-            <div className="text-center mt-[30px]">
-              <Link
-                href="/blog"
-                className="lumera-btn"
-              >
-                Objevte vГ­ce inspirace
+            <div className="mt-[30px] text-center">
+              <Link href="/blog" className="lumera-btn">
+                Objevte vР“В­ce inspirace
               </Link>
             </div>
           </div>
         </section>
 
-        {/* Block 10: CTA */}
-        <section className="mt-[30px] mb-[40px] py-0 bg-white" id="block-10">
+        <section className="mt-[30px] mb-[40px] bg-white py-0" id="block-10">
           <div className="lumera-container">
-            <div className="relative h-[220px] md:h-[340px] flex flex-col justify-center px-[20px] md:px-[40px] lg:px-[40px] lg:pr-[129.1px] w-full">
-              {/* Background gradient image logic */}
+            <div className="relative flex h-[220px] w-full flex-col justify-center px-[20px] md:h-[340px] md:px-[40px] lg:px-[40px] lg:pr-[129.1px]">
               <div className="absolute inset-0 z-0">
                 <Image
                   src="/assets/bg/cta-home.webp"
@@ -220,28 +228,25 @@ export default async function Home() {
                 <div className="absolute inset-0 bg-black/50" />
               </div>
 
-              <div className="relative z-10 w-full flex flex-col md:flex-row md:justify-between md:items-center">
-                <div className="text-left max-w-2xl">
+              <div className="relative z-10 flex w-full flex-col md:flex-row md:items-center md:justify-between">
+                <div className="max-w-2xl text-left">
                   <h2
-                    className="text-[30px] md:text-[40px] lg:text-[48px] font-serif font-bold text-white mb-[0px] leading-[1.1]"
+                    className="mb-[0px] font-serif text-[30px] leading-[1.1] text-white font-bold md:text-[40px] lg:text-[48px]"
                     style={{ fontFamily: '"Cormorant Garamond", serif', textShadow: '2px 2px 8px rgba(0,0,0,0.4)' }}
                   >
                     Objevte eleganci s Lumera
                   </h2>
                   <p
-                    className="text-[14px] md:text-[16px] lg:text-[18px] font-normal text-white mt-[15px] md:mt-[20px] mb-0"
+                    className="mt-[15px] mb-0 text-[14px] font-normal text-white md:mt-[20px] md:text-[16px] lg:text-[18px]"
                     style={{ fontFamily: '"Work Sans", sans-serif', textShadow: '2px 2px 8px rgba(0,0,0,0.4)' }}
                   >
-                    NajdД›te svЕЇj dokonalГЅ doplnД›k jeЕЎtД› dnes.
+                    NajdР”вЂєte svР•Р‡j dokonalР“Р… doplnР”вЂєk jeР•РЋtР”вЂє dnes.
                   </p>
                 </div>
 
-                <div className="mt-[30px] md:mt-0 flex-shrink-0">
-                  <Link
-                    href="/shop"
-                    className="lumera-btn lumera-btn--light inline-flex"
-                  >
-                    ProhlГ©dnout kolekci
+                <div className="mt-[30px] flex-shrink-0 md:mt-0">
+                  <Link href="/shop" className="lumera-btn lumera-btn--light inline-flex">
+                    ProhlР“В©dnout kolekci
                   </Link>
                 </div>
               </div>
@@ -254,5 +259,3 @@ export default async function Home() {
     </div>
   );
 }
-
-

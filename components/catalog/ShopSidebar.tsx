@@ -1,4 +1,7 @@
 'use client';
+
+import { useState } from 'react';
+import { ChevronDown, X } from 'lucide-react';
 import CategoryFilter from './CategoryFilter';
 import PriceFilter from './PriceFilter';
 import MultiSelectFilter from './MultiSelectFilter';
@@ -42,81 +45,115 @@ const ShopSidebar = ({
     onRemoveFilter = () => undefined,
     onClearFilters = () => undefined,
 }: ShopSidebarProps) => {
-    return (
-        <aside className="w-full shrink-0 self-stretch lg:w-[270px] lg:pr-[20px]">
-            <div className="flex w-full max-w-[250px] flex-col gap-[42px] bg-white px-[6px] pb-[36px] pt-[26px]">
-                <CategoryFilter
-                    title="Kategorie produktu"
-                    categories={categories}
-                    selectedCategory={selectedCategory}
-                    onSelect={onCategoryChange}
-                />
+    const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
-                <div className="w-full">
+    const filtersBody = (
+        <>
+            <CategoryFilter
+                title="Kategorie produktu"
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onSelect={onCategoryChange}
+            />
+
+            <div className="w-full">
+                <div className="mb-[18px] flex items-center justify-between">
+                    <h2
+                        className="text-[20px] font-bold leading-[24px] text-[#111111]"
+                        style={{ fontFamily: '"Cormorant Garamond", serif' }}
+                    >
+                        Filtry
+                    </h2>
+
                     <button
                         type="button"
-                        className="flex h-[50px] w-[203px] items-center justify-center gap-2 bg-black px-4 text-[15px] font-medium text-white"
+                        onClick={() => setIsMobileFiltersOpen(false)}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#111111]/10 text-[#111111] lg:hidden"
+                        aria-label="Zavřít filtry"
                     >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M9.62 16.84h3.85v-1.45H9.62v1.45ZM5.77 5.77v1.45h11.55V5.77H5.77Zm1.93 6.25h7.69v-1.44H7.7v1.44Z" fill="currentColor" />
-                        </svg>
-                        Filtr produktu
+                        <X size={15} />
                     </button>
+                </div>
 
-                    <div className="mt-[7px]">
-                        <h2
-                            className="text-[20px] font-bold leading-[24px] text-[#111111]"
-                            style={{ fontFamily: '"Cormorant Garamond", serif' }}
-                        >
-                            Filtry
-                        </h2>
-
-                        {activeFilters.length > 0 && (
-                            <div className="mb-[18px] mt-4">
-                                <div className="mb-3 flex flex-wrap gap-[4px] py-[8px]">
-                                    {activeFilters.map((filter) => (
-                                        <button
-                                            key={filter.id}
-                                            type="button"
-                                            onClick={() => onRemoveFilter(filter.id)}
-                                            className="inline-flex items-center gap-[6px] rounded-[2px] border border-[#111111]/20 px-[10px] py-[4px] text-[14px] leading-[22px] text-[#111111]"
-                                        >
-                                            <span>{filter.label}</span>
-                                            <span className="text-[16px] leading-none">x</span>
-                                        </button>
-                                    ))}
-                                </div>
-
+                {activeFilters.length > 0 && (
+                    <div className="mb-[18px]">
+                        <div className="mb-3 flex flex-wrap gap-[4px] py-[8px]">
+                            {activeFilters.map((filter) => (
                                 <button
+                                    key={filter.id}
                                     type="button"
-                                    onClick={onClearFilters}
-                                    className="w-full bg-black px-2 py-[5px] text-[14px] text-white"
+                                    onClick={() => onRemoveFilter(filter.id)}
+                                    className="inline-flex items-center gap-[6px] rounded-[2px] border border-[#111111]/20 px-[10px] py-[4px] text-[14px] leading-[22px] text-[#111111]"
                                 >
-                                    Vymazat filtry
+                                    <span>{filter.label}</span>
+                                    <span className="text-[16px] leading-none">x</span>
                                 </button>
-                            </div>
-                        )}
-
-                        <div className="space-y-[18px]">
-                            <PriceFilter
-                                min={priceBounds[0]}
-                                max={priceBounds[1]}
-                                value={priceRange}
-                                onChange={onPriceChange}
-                            />
-
-                            {filterGroups.map((group) => (
-                                <MultiSelectFilter
-                                    key={group.key}
-                                    title={group.title}
-                                    options={group.options}
-                                    selected={group.selected}
-                                    onToggle={(value) => onToggleFilterOption(group.key, value)}
-                                />
                             ))}
                         </div>
+
+                        <button
+                            type="button"
+                            onClick={onClearFilters}
+                            className="w-full bg-black px-2 py-[5px] text-[14px] text-white"
+                        >
+                            Vymazat filtry
+                        </button>
                     </div>
+                )}
+
+                <div className="space-y-[18px]">
+                    <PriceFilter
+                        min={priceBounds[0]}
+                        max={priceBounds[1]}
+                        value={priceRange}
+                        onChange={onPriceChange}
+                    />
+
+                    {filterGroups.map((group) => (
+                        <MultiSelectFilter
+                            key={group.key}
+                            title={group.title}
+                            options={group.options}
+                            selected={group.selected}
+                            onToggle={(value) => onToggleFilterOption(group.key, value)}
+                        />
+                    ))}
                 </div>
+            </div>
+        </>
+    );
+
+    return (
+        <aside className="w-full shrink-0 self-stretch lg:w-[270px] lg:pr-[20px]">
+            <div className="mb-5 lg:hidden">
+                <button
+                    type="button"
+                    onClick={() => setIsMobileFiltersOpen((open) => !open)}
+                    className="flex h-[50px] w-[203px] items-center justify-center gap-2 bg-black px-4 text-[15px] font-medium text-white"
+                    aria-expanded={isMobileFiltersOpen}
+                    aria-controls="mobile-catalog-filters"
+                >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M9.62 16.84h3.85v-1.45H9.62v1.45ZM5.77 5.77v1.45h11.55V5.77H5.77Zm1.93 6.25h7.69v-1.44H7.7v1.44Z" fill="currentColor" />
+                    </svg>
+                    Filtr produktu
+                    <ChevronDown size={15} className={`transition-transform ${isMobileFiltersOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isMobileFiltersOpen && (
+                    <div
+                        id="mobile-catalog-filters"
+                        className="mt-4 rounded-[18px] border border-[#111111]/10 bg-white px-4 py-5 shadow-[0_22px_50px_rgba(17,17,17,0.08)]"
+                    >
+                        <div className="flex flex-col gap-[28px]">
+                            {filtersBody}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            <div className="hidden w-full max-w-[250px] flex-col gap-[42px] bg-white px-[6px] pb-[36px] pt-[26px] lg:flex">
+                {filtersBody}
             </div>
         </aside>
     );

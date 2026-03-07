@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Cormorant_Garamond, Work_Sans } from "next/font/google";
 
 import { CartProvider } from "@/context/CartContext";
 
@@ -17,11 +18,10 @@ const workSans = Work_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Lumera - Elegantní kožené kabelky z Itálie",
-  description: "Obchod s italskými koženými kabelkami, peněženkami a doplňky. Pravá kůže, nadčasový styl.",
+  title: "Lumera - Elegantn\u00ed ko\u017een\u00e9 kabelky z It\u00e1lie",
+  description:
+    "Obchod s italsk\u00fdmi ko\u017een\u00fdmi kabelkami, pen\u011b\u017eenkami a dopl\u0148ky. Prav\u00e1 k\u016f\u017ee, nad\u010dasov\u00fd styl.",
 };
-
-import { CartProvider } from "@/context/CartContext";
 
 export default function RootLayout({
   children,
@@ -33,9 +33,7 @@ export default function RootLayout({
       <body
         className={`${cormorantGaramond.variable} ${workSans.variable} antialiased font-sans`}
       >
-        <CartProvider>
-          {children}
-        </CartProvider>
+        <CartProvider>{children}</CartProvider>
       </body>
     </html>
   );

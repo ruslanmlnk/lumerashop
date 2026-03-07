@@ -6,7 +6,7 @@ const AboutCTA = () => {
     return (
         <section className="relative h-[600px] flex items-center justify-center overflow-hidden">
             <Image
-                src="https://lumerashop.cz/wp-content/uploads/2025/11/o-nas-cta-4.webp"
+                src="/assets/about/cta.webp"
                 alt="Objevte Lumera"
                 fill
                 className="object-cover"

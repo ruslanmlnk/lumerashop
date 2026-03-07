@@ -1,135 +1,136 @@
 'use client';
-import Link from 'next/link';
+
 import Image from 'next/image';
+import Link from 'next/link';
+import { useState, type CSSProperties } from 'react';
 import { motion } from 'framer-motion';
+
 import { HERO_CATEGORIES } from '../data/site-data';
 
+type CSSVars = CSSProperties & Record<`--${string}`, string>;
+
 const Hero = () => {
+    const [isVideoReady, setIsVideoReady] = useState(false);
+
     return (
         <section
-            className="mt-[134px] lg:mt-[120px] pt-0 pb-0 bg-white overflow-hidden relative"
+            className="mt-[148px] lg:mt-[132px] overflow-hidden bg-white pt-0 pb-0 relative"
             id="block-12"
         >
             <div className="lumera-container">
-                <div className="flex flex-col lg:flex-row gap-[31px] lg:gap-6 items-start">
-                    {/* Left Column (Video/Main content) - 810.2px (+ 24px gap = 834.2px equivalent) */}
-                    <div
-                        className="w-full lg:w-[810.2px] relative group overflow-hidden h-[480px] lg:h-[567px] bg-[#111111]"
-                    >
-                        {/* Video Layer */}
+                <div className="flex flex-col items-start gap-[31px] lg:flex-row lg:gap-6">
+                    <div className="relative h-[480px] w-full overflow-hidden bg-[#d9c2b2] group lg:h-[567px] lg:w-[810.2px]">
                         <div className="absolute inset-0 z-0">
+                            <Image
+                                src="/assets/bg/hero-slider-1.webp"
+                                alt=""
+                                fill
+                                priority
+                                sizes="(min-width: 1024px) 810px, 100vw"
+                                className={`object-cover transition-opacity duration-500 ${isVideoReady ? 'opacity-0' : 'opacity-100'}`}
+                            />
                             <video
                                 src="/assets/videos/hero.mp4"
                                 autoPlay
                                 loop
                                 muted
                                 playsInline
-                                className="w-full h-full object-cover"
+                                preload="metadata"
+                                className={`h-full w-full object-cover transition-opacity duration-500 ${isVideoReady ? 'opacity-100' : 'opacity-0'}`}
                                 style={{ willChange: 'transform' }}
+                                onLoadedData={() => setIsVideoReady(true)}
                             />
-                            {/* Overlay/Shading */}
                             <div className="absolute inset-0 bg-black/35" />
                         </div>
 
-                        {/* Content Layer - Align H1 to 59px relative top as per audit */}
-                        <div className="absolute inset-x-0 top-0 flex flex-col z-10 text-white pt-[94px] lg:pt-[59px] pl-6 md:pl-[40px] pr-6 md:pr-0">
+                        <div className="absolute inset-x-0 top-0 z-10 flex flex-col pt-[94px] pr-6 pl-6 text-white md:pl-[40px] md:pr-0 lg:pt-[59px]">
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.8 }}
                                 className="w-full"
                             >
-                                {/* H1: Cormorant Garamond, 72px (Desktop) / 36px (Mobile), 700, LH 1.1 */}
                                 <h1
-                                    className="font-serif font-bold text-[36px] lg:text-[72px] leading-[1.1] text-white lg:mr-[210px]"
+                                    className="font-serif text-[36px] leading-[1.1] text-white font-bold lg:mr-[210px] lg:text-[72px]"
                                     style={{
                                         fontFamily: '"Cormorant Garamond", serif',
-                                        textShadow: 'rgb(64, 64, 64) 0px 0px 8px'
+                                        textShadow: 'rgb(64, 64, 64) 0px 0px 8px',
                                     }}
                                 >
-                                    Elegantní kožené kabelky z Itálie
+                                    {'Elegantn\u00ed ko\u017een\u00e9 kabelky z It\u00e1lie'}
                                 </h1>
 
-                                {/* P: Work Sans, 16px, LH 1.6, Margin: 20px top, 113px right */}
                                 <p
-                                    className="font-sans font-light text-[16px] leading-[1.6] text-white mt-4 md:mt-[20px] lg:mr-[113px]"
-                                    style={{
-                                        fontFamily: '"Work Sans", sans-serif'
-                                    }}
+                                    className="mt-4 font-sans text-[16px] leading-[1.6] text-white font-light md:mt-[20px] lg:mr-[113px]"
+                                    style={{ fontFamily: '"Work Sans", sans-serif' }}
                                 >
-                                    Objevte jedinečné modely od malých italských výrobců – kvalita, styl a originalita v každém detailu.
+                                    {'Objevte jedine\u010dn\u00e9 modely od mal\u00fdch italsk\u00fdch v\u00fdrobc\u016f \u2013 kvalita, styl a originalita v ka\u017ed\u00e9m detailu.'}
                                 </p>
 
-                                {/* Button: White BG, Black Text, No shadow, Flat */}
                                 <div className="mt-8 md:mt-[39px]">
-                                    <Link
-                                        href="/shop"
-                                        className="lumera-btn lumera-btn--light"
-                                    >
-                                        Prohlédnout kolekci
+                                    <Link href="/shop" className="lumera-btn lumera-btn--light">
+                                        {'Prohl\u00e9dnout kolekci'}
                                     </Link>
                                 </div>
                             </motion.div>
                         </div>
                     </div>
 
-                    {/* Right Column (Category Tiles) - 305.8px */}
-                    <div className="w-full lg:w-[305.8px] flex flex-col gap-6 lg:gap-[24px] h-auto lg:h-[567px] lg:py-[12.5px]">
+                    <div className="flex h-auto w-full flex-col gap-6 lg:h-[567px] lg:w-[305.8px] lg:gap-[24px] lg:py-[12.5px]">
                         {HERO_CATEGORIES.map((cat, idx) => {
-                            const pcHeights = ["126.5px", "126.5px", "110px", "107px"];
-                            const mobileHeights = ["104px", "104px", "104px", "104px"];
-                            const pcTops = ["25px", "25px", "38.5px", "44px"];
-                            const pcImgW = ["80px", "88px", "89px", "90px"];
-                            const pcImgTop = ["18px", "18px", "14.5px", "35px"];
-                            const pcImgRight = ["30px", "26px", "26px", "25px"];
-
-                            const bgScales = ["115%", "115%", "130%", "110%"];
-                            const bgPositions = ["100% 18.4%", "56.06% 54.68%", "100% 71.16%", "86.39% 0%"];
+                            const pcHeights = ['126.5px', '126.5px', '110px', '107px'];
+                            const mobileHeights = ['104px', '104px', '104px', '104px'];
+                            const pcTops = ['25px', '25px', '38.5px', '44px'];
+                            const pcImgW = ['80px', '88px', '89px', '90px'];
+                            const pcImgTop = ['18px', '18px', '14.5px', '35px'];
+                            const pcImgRight = ['30px', '26px', '26px', '25px'];
+                            const bgScales = ['115%', '115%', '130%', '110%'];
+                            const bgPositions = ['100% 18.4%', '56.06% 54.68%', '100% 71.16%', '86.39% 0%'];
 
                             return (
                                 <Link
                                     key={idx}
                                     href={cat.href}
-                                    className="group relative overflow-hidden bg-[#F5F5F5] block w-full border-l border-white/5 h-[var(--h-m)] lg:h-[var(--h-pc)]"
+                                    className="relative block h-[var(--h-m)] w-full overflow-hidden border-l border-white/5 bg-[#F5F5F5] group lg:h-[var(--h-pc)]"
                                     style={{
                                         '--h-m': mobileHeights[idx],
-                                        '--h-pc': pcHeights[idx]
-                                    } as any}
+                                        '--h-pc': pcHeights[idx],
+                                    } as CSSVars}
                                 >
                                     <div className="absolute inset-0 z-0 overflow-hidden">
                                         <div
-                                            className="absolute inset-0 group-hover:scale-105 transition-transform duration-700 bg-no-repeat"
+                                            className="absolute inset-0 bg-no-repeat transition-transform duration-700 group-hover:scale-105"
                                             style={{
                                                 backgroundImage: `url(${cat.bg})`,
+                                                backgroundPosition: bgPositions[idx],
                                                 backgroundSize: bgScales[idx],
-                                                backgroundPosition: bgPositions[idx]
                                             }}
                                         />
                                     </div>
-                                    <div className="absolute inset-0 z-10 pointer-events-none">
-                                        {/* Exact text positioning */}
+
+                                    <div className="pointer-events-none absolute inset-0 z-10">
                                         <h2
-                                            className="absolute left-[60px] font-serif font-bold text-[24px] lg:text-[30px] text-[#111111] leading-[1.1] whitespace-pre-line top-[var(--t-m)] lg:top-[var(--t-pc)]"
+                                            className="absolute top-[var(--t-m)] left-[60px] font-serif text-[24px] leading-[1.1] text-[#111111] whitespace-pre-line font-bold lg:top-[var(--t-pc)] lg:text-[30px]"
                                             style={{
                                                 fontFamily: '"Cormorant Garamond", serif',
+                                                '--t-m': ['35px', '35px', '34px', '34px'][idx],
                                                 '--t-pc': pcTops[idx],
-                                                '--t-m': ["35px", "35px", "34px", "34px"][idx]
-                                            } as any}
+                                            } as CSSVars}
                                         >
                                             {idx < 2 ? cat.name.replace(' ', '\n') : cat.name}
                                         </h2>
-                                        {/* Exact product image sizing & positioning */}
+
                                         {cat.product && (
                                             <div
-                                                className="absolute group-hover:scale-110 transition-transform duration-700 w-[86px] lg:w-[var(--w-pc)] h-[var(--hi-m)] lg:h-[var(--hi-pc)] top-[var(--it-m)] lg:top-[var(--it-pc)] right-[16px] lg:right-[var(--ir-pc)]"
+                                                className="absolute top-[var(--it-m)] right-[16px] h-[var(--hi-m)] w-[86px] transition-transform duration-700 group-hover:scale-110 lg:top-[var(--it-pc)] lg:right-[var(--ir-pc)] lg:h-[var(--hi-pc)] lg:w-[var(--w-pc)]"
                                                 style={{
-                                                    '--w-pc': pcImgW[idx],
-                                                    '--hi-m': ["86px", "79px", "77px", "47px"][idx],
-                                                    '--hi-pc': ["80px", "80px", "80px", "50px"][idx],
-                                                    '--it-m': ["10.4px", "9.4px", "9px", "24px"][idx],
+                                                    '--hi-m': ['86px', '79px', '77px', '47px'][idx],
+                                                    '--hi-pc': ['80px', '80px', '80px', '50px'][idx],
+                                                    '--ir-pc': pcImgRight[idx],
+                                                    '--it-m': ['10.4px', '9.4px', '9px', '24px'][idx],
                                                     '--it-pc': pcImgTop[idx],
-                                                    '--ir-pc': pcImgRight[idx]
-                                                } as any}
+                                                    '--w-pc': pcImgW[idx],
+                                                } as CSSVars}
                                             >
                                                 <Image
                                                     src={cat.product}
@@ -152,4 +153,3 @@ const Hero = () => {
 };
 
 export default Hero;
-

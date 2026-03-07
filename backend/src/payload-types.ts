@@ -244,18 +244,40 @@ export interface Product {
   price: number;
   oldPrice?: number | null;
   sku?: string | null;
+  stockQuantity?: number | null;
+  /**
+   * Used for popularity sorting on the storefront.
+   */
+  purchaseCount?: number | null;
+  /**
+   * Controls the stock badge on the product page.
+   */
+  stockStatus?: ('in-stock' | 'low-stock' | 'out-of-stock') | null;
+  /**
+   * Compact intro shown next to the product title.
+   */
+  shortDescription?: string | null;
   description?: string | null;
   category: number | Category;
   subcategories?: (number | Subcategory)[] | null;
   mainImage?: (number | null) | Media;
   /**
-   * Use this when image is hosted externally or in frontend assets.
+   * Use this for CDN, external or frontend asset images.
    */
   imageUrl?: string | null;
   gallery?:
     | {
         image?: (number | null) | Media;
         imageUrl?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Short bullets shown on the product page.
+   */
+  highlights?:
+    | {
+        text: string;
         id?: string | null;
       }[]
     | null;
@@ -267,13 +289,16 @@ export interface Product {
       }[]
     | null;
   /**
+   * Pick products that should appear in the color/variant block on the product page.
+   */
+  variantProducts?: (number | Product)[] | null;
+  /**
    * Pick all filter options that apply to this product.
    */
   filterOptions?: (number | FilterOption)[] | null;
   status?: ('draft' | 'published') | null;
   isFeatured?: boolean | null;
   isRecommended?: boolean | null;
-  stockQuantity?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -475,6 +500,10 @@ export interface ProductsSelect<T extends boolean = true> {
   price?: T;
   oldPrice?: T;
   sku?: T;
+  stockQuantity?: T;
+  purchaseCount?: T;
+  stockStatus?: T;
+  shortDescription?: T;
   description?: T;
   category?: T;
   subcategories?: T;
@@ -487,6 +516,12 @@ export interface ProductsSelect<T extends boolean = true> {
         imageUrl?: T;
         id?: T;
       };
+  highlights?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
   specifications?:
     | T
     | {
@@ -494,11 +529,11 @@ export interface ProductsSelect<T extends boolean = true> {
         value?: T;
         id?: T;
       };
+  variantProducts?: T;
   filterOptions?: T;
   status?: T;
   isFeatured?: T;
   isRecommended?: T;
-  stockQuantity?: T;
   updatedAt?: T;
   createdAt?: T;
 }

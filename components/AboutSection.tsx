@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import LazyAutoplayVideo from './LazyAutoplayVideo';
 
 const AboutSection = () => {
     return (
@@ -34,13 +35,14 @@ const AboutSection = () => {
                     {/* Right Column: Video */}
                     <div className="w-full lg:w-1/2 relative min-h-[300px] md:min-h-[450px]">
                         <div className="w-full h-full relative overflow-hidden rounded-sm shadow-xl shadow-black/5">
-                            <video
+                            <LazyAutoplayVideo
+                                src="/assets/videos/about.mp4"
                                 className="w-full h-full object-cover"
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
-                                src="https://lumerashop.cz/wp-content/uploads/2025/11/OobchodeLumera-5.mp4"
+                                placeholderClassName="h-full w-full bg-[#f6f3ef]"
+                                posterSrc="/assets/bg/about-hero.webp"
+                                posterClassName="object-cover"
+                                posterSizes="(min-width: 1024px) 570px, 100vw"
+                                preload="metadata"
                             />
                         </div>
                     </div>

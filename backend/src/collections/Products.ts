@@ -1,10 +1,26 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Validate } from 'payload'
+
+const requireImageSource: Validate<string | null | undefined, unknown, unknown, unknown> = (value, { siblingData }) => {
+  if (value || siblingData?.mainImage) {
+    return true
+  }
+
+  return 'Add a main image upload or external image URL.'
+}
+
+const requireMainImage: Validate<number | null | undefined, unknown, unknown, unknown> = (value, { siblingData }) => {
+  if (value || siblingData?.imageUrl) {
+    return true
+  }
+
+  return 'Add a main image upload or external image URL.'
+}
 
 export const Products: CollectionConfig = {
   slug: 'products',
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'price', 'category', 'status', 'isFeatured', 'isRecommended', 'updatedAt'],
+    defaultColumns: ['name', 'price', 'category', 'status', 'stockStatus', 'isFeatured', 'isRecommended', 'updatedAt'],
   },
   access: {
     read: () => true,
@@ -24,20 +40,82 @@ export const Products: CollectionConfig = {
       label: 'Slug (URL)',
     },
     {
-      name: 'price',
-      type: 'number',
-      required: true,
-      label: 'Price (CZK)',
+      type: 'row',
+      fields: [
+        {
+          name: 'price',
+          type: 'number',
+          required: true,
+          label: 'Price (CZK)',
+        },
+        {
+          name: 'oldPrice',
+          type: 'number',
+          label: 'Old price',
+        },
+      ],
     },
     {
-      name: 'oldPrice',
-      type: 'number',
-      label: 'Old price (optional)',
+      type: 'row',
+      fields: [
+        {
+          name: 'sku',
+          type: 'text',
+          label: 'SKU',
+        },
+        {
+          name: 'stockQuantity',
+          type: 'number',
+          label: 'Stock quantity',
+          defaultValue: 0,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          name: 'purchaseCount',
+          type: 'number',
+          label: 'Purchase count',
+          defaultValue: 0,
+          min: 0,
+          admin: {
+            width: '50%',
+            description: 'Used for popularity sorting on the storefront.',
+          },
+        },
+      ],
     },
     {
-      name: 'sku',
-      type: 'text',
-      label: 'SKU',
+      name: 'stockStatus',
+      type: 'select',
+      defaultValue: 'in-stock',
+      label: 'Stock status',
+      options: [
+        {
+          label: 'In stock',
+          value: 'in-stock',
+        },
+        {
+          label: 'Low stock',
+          value: 'low-stock',
+        },
+        {
+          label: 'Out of stock',
+          value: 'out-of-stock',
+        },
+      ],
+      admin: {
+        description: 'Controls the stock badge on the product page.',
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'shortDescription',
+      type: 'textarea',
+      label: 'Short description',
+      admin: {
+        description: 'Compact intro shown next to the product title.',
+      },
     },
     {
       name: 'description',
@@ -65,22 +143,34 @@ export const Products: CollectionConfig = {
             },
           }
         }
+
         return true
       },
     },
     {
-      name: 'mainImage',
-      type: 'upload',
-      relationTo: 'media',
-      label: 'Main image (upload)',
-    },
-    {
-      name: 'imageUrl',
-      type: 'text',
-      label: 'Main image URL (optional)',
-      admin: {
-        description: 'Use this when image is hosted externally or in frontend assets.',
-      },
+      type: 'row',
+      fields: [
+        {
+          name: 'mainImage',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Main image (upload)',
+          validate: requireMainImage,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          name: 'imageUrl',
+          type: 'text',
+          label: 'Main image URL',
+          validate: requireImageSource,
+          admin: {
+            description: 'Use this for CDN, external or frontend asset images.',
+            width: '50%',
+          },
+        },
+      ],
     },
     {
       name: 'gallery',
@@ -88,15 +178,42 @@ export const Products: CollectionConfig = {
       label: 'Gallery',
       fields: [
         {
-          name: 'image',
-          type: 'upload',
-          relationTo: 'media',
-          label: 'Upload image',
+          type: 'row',
+          fields: [
+            {
+              name: 'image',
+              type: 'upload',
+              relationTo: 'media',
+              label: 'Upload image',
+              admin: {
+                width: '50%',
+              },
+            },
+            {
+              name: 'imageUrl',
+              type: 'text',
+              label: 'Image URL',
+              admin: {
+                width: '50%',
+              },
+            },
+          ],
         },
+      ],
+    },
+    {
+      name: 'highlights',
+      type: 'array',
+      label: 'Highlights block',
+      admin: {
+        description: 'Short bullets shown on the product page.',
+      },
+      fields: [
         {
-          name: 'imageUrl',
+          name: 'text',
           type: 'text',
-          label: 'Image URL',
+          required: true,
+          label: 'Highlight',
         },
       ],
     },
@@ -118,6 +235,16 @@ export const Products: CollectionConfig = {
           label: 'Value',
         },
       ],
+    },
+    {
+      name: 'variantProducts',
+      type: 'relationship',
+      relationTo: 'products',
+      hasMany: true,
+      label: 'Variant products',
+      admin: {
+        description: 'Pick products that should appear in the color/variant block on the product page.',
+      },
     },
     {
       name: 'filterOptions',
@@ -161,15 +288,6 @@ export const Products: CollectionConfig = {
       type: 'checkbox',
       label: 'Recommended product',
       defaultValue: false,
-      admin: {
-        position: 'sidebar',
-      },
-    },
-    {
-      name: 'stockQuantity',
-      type: 'number',
-      label: 'Stock quantity',
-      defaultValue: 0,
       admin: {
         position: 'sidebar',
       },

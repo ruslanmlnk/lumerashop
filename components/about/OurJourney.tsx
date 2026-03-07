@@ -28,7 +28,7 @@ const OurJourney = () => {
 
                     <div className="w-full lg:w-1/2 relative aspect-[4/3] shadow-2xl">
                         <Image
-                            src="https://lumerashop.cz/wp-content/uploads/2025/11/o-lumerashop-4.webp"
+                            src="/assets/about/our-journey.webp"
                             alt="Naše cesta"
                             fill
                             className="object-cover"

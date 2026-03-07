@@ -62,7 +62,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   const description =
     product.description || 'Italska kabelka z prave kuze. Elegantni design a prakticke vnitrni usporadani.';
 
-  const shortDescription = (() => {
+  const shortDescription = product.shortDescription || (() => {
     const firstSentence = description.split('.').find((part) => part.trim());
     return firstSentence ? `${firstSentence.trim()}.` : undefined;
   })();
@@ -72,18 +72,27 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     'Zeme puvodu': 'Italie',
   };
 
-  const relatedVariants = products.filter(
-    (item) => item.category === product.category && item.slug !== product.slug,
-  );
-  const fallbackVariants = products.filter((item) => item.slug !== product.slug);
-  const variantSource = relatedVariants.length ? relatedVariants : fallbackVariants;
-
-  const variants = variantSource.slice(0, 4).map((item) => ({
-    id: item.id,
-    image: item.gallery?.[0] || item.image,
-    slug: item.slug,
-    name: item.name,
-  }));
+  const relatedVariants = product.variants?.length
+    ? product.variants
+    : products
+        .filter((item) => item.category === product.category && item.slug !== product.slug)
+        .slice(0, 4)
+        .map((item) => ({
+          id: item.id,
+          image: item.gallery?.[0] || item.image,
+          slug: item.slug,
+          name: item.name,
+        }));
+  const fallbackVariants = products
+    .filter((item) => item.slug !== product.slug)
+    .slice(0, 4)
+    .map((item) => ({
+      id: item.id,
+      image: item.gallery?.[0] || item.image,
+      slug: item.slug,
+      name: item.name,
+    }));
+  const variants = relatedVariants.length ? relatedVariants : fallbackVariants;
 
   const recommendedProducts = products.filter((item) => item.isRecommended).slice(0, 6);
   const fallbackRecommended = products.slice(0, 6);
@@ -95,6 +104,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
       price: normalizePrice(product.price),
       image: gallery[0] || product.image,
       quantity,
+      slug: product.slug,
       sku: product.sku,
     });
   };
@@ -126,11 +136,13 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               <ProductInfo
                 name={product.name}
                 price={product.price}
+                oldPrice={product.oldPrice}
                 sku={product.sku}
                 shortDescription={shortDescription}
                 fullDescription={description}
                 specifications={specifications}
-                stockStatus="in-stock"
+                highlights={product.highlights}
+                stockStatus={product.stockStatus || 'in-stock'}
                 variants={variants}
                 onAddToCart={handleAddToCart}
               />

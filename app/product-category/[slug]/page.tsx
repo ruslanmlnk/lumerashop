@@ -8,6 +8,7 @@ import ProductSort from '@/components/catalog/ProductSort';
 import ProductCard from '@/components/ProductCard';
 import { useProducts } from '@/lib/use-products';
 import { buildFilterGroups, getProductFilterValues, normalizeFilterKey, parseProductPrice } from '@/lib/catalog-filters';
+import { compareProductsByPopularity } from '@/lib/product-sorting';
 
 type ActiveChip = {
     id: string;
@@ -178,6 +179,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
             const idA = Number(a.id);
             const idB = Number(b.id);
 
+            if (sortOrder === 'popularity') return compareProductsByPopularity(a, b);
             if (sortOrder === 'price-low') return priceA - priceB;
             if (sortOrder === 'price-high') return priceB - priceA;
             if (sortOrder === 'newest') return (Number.isFinite(idB) ? idB : 0) - (Number.isFinite(idA) ? idA : 0);

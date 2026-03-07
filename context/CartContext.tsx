@@ -1,6 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { getRenderableAssetPath } from '@/lib/local-assets';
 
 export interface CartItem {
     id: number | string;
@@ -8,6 +9,7 @@ export interface CartItem {
     price: number;
     image: string;
     quantity: number;
+    slug?: string;
     sku?: string;
     variant?: string;
 }
@@ -22,64 +24,100 @@ interface CartContextType {
     totalPrice: number;
 }
 
+type PersistedCartItem = Partial<CartItem> & { image?: string };
+
+const CART_STORAGE_KEY = 'lumera_cart';
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [cartItems, setCartItems] = useState<CartItem[]>([]);
+const sanitizePersistedCart = (value: unknown): CartItem[] => {
+    if (!Array.isArray(value)) {
+        return [];
+    }
 
-    // Load cart from localStorage on mount
-    useEffect(() => {
-        const savedCart = localStorage.getItem('lumera_cart');
-        if (savedCart) {
-            try {
-                const parsed = JSON.parse(savedCart);
-                // Fix broken images from old mock data if they exist
-                const sanitized = parsed.map((item: any) => {
-                    if (item.image?.includes('bag-olivia.webp')) {
-                        return { ...item, image: '/assets/products/elis-bezova.webp' };
-                    }
-                    return item;
-                });
-                setCartItems(sanitized);
-            } catch (e) {
-                console.error('Failed to parse cart from localStorage', e);
+    return value
+        .map((rawItem) => {
+            const item =
+                typeof rawItem === 'object' && rawItem !== null ? (rawItem as PersistedCartItem) : null;
+
+            if (!item) {
+                return null;
             }
-        } else {
-            // Mock data for initial testing if empty
-            setCartItems([
-                {
-                    id: 1,
-                    name: 'Italská shopper kabelka z pravé kůže Olivia modrá',
-                    price: 2199,
-                    image: '/assets/products/elis-bezova.webp',
-                    quantity: 1,
-                    sku: 'OLIVIA-BLUE'
-                }
-            ]);
-        }
-    }, []);
 
-    // Save cart to localStorage on change
+            return {
+                ...item,
+                image: getRenderableAssetPath(item.image),
+            };
+        })
+        .filter(
+            (item): item is CartItem =>
+                item !== null &&
+                (typeof item.id === 'string' || typeof item.id === 'number') &&
+                typeof item.name === 'string' &&
+                typeof item.price === 'number' &&
+                typeof item.image === 'string' &&
+                typeof item.quantity === 'number',
+        );
+};
+
+const getInitialCartItems = (): CartItem[] => {
+    if (typeof window === 'undefined') {
+        return [];
+    }
+
+    try {
+        const savedCart = localStorage.getItem(CART_STORAGE_KEY);
+        if (!savedCart) {
+            return [];
+        }
+
+        return sanitizePersistedCart(JSON.parse(savedCart));
+    } catch (error) {
+        console.error('Failed to parse cart from localStorage', error);
+        return [];
+    }
+};
+
+export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [cartItems, setCartItems] = useState<CartItem[]>(getInitialCartItems);
+
     useEffect(() => {
         if (cartItems.length > 0) {
-            localStorage.setItem('lumera_cart', JSON.stringify(cartItems));
+            localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+            return;
         }
+
+        localStorage.removeItem(CART_STORAGE_KEY);
     }, [cartItems]);
 
     const addToCart = (item: CartItem) => {
         setCartItems((prev) => {
-            const existingItem = prev.find((i) => i.id === item.id);
+            const normalizedItem = {
+                ...item,
+                image: getRenderableAssetPath(item.image),
+            };
+            const existingItem = prev.find((entry) => entry.id === item.id);
+
             if (existingItem) {
-                return prev.map((i) =>
-                    i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i
+                return prev.map((entry) =>
+                    entry.id === item.id
+                        ? {
+                              ...entry,
+                              quantity: entry.quantity + normalizedItem.quantity,
+                              slug: entry.slug ?? normalizedItem.slug,
+                              sku: entry.sku ?? normalizedItem.sku,
+                              variant: entry.variant ?? normalizedItem.variant,
+                              image: getRenderableAssetPath(entry.image),
+                          }
+                        : entry,
                 );
             }
-            return [...prev, item];
+
+            return [...prev, normalizedItem];
         });
     };
 
     const removeFromCart = (id: number | string) => {
-        setCartItems((prev) => prev.filter((i) => i.id !== id));
+        setCartItems((prev) => prev.filter((entry) => entry.id !== id));
     };
 
     const updateQuantity = (id: number | string, quantity: number) => {
@@ -87,14 +125,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             removeFromCart(id);
             return;
         }
+
         setCartItems((prev) =>
-            prev.map((i) => (i.id === id ? { ...i, quantity } : i))
+            prev.map((entry) => (entry.id === id ? { ...entry, quantity } : entry)),
         );
     };
 
     const clearCart = () => {
         setCartItems([]);
-        localStorage.removeItem('lumera_cart');
+        localStorage.removeItem(CART_STORAGE_KEY);
     };
 
     const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -122,5 +161,6 @@ export const useCart = () => {
     if (context === undefined) {
         throw new Error('useCart must be used within a CartProvider');
     }
+
     return context;
 };

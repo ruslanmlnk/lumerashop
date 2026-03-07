@@ -3,13 +3,7 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-
-interface ProductVariant {
-  id: string;
-  image: string;
-  slug: string;
-  name: string;
-}
+import type { ProductVariant } from "@/types/site";
 
 interface ProductInfoProps {
   name: string;
@@ -19,6 +13,7 @@ interface ProductInfoProps {
   shortDescription?: string;
   fullDescription?: string;
   specifications?: Record<string, string>;
+  highlights?: string[];
   stockStatus?: "in-stock" | "low-stock" | "out-of-stock";
   variants?: ProductVariant[];
   onAddToCart?: (quantity: number) => void;
@@ -34,6 +29,7 @@ const ProductInfo = ({
   shortDescription,
   fullDescription,
   specifications,
+  highlights,
   stockStatus = "in-stock",
   variants,
   onAddToCart,
@@ -54,7 +50,16 @@ const ProductInfo = ({
   const summaryItems = useMemo(() => {
     const items: string[] = [];
 
-    if (shortDescription) {
+    if (Array.isArray(highlights) && highlights.length > 0) {
+      highlights.forEach((highlight) => {
+        const cleanHighlight = stripHtml(highlight);
+        if (cleanHighlight) {
+          items.push(cleanHighlight);
+        }
+      });
+    }
+
+    if (items.length === 0 && shortDescription) {
       const cleanShortDescription = stripHtml(shortDescription);
       if (cleanShortDescription) {
         items.push(cleanShortDescription);
@@ -67,7 +72,7 @@ const ProductInfo = ({
       });
     }
 
-    if (!shortDescription && fullDescription) {
+    if (items.length === 0 && !shortDescription && fullDescription) {
       const cleanDescription = stripHtml(fullDescription);
       if (cleanDescription) {
         items.push(cleanDescription);
@@ -78,8 +83,8 @@ const ProductInfo = ({
       items.push(sku);
     }
 
-    return items;
-  }, [fullDescription, shortDescription, sku, specifications]);
+    return Array.from(new Set(items));
+  }, [fullDescription, highlights, shortDescription, sku, specifications]);
 
   return (
     <div className="w-full pb-[36px] text-[#111111]">
@@ -129,7 +134,12 @@ const ProductInfo = ({
 
         <button
           type="button"
-          onClick={() => onAddToCart?.(quantity)}
+          onClick={() => {
+            onAddToCart?.(quantity);
+            if (onAddToCart && typeof window !== "undefined") {
+              window.dispatchEvent(new CustomEvent("lumera:cart-open"));
+            }
+          }}
           disabled={stockStatus === "out-of-stock"}
           className="inline-flex h-[42px] items-center justify-center bg-black px-[30px] text-[15px] font-bold uppercase tracking-[0.02em] text-white transition hover:bg-[#222222] disabled:cursor-not-allowed disabled:bg-[#8e8e8e]"
         >
