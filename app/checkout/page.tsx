@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
-import { Check, ChevronRight, Truck, CreditCard, User, MapPin, Receipt, Info, ArrowLeft, Loader2 } from 'lucide-react';
+import { Check, Truck, CreditCard, User, Receipt, Info, ArrowLeft, Loader2 } from 'lucide-react';
 import '@/app/checkout.css';
 
 type PaymentProvider = 'global-payments' | 'stripe';
@@ -21,6 +21,35 @@ type CheckoutStartResponse = {
 };
 
 type Step = 'contact' | 'shipping' | 'billing' | 'payment';
+
+type ShippingMethodId =
+    | 'ppl-courier-cod'
+    | 'ppl-pickup-cod'
+    | 'ppl-courier'
+    | 'ppl-pickup'
+    | 'zasilkovna-courier'
+    | 'zasilkovna-pickup'
+    | 'personal-pickup';
+
+type ShippingMethod = {
+    id: ShippingMethodId;
+    label: string;
+    price: number;
+};
+
+const SHIPPING_METHODS: ShippingMethod[] = [
+    { id: 'ppl-courier-cod', label: 'PPL - kurýr na dobírku', price: 0 },
+    { id: 'ppl-pickup-cod', label: 'PPL - Výdejní místa na dobírku', price: 0 },
+    { id: 'ppl-courier', label: 'PPL - kurýr', price: 0 },
+    { id: 'ppl-pickup', label: 'PPL - Výdejní místa', price: 0 },
+    { id: 'zasilkovna-courier', label: 'Zásilkovna - kurýr', price: 0 },
+    { id: 'zasilkovna-pickup', label: 'Zásilkovna - Výdejní místa', price: 0 },
+    { id: 'personal-pickup', label: 'Osobní odběr - Lisabonská 2394, Praha (Výdejní místo)', price: 0 }
+];
+
+const DEFAULT_SHIPPING_METHOD = SHIPPING_METHODS[0].id;
+
+const formatShippingPrice = (price: number) => (price === 0 ? 'Zdarma' : `${price.toLocaleString('cs-CZ')} Kč`);
 
 const submitHppForm = (actionUrl: string, fields: Record<string, string>) => {
     const form = document.createElement('form');
@@ -41,7 +70,7 @@ const submitHppForm = (actionUrl: string, fields: Record<string, string>) => {
 };
 
 export default function CheckoutPage() {
-    const { cartItems, totalPrice, totalItems } = useCart();
+    const { cartItems, totalPrice } = useCart();
     const [currentStep, setCurrentStep] = useState<Step>('contact');
     const [completedSteps, setCompletedSteps] = useState<Step[]>([]);
     const [isSubmitting, setIsSubmitting] = useState<PaymentProvider | null>(null);
@@ -60,7 +89,7 @@ export default function CheckoutPage() {
         city: '',
         zip: '',
         notes: '',
-        shippingMethod: 'ppl',
+        shippingMethod: DEFAULT_SHIPPING_METHOD,
         billingSameAsShipping: true,
         billingFirstName: '',
         billingLastName: '',
@@ -80,7 +109,7 @@ export default function CheckoutPage() {
         setIsClient(true);
     }, []);
 
-    const updateFormData = (field: string, value: any) => {
+    const updateFormData = (field: string, value: string | boolean) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
@@ -173,6 +202,11 @@ export default function CheckoutPage() {
 
     const currentStepIndex = stepsInfo.findIndex(s => s.id === currentStep);
     const progress = ((currentStepIndex + 1) / stepsInfo.length) * 100;
+    const selectedShippingMethod =
+        SHIPPING_METHODS.find((method) => method.id === formData.shippingMethod) ?? SHIPPING_METHODS[0];
+    const shippingPrice = selectedShippingMethod.price;
+    const orderTotal = totalPrice + shippingPrice;
+    const isCustomerStage = currentStep === 'contact' || currentStep === 'shipping';
 
     return (
         <div className="flex min-h-screen flex-col bg-[#fdfdfd]">
@@ -198,7 +232,8 @@ export default function CheckoutPage() {
 
                         {/* Left Column: Form Steps */}
                         <div className="checkout-main">
-
+                            {isCustomerStage && (
+                                <>
                             {/* Step 1: Contact */}
                             <section className={`checkout-step-card ${currentStep === 'contact' ? 'active' : ''}`}>
                                 <div className="checkout-step-header" onClick={() => goToStep('contact')}>
@@ -343,12 +378,13 @@ export default function CheckoutPage() {
                                         </div>
 
                                         <h3 className="mt-8 mb-4 text-[14px] font-bold uppercase tracking-wider text-[#111]">Metoda přepravy</h3>
+                                        {false && (<>
                                         <div
-                                            className={`shipping-option ${formData.shippingMethod === 'ppl' ? 'selected' : ''}`}
-                                            onClick={() => updateFormData('shippingMethod', 'ppl')}
+                                            className={`shipping-option ${formData.shippingMethod === 'ppl-courier-cod' ? 'selected' : ''}`}
+                                            onClick={() => updateFormData('shippingMethod', 'ppl-courier-cod')}
                                         >
-                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${formData.shippingMethod === 'ppl' ? 'border-[#f1c50e]' : 'border-gray-300'}`}>
-                                                {formData.shippingMethod === 'ppl' && <div className="w-2.5 h-2.5 rounded-full bg-[#f1c50e]" />}
+                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${formData.shippingMethod === 'ppl-courier-cod' ? 'border-[#f1c50e]' : 'border-gray-300'}`}>
+                                                {formData.shippingMethod === 'ppl-courier-cod' && <div className="w-2.5 h-2.5 rounded-full bg-[#f1c50e]" />}
                                             </div>
                                             <div className="flex-1">
                                                 <span className="font-semibold block">PPL - Doručení na adresu</span>
@@ -357,11 +393,11 @@ export default function CheckoutPage() {
                                             <span className="font-bold">99 Kč</span>
                                         </div>
                                         <div
-                                            className={`shipping-option ${formData.shippingMethod === 'zasilkovna' ? 'selected' : ''}`}
-                                            onClick={() => updateFormData('shippingMethod', 'zasilkovna')}
+                                            className={`shipping-option ${formData.shippingMethod === 'zasilkovna-pickup' ? 'selected' : ''}`}
+                                            onClick={() => updateFormData('shippingMethod', 'zasilkovna-pickup')}
                                         >
-                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${formData.shippingMethod === 'zasilkovna' ? 'border-[#f1c50e]' : 'border-gray-300'}`}>
-                                                {formData.shippingMethod === 'zasilkovna' && <div className="w-2.5 h-2.5 rounded-full bg-[#f1c50e]" />}
+                                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${formData.shippingMethod === 'zasilkovna-pickup' ? 'border-[#f1c50e]' : 'border-gray-300'}`}>
+                                                {formData.shippingMethod === 'zasilkovna-pickup' && <div className="w-2.5 h-2.5 rounded-full bg-[#f1c50e]" />}
                                             </div>
                                             <div className="flex-1">
                                                 <span className="font-semibold block">Zásilkovna - Výdejní místo</span>
@@ -369,6 +405,27 @@ export default function CheckoutPage() {
                                             </div>
                                             <span className="font-bold">79 Kč</span>
                                         </div>
+                                        </>)}
+
+                                        {SHIPPING_METHODS.map((method) => {
+                                            const isSelected = formData.shippingMethod === method.id;
+
+                                            return (
+                                                <div
+                                                    key={method.id}
+                                                    className={`shipping-option items-start ${isSelected ? 'selected' : ''}`}
+                                                    onClick={() => updateFormData('shippingMethod', method.id)}
+                                                >
+                                                    <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-[#f1c50e]' : 'border-gray-300'}`}>
+                                                        {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-[#f1c50e]" />}
+                                                    </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <span className="block font-semibold leading-snug">{method.label}</span>
+                                                    </div>
+                                                    <span className="shrink-0 font-bold text-right">{formatShippingPrice(method.price)}</span>
+                                                </div>
+                                            );
+                                        })}
 
                                         <button
                                             className="checkout-button-primary mt-6"
@@ -381,12 +438,27 @@ export default function CheckoutPage() {
                                 ) : (
                                     completedSteps.includes('shipping') && (
                                         <div className="text-[14px] text-[#666]">
-                                            {formData.firstName} {formData.lastName}, {formData.address}, {formData.city} {formData.zip}
+                                            <div>{formData.firstName} {formData.lastName}, {formData.address}, {formData.city} {formData.zip}</div>
+                                            <div className="mt-1 text-[13px] text-[#888]">{selectedShippingMethod.label}</div>
                                         </div>
                                     )
                                 )}
                             </section>
+                                </>
+                            )}
 
+                            {!isCustomerStage && (
+                                <>
+                                    <div className="mb-6 flex justify-start">
+                                        <button
+                                            type="button"
+                                            className="inline-flex items-center gap-2 rounded-md border border-[#e5e7eb] bg-white px-4 py-2 text-[13px] font-semibold uppercase tracking-[0.05em] text-[#111] transition-colors hover:border-[#f1c50e]"
+                                            onClick={() => goToStep('shipping')}
+                                        >
+                                            <ArrowLeft size={14} />
+                                            Zpět na kontakt a dopravu
+                                        </button>
+                                    </div>
                             {/* Step 3: Billing */}
                             <section className={`checkout-step-card ${currentStep === 'billing' ? 'active' : ''}`}>
                                 <div className="checkout-step-header" onClick={() => goToStep('billing')}>
@@ -574,6 +646,8 @@ export default function CheckoutPage() {
                                     )
                                 )}
                             </section>
+                                </>
+                            )}
                         </div>
 
                         {/* Right Column: Order Summary */}
@@ -604,14 +678,29 @@ export default function CheckoutPage() {
                                         <span>Mezisoučet</span>
                                         <span>{totalPrice.toLocaleString('cs-CZ')} Kč</span>
                                     </div>
+                                    {false && (<>
                                     <div className="summary-item leading-snug">
                                         <span>Doprava</span>
-                                        <span>{formData.shippingMethod === 'ppl' ? '99 Kč' : '79 Kč'}</span>
+                                        <span>{formData.shippingMethod === 'ppl-courier-cod' ? '99 Kč' : '79 Kč'}</span>
                                     </div>
                                     <div className="summary-total mt-4 pt-4 border-t border-[#111]/10">
                                         <span>CELKEM</span>
                                         <span className="text-[22px]">
-                                            {(totalPrice + (formData.shippingMethod === 'ppl' ? 99 : 79)).toLocaleString('cs-CZ')} Kč
+                                            {(totalPrice + (formData.shippingMethod === 'ppl-courier-cod' ? 99 : 79)).toLocaleString('cs-CZ')} Kč
+                                        </span>
+                                    </div>
+                                </>)}
+                                    <div className="summary-item leading-snug">
+                                        <div className="pr-4">
+                                            <span className="block">Doprava</span>
+                                            <span className="block text-[12px] text-[#888]">{selectedShippingMethod.label}</span>
+                                        </div>
+                                        <span>{formatShippingPrice(shippingPrice)}</span>
+                                    </div>
+                                    <div className="summary-total mt-4 pt-4 border-t border-[#111]/10">
+                                        <span>CELKEM</span>
+                                        <span className="text-[22px]">
+                                            {orderTotal.toLocaleString('cs-CZ')} KДЌ
                                         </span>
                                     </div>
                                 </div>
