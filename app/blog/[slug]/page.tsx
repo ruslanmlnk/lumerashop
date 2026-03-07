@@ -1,15 +1,15 @@
-'use client';
-import { use } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { BLOG_POSTS } from '@/data/site-data';
+import { fetchPayloadArticles } from '@/lib/payload-articles';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronRight, Calendar, Tag, User } from 'lucide-react';
 
-export default function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
-    const { slug } = use(params);
-    const post = BLOG_POSTS.find(p => p.slug === slug);
+export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
+
+    const posts = await fetchPayloadArticles();
+    const post = posts.find(p => p.slug === slug);
 
     if (!post) {
         return (

@@ -9,8 +9,9 @@ import Hero from '@/components/Hero';
 import LazyAutoplayVideo from '@/components/LazyAutoplayVideo';
 import MarketingSlider from '@/components/MarketingSlider';
 import ProductGrid from '@/components/ProductGrid';
-import { BLOG_POSTS, FEATURED_PRODUCTS, RECOMMENDED_PRODUCTS, TESTIMONIALS } from '@/data/site-data';
+import { FEATURED_PRODUCTS, RECOMMENDED_PRODUCTS, TESTIMONIALS } from '@/data/site-data';
 import { getGlobal } from '@/lib/payload-data';
+import { fetchPayloadArticles } from '@/lib/payload-articles';
 import { fetchPayloadProducts } from '@/lib/payload-products';
 import { getProductPurchaseCount, sortProductsByPopularity } from '@/lib/product-sorting';
 
@@ -26,6 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Home() {
   const homePageData = await getGlobal('home-page');
   const products = await fetchPayloadProducts();
+  const blogPosts = await fetchPayloadArticles();
   const featuredProducts = products.filter((product) => product.isFeatured);
   const recommendedProducts = products.filter((product) => product.isRecommended);
   const popularProducts = sortProductsByPopularity(products);
@@ -183,11 +185,11 @@ export default async function Home() {
               className="mb-[30px] text-[14px] leading-[1.6] text-[#111111] md:text-[16px]"
               style={{ fontFamily: '"Work Sans", sans-serif' }}
             >
-             Styl, inspirace a péče o vaše kožené doplňky.
+              Styl, inspirace a péče o vaše kožené doplňky.
             </p>
 
             <div className="mb-[40px] grid grid-cols-1 gap-[10px] md:grid-cols-3">
-              {BLOG_POSTS.map((post, idx) => (
+              {blogPosts.slice(0, 3).map((post, idx) => (
                 <div key={idx} className="flex flex-col">
                   <h3 className="mb-[20px] font-serif text-[20px] leading-[1.2] font-normal md:text-[24px]">
                     <Link href={`/blog/${post.slug}`} className="text-[#111111] hover:text-[#111111]">
@@ -209,7 +211,7 @@ export default async function Home() {
 
             <div className="mt-[30px] text-center">
               <Link href="/blog" className="lumera-btn">
-                 Objevte více inspirace
+                Objevte více inspirace
               </Link>
             </div>
           </div>
@@ -246,7 +248,7 @@ export default async function Home() {
 
                 <div className="mt-[30px] flex-shrink-0 md:mt-0">
                   <Link href="/shop" className="lumera-btn lumera-btn--light inline-flex">
-                     Prohlédnout kolekci
+                    Prohlédnout kolekci
                   </Link>
                 </div>
               </div>

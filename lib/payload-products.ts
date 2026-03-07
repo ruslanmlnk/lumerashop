@@ -1,4 +1,3 @@
-import 'server-only';
 import { ALL_PRODUCTS } from '@/data/site-data';
 import {
     DEFAULT_LOCAL_ASSET_FALLBACK,

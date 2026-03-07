@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "feed:google-merchant": "npm --prefix backend run feed:google-merchant"
   },
   "dependencies": {
     "framer-motion": "^12.34.0",

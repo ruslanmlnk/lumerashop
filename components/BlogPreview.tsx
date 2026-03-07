@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { BLOG_POSTS } from '@/data/site-data';
+import { fetchPayloadArticles } from '@/lib/payload-articles';
 
-const BlogPreview = () => {
+const BlogPreview = async () => {
+    const blogPosts = await fetchPayloadArticles();
     return (
         <section className="bg-white py-12 md:py-20" id="blog-preview">
             <div className="max-w-[1140px] mx-auto px-4 lg:px-0">
@@ -19,7 +20,7 @@ const BlogPreview = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 mb-16">
-                    {BLOG_POSTS.slice(0, 3).map((post, idx) => (
+                    {blogPosts.slice(0, 3).map((post, idx) => (
                         <div key={idx} className="flex flex-col group h-full">
                             <Link href={`/blog/${post.slug}`} className="block relative w-full aspect-[4/3] mb-8 overflow-hidden rounded-sm shadow-sm ring-1 ring-black/5">
                                 <Image

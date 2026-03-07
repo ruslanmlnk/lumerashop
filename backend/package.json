@@ -10,6 +10,7 @@
     "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+    "feed:google-merchant": "cross-env NODE_OPTIONS=--no-deprecation tsx ./src/scripts/generate-google-merchant-feed.ts",
     "import:homepage-slider": "cross-env NODE_OPTIONS=--no-deprecation tsx ./src/scripts/import-homepage-slider.ts",
     "import:products": "cross-env NODE_OPTIONS=--no-deprecation tsx ./src/scripts/import-hardcoded-products.ts",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
