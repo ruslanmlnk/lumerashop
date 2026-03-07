@@ -14,5 +14,8 @@ const getPopularityScore = (product: Product): number => {
     return score;
 };
 
+export const compareProductsByPopularity = (a: Product, b: Product): number =>
+    getPopularityScore(b) - getPopularityScore(a);
+
 export const sortProductsByPopularity = (products: Product[]): Product[] =>
-    [...products].sort((a, b) => getPopularityScore(b) - getPopularityScore(a));
+    [...products].sort(compareProductsByPopularity);

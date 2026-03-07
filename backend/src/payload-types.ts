@@ -74,6 +74,7 @@ export interface Config {
     'filter-groups': FilterGroup;
     'filter-options': FilterOption;
     products: Product;
+    article: Article;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -88,6 +89,7 @@ export interface Config {
     'filter-groups': FilterGroupsSelect<false> | FilterGroupsSelect<true>;
     'filter-options': FilterOptionsSelect<false> | FilterOptionsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
+    article: ArticleSelect<false> | ArticleSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -304,6 +306,38 @@ export interface Product {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "article".
+ */
+export interface Article {
+  id: number;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  title: string;
+  mainImage: number | Media;
+  description?: string | null;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -353,6 +387,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'products';
         value: number | Product;
+      } | null)
+    | ({
+        relationTo: 'article';
+        value: number | Article;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -534,6 +572,20 @@ export interface ProductsSelect<T extends boolean = true> {
   status?: T;
   isFeatured?: T;
   isRecommended?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "article_select".
+ */
+export interface ArticleSelect<T extends boolean = true> {
+  generateSlug?: T;
+  slug?: T;
+  title?: T;
+  mainImage?: T;
+  description?: T;
+  content?: T;
   updatedAt?: T;
   createdAt?: T;
 }

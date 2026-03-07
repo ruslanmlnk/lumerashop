@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Work_Sans } from "next/font/google";
 
 import { CartProvider } from "@/context/CartContext";
+import { ProductsProvider } from "@/context/ProductsContext";
+import { fetchPayloadProducts } from "@/lib/payload-products";
 
 import "./globals.css";
 
@@ -23,17 +25,20 @@ export const metadata: Metadata = {
     "Obchod s italsk\u00fdmi ko\u017een\u00fdmi kabelkami, pen\u011b\u017eenkami a dopl\u0148ky. Prav\u00e1 k\u016f\u017ee, nad\u010dasov\u00fd styl.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const products = await fetchPayloadProducts();
   return (
     <html lang="cs">
       <body
         className={`${cormorantGaramond.variable} ${workSans.variable} antialiased font-sans`}
       >
-        <CartProvider>{children}</CartProvider>
+        <ProductsProvider initialProducts={products}>
+          <CartProvider>{children}</CartProvider>
+        </ProductsProvider>
       </body>
     </html>
   );

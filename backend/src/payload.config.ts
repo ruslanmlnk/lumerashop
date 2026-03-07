@@ -12,7 +12,10 @@ import { Subcategories } from './collections/Subcategories'
 import { Products } from './collections/Products'
 import { FilterGroups } from './collections/FilterGroups'
 import { FilterOptions } from './collections/FilterOptions'
+import { Article } from './collections/Article'
+
 import { HomePage } from './globals/HomePage'
+
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -24,7 +27,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Categories, Subcategories, FilterGroups, FilterOptions, Products],
+  collections: [Users, Media, Categories, Subcategories, FilterGroups, FilterOptions, Products, Article],
   globals: [HomePage],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

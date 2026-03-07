@@ -126,9 +126,9 @@ export default async function Home() {
 
         <div className="mt-[20px]">
           <ProductGrid
-            title="NaР•РЋe doporuР”РЊenР“В­"
+            title="Naše doporučení­"
             products={recommendedForView}
-            description="Vybrali jsme pro vР“РЋs nР”вЂєkolik oblР“В­benР“Р…ch modelР•Р‡ z ItР“РЋlie. KaР•С•dР“Р… z nich spojuje kvalitu, styl a poctivou ruР”РЊnР“В­ prР“РЋci."
+            description="Vybrali jsme pro vás několik oblíbených modelů z Itálie. Každý z nich spojuje kvalitu, styl a poctivou ruční práci."
           />
         </div>
 
@@ -138,7 +138,7 @@ export default async function Home() {
               className="mb-[30px] font-serif text-[30px] leading-[1.1] text-[#111111] font-bold md:text-[36px]"
               style={{ fontFamily: '"Cormorant Garamond", serif' }}
             >
-              Co o nР“РЋs Р•в„ўР“В­kajР“В­ naР•РЋe zР“РЋkaznice
+              Co o nás říkají naše zákaznice
             </h2>
 
             <div className="group relative mx-auto max-w-[1140px] pt-2 pb-6">
@@ -183,7 +183,7 @@ export default async function Home() {
               className="mb-[30px] text-[14px] leading-[1.6] text-[#111111] md:text-[16px]"
               style={{ fontFamily: '"Work Sans", sans-serif' }}
             >
-              Styl, inspirace a pР“В©Р”РЊe o vaР•РЋe koР•С•enР“В© doplР•в‚¬ky.
+             Styl, inspirace a péče o vaše kožené doplňky.
             </p>
 
             <div className="mb-[40px] grid grid-cols-1 gap-[10px] md:grid-cols-3">
@@ -209,7 +209,7 @@ export default async function Home() {
 
             <div className="mt-[30px] text-center">
               <Link href="/blog" className="lumera-btn">
-                Objevte vР“В­ce inspirace
+                 Objevte více inspirace
               </Link>
             </div>
           </div>
@@ -240,13 +240,13 @@ export default async function Home() {
                     className="mt-[15px] mb-0 text-[14px] font-normal text-white md:mt-[20px] md:text-[16px] lg:text-[18px]"
                     style={{ fontFamily: '"Work Sans", sans-serif', textShadow: '2px 2px 8px rgba(0,0,0,0.4)' }}
                   >
-                    NajdР”вЂєte svР•Р‡j dokonalР“Р… doplnР”вЂєk jeР•РЋtР”вЂє dnes.
+                    Najděte svůj dokonalý doplněk ještě dnes.
                   </p>
                 </div>
 
                 <div className="mt-[30px] flex-shrink-0 md:mt-0">
                   <Link href="/shop" className="lumera-btn lumera-btn--light inline-flex">
-                    ProhlР“В©dnout kolekci
+                     Prohlédnout kolekci
                   </Link>
                 </div>
               </div>
