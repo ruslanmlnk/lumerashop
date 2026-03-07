@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Work_Sans } from "next/font/google";
+
+import { CartProvider } from "@/context/CartContext";
+
 import "./globals.css";
 
 const cormorantGaramond = Cormorant_Garamond({
