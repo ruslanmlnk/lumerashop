@@ -1,133 +1,165 @@
 'use client';
+
 import { use } from 'react';
+import Link from 'next/link';
+
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import ProductGrid from '@/components/ProductGrid';
+import Features from '@/components/Features';
 import ProductGallery from '@/components/product/ProductGallery';
 import ProductInfo from '@/components/product/ProductInfo';
 import ProductTabs from '@/components/product/ProductTabs';
-import ProductGrid from '@/components/ProductGrid';
-import { ALL_PRODUCTS, RECOMMENDED_PRODUCTS } from '@/data/site-data';
-import Link from 'next/link';
-import { ShieldCheck, Star, Award, Heart } from 'lucide-react';
+import { useCart } from '@/context/CartContext';
+import { useProducts } from '@/lib/use-products';
+
+const normalizePrice = (price: string) => {
+  const normalized = Number(price.replace(/\s+/g, '').replace(',', '.').replace(/[^\d.]/g, ''));
+
+  if (Number.isFinite(normalized) && normalized > 0) {
+    return Math.round(normalized);
+  }
+
+  const fallback = Number(price.replace(/[^\d]/g, ''));
+  return Number.isFinite(fallback) ? fallback : 0;
+};
 
 export default function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
-    const { slug } = use(params);
+  const { slug } = use(params);
+  const { addToCart } = useCart();
+  const { products, loading } = useProducts();
 
-    const product = ALL_PRODUCTS.find(p => p.slug === slug);
+  const product = products.find((item) => item.slug === slug);
 
-    if (!product) {
-        return (
-            <div className="min-h-screen flex flex-col">
-                <Header />
-                <main className="flex-1 flex flex-col items-center justify-center p-20">
-                    <h1 className="text-[32px] font-serif mb-6">Produkt nebyl nalezen</h1>
-                    <Link href="/shop" className="px-8 py-3 bg-black text-white uppercase tracking-wider text-[14px]">
-                        Zpět do obchodu
-                    </Link>
-                </main>
-                <Footer />
-            </div>
-        );
-    }
-
-    const gallery = product.gallery || [product.image];
-    const description = product.description || 'Italská kabelka z pravé kůže. Elegantní a praktická.';
-    const specifications = product.specifications || {
-        'Materiál': 'Kůže',
-        'Země původu': 'Itálie'
-    };
-
-    // Mock variants for matching original look
-    const mockVariants = [
-        { id: '1', image: '/images/products/bag-black.jpg', slug: 'bag-black' },
-        { id: '2', image: '/images/products/bag-red.jpg', slug: 'bag-red' },
-        { id: '3', image: '/images/products/bag-brown.jpg', slug: 'bag-brown' },
-    ];
-
+  if (!product && loading) {
     return (
-        <div className="min-h-screen font-sans text-[#111111] bg-white">
-            <Header />
-
-            <main className="pt-[140px] md:pt-[200px] pb-32">
-                <div className="max-w-[1140px] mx-auto px-4 lg:px-0">
-                    {/* Breadcrumbs */}
-                    <nav className="mb-12 text-[11px] text-gray-400 uppercase tracking-[0.2em] flex items-center gap-3">
-                        <Link href="/" className="hover:text-[#c8a16a] transition-colors">Domů</Link>
-                        <span className="text-[10px]">/</span>
-                        <Link href="/shop" className="hover:text-[#c8a16a] transition-colors">Obchod</Link>
-                        <span className="text-[10px]">/</span>
-                        <span className="text-black font-bold">{product.category}</span>
-                    </nav>
-
-                    <div className="flex flex-col lg:flex-row gap-16 lg:gap-20 items-start">
-                        <div className="w-full lg:w-[55%]">
-                            <ProductGallery images={gallery} />
-                        </div>
-                        <div className="w-full lg:w-[45%] lg:sticky lg:top-[160px]">
-                            <ProductInfo
-                                name={product.name}
-                                price={product.price}
-                                oldPrice={product.name.includes('Sleva') ? '2 950 Kč' : undefined}
-                                sku={product.sku || product.id}
-                                category={product.category}
-                                shortDescription={description.split('.')[0] + '.'}
-                                stockStatus={product.id === '1' ? 'low-stock' : 'in-stock'}
-                                variants={mockVariants}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="mt-24">
-                        <ProductTabs
-                            description={description}
-                            specifications={specifications}
-                        />
-                    </div>
-
-                    {/* Features Section - Replicated from D:/lumera/wp-content/themes/Lumera_Shop_1_61/woocommerce/template-parts/productTemplate/content-single-product.php */}
-                    <section className="mt-32 py-20 border-t border-b border-gray-50">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-                            <div className="flex flex-col items-center text-center group">
-                                <div className="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-[#c8a16a]">
-                                    <ShieldCheck size={32} />
-                                </div>
-                                <h3 className="font-serif text-[20px] font-bold mb-3 tracking-tight">Italský původ</h3>
-                                <p className="text-gray-400 text-[14px] leading-relaxed">Kabelky přímo від menších výrobců з Itálie.</p>
-                            </div>
-                            <div className="flex flex-col items-center text-center group">
-                                <div className="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-[#c8a16a]">
-                                    <Star size={32} />
-                                </div>
-                                <h3 className="font-serif text-[20px] font-bold mb-3 tracking-tight">Pečlivý výběr</h3>
-                                <p className="text-gray-400 text-[14px] leading-relaxed">Každý model vybíráme osobně з důrazem на kvalitu а styl.</p>
-                            </div>
-                            <div className="flex flex-col items-center text-center group">
-                                <div className="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-[#c8a16a]">
-                                    <Award size={32} />
-                                </div>
-                                <h3 className="font-serif text-[20px] font-bold mb-3 tracking-tight">Doprava zdarma</h3>
-                                <p className="text-gray-400 text-[14px] leading-relaxed">Pro objednávky nad 1500 Kč doprava zdarma. Rychlé а bezpečné doručení.</p>
-                            </div>
-                            <div className="flex flex-col items-center text-center group">
-                                <div className="w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-[#c8a16a]">
-                                    <Heart size={32} />
-                                </div>
-                                <h3 className="font-serif text-[20px] font-bold mb-3 tracking-tight">Osobní přístup</h3>
-                                <p className="text-gray-400 text-[14px] leading-relaxed">Malý obchod, velká vášeň pro krásu а design.</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <div className="mt-32">
-                        <ProductGrid
-                            title="Mohlo by se vám také líbit"
-                            products={RECOMMENDED_PRODUCTS.slice(0, 4)}
-                        />
-                    </div>
-                </div>
-            </main>
-
-            <Footer />
-        </div>
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        <main className="flex flex-1 flex-col items-center justify-center p-20">
+          <p className="text-[18px] text-gray-500">Nacitam produkt...</p>
+        </main>
+        <Footer />
+      </div>
     );
+  }
+
+  if (!product) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <Header />
+        <main className="flex flex-1 flex-col items-center justify-center p-20">
+          <h1 className="mb-6 font-serif text-[32px]">Produkt nebyl nalezen</h1>
+          <Link href="/shop" className="bg-black px-8 py-3 text-[14px] uppercase tracking-wider text-white">
+            Zpet do obchodu
+          </Link>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const gallery = product.gallery?.length ? product.gallery : [product.image];
+  const description =
+    product.description || 'Italska kabelka z prave kuze. Elegantni design a prakticke vnitrni usporadani.';
+
+  const shortDescription = (() => {
+    const firstSentence = description.split('.').find((part) => part.trim());
+    return firstSentence ? `${firstSentence.trim()}.` : undefined;
+  })();
+
+  const specifications = product.specifications || {
+    Material: 'Kuze',
+    'Zeme puvodu': 'Italie',
+  };
+
+  const relatedVariants = products.filter(
+    (item) => item.category === product.category && item.slug !== product.slug,
+  );
+  const fallbackVariants = products.filter((item) => item.slug !== product.slug);
+  const variantSource = relatedVariants.length ? relatedVariants : fallbackVariants;
+
+  const variants = variantSource.slice(0, 4).map((item) => ({
+    id: item.id,
+    image: item.gallery?.[0] || item.image,
+    slug: item.slug,
+    name: item.name,
+  }));
+
+  const recommendedProducts = products.filter((item) => item.isRecommended).slice(0, 6);
+  const fallbackRecommended = products.slice(0, 6);
+
+  const handleAddToCart = (quantity: number) => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: normalizePrice(product.price),
+      image: gallery[0] || product.image,
+      quantity,
+      sku: product.sku,
+    });
+  };
+
+  return (
+    <div className="min-h-screen bg-white font-sans text-[#111111]">
+      <Header />
+
+      <main className="pb-16 pt-[148px] lg:pt-[164px]">
+        <div className="lumera-container">
+          <nav className="mb-8 flex items-center gap-2 text-[14px] text-[#7a7a7a]">
+            <Link href="/" className="transition-colors hover:text-black">
+              Domu
+            </Link>
+            <span>/</span>
+            <Link href="/shop" className="transition-colors hover:text-black">
+              Obchod
+            </Link>
+            <span>/</span>
+            <span className="text-[#999999]">{product.name}</span>
+          </nav>
+
+          <section className="grid grid-cols-1 items-start gap-10 lg:grid-cols-2 lg:gap-[60px]">
+            <div className="w-full">
+              <ProductGallery images={gallery} productName={product.name} />
+            </div>
+
+            <div className="w-full lg:pt-[30px]">
+              <ProductInfo
+                name={product.name}
+                price={product.price}
+                sku={product.sku}
+                shortDescription={shortDescription}
+                fullDescription={description}
+                specifications={specifications}
+                stockStatus="in-stock"
+                variants={variants}
+                onAddToCart={handleAddToCart}
+              />
+            </div>
+          </section>
+
+          <section className="mb-16 mt-[36px]">
+            <ProductTabs title={product.name} description={description} specifications={specifications} />
+          </section>
+
+          <div className="mt-[20px] hidden md:block">
+            <Features />
+          </div>
+
+          <div className="mt-[35px]">
+            <ProductGrid
+              title="Novinky"
+              products={recommendedProducts.length ? recommendedProducts : fallbackRecommended}
+              description="Podivejte se na nejnovejsi modely, ktere prave dorazily z Italie"
+              isSlider={true}
+              alignLeft={true}
+              variant="novinky"
+              autoPlay={false}
+            />
+          </div>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
 }

@@ -4,69 +4,33 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { Variants } from 'framer-motion';
+import { DEFAULT_MARKETING_SLIDES, type MarketingSlide } from '@/data/marketing-slides';
 
-const SLIDES = [
-    {
-        title: "Každodenní elegance z Itálie",
-        description: "Kabelky, které doplní váš den – stylové, lehké a vždy připravené vyrazit s vámi.",
-        button: "Prohlédnout kabelky",
-        link: "/product-category/kabelky",
-        bg: "/assets/bg/hero-slider-1.webp",
-        overlayImage: "/assets/products/cutout-1.webp",
-        layout: {
-            paddingTop: 160,
-            titleMaxWidth: 540,
-            descMaxWidth: 600,
-            img: { w: 269, h: 565, top: 105, right: 64 }
-        }
-    },
-    {
-        title: "Lehkost v pohybu",
-        description: "Pro chvíle, kdy potřebujete mít styl i pohodlí. Italské kabelky a batohy pro váš volný den.",
-        button: "Objevte batohy",
-        link: "/product-category/batohy",
-        bg: "/assets/bg/hero-slider-2.webp",
-        overlayImage: "/assets/products/cutout-2.png",
-        layout: {
-            paddingTop: 219,
-            titleMaxWidth: 335,
-            descMaxWidth: 453,
-            img: { w: 343, h: 561, top: 83, right: 120 }
-        }
-    },
-    {
-        title: "Síla elegance",
-        description: "Klasický design, pravá kůže, dokonalé zpracování. Kabelky, které podtrhnou vaši sebedůvěru.",
-        button: "Vyberte si svůj styl",
-        link: "/shop",
-        bg: "/assets/bg/hero-slider-3.webp",
-        overlayImage: "/assets/products/cutout-3.png",
-        layout: {
-            paddingTop: 136,
-            titleMaxWidth: 300,
-            descMaxWidth: 453,
-            img: { w: 177, h: 467, top: 160, right: 151 }
-        }
-    }
-];
+interface MarketingSliderProps {
+    slides?: MarketingSlide[];
+}
 
-const MarketingSlider = () => {
+const MarketingSlider = ({ slides }: MarketingSliderProps) => {
+    const sliderSlides = slides && slides.length > 0 ? slides : DEFAULT_MARKETING_SLIDES;
     const [current, setCurrent] = useState(0);
     const [direction, setDirection] = useState(0);
+    const activeIndex = current % sliderSlides.length;
 
     const paginate = (newDirection: number) => {
         setDirection(newDirection);
-        setCurrent((prev) => (prev + newDirection + SLIDES.length) % SLIDES.length);
+        setCurrent((prev) => (prev + newDirection + sliderSlides.length) % sliderSlides.length);
     };
 
     useEffect(() => {
         const timer = setInterval(() => {
-            paginate(1);
+            setDirection(1);
+            setCurrent((prev) => (prev + 1) % sliderSlides.length);
         }, 7000);
         return () => clearInterval(timer);
-    }, [current]);
+    }, [sliderSlides.length]);
 
-    const slideVariants: any = {
+    const slideVariants: Variants = {
         enter: (direction: number) => ({
             x: direction > 0 ? '100%' : '-100%',
             opacity: 1,
@@ -84,7 +48,7 @@ const MarketingSlider = () => {
         })
     };
 
-    const getVariants = (enterX: number, centerDelay: number, exitDuration: number = 0.5): any => ({
+    const getVariants = (enterX: number, centerDelay: number, exitDuration: number = 0.5): Variants => ({
         enter: {
             opacity: 0,
             x: enterX
@@ -129,7 +93,7 @@ const MarketingSlider = () => {
                             >
                                 {/* Background Image */}
                                 <Image
-                                    src={SLIDES[current].bg}
+                                    src={sliderSlides[activeIndex].bg}
                                     alt=""
                                     fill
                                     className="object-cover"
@@ -143,7 +107,7 @@ const MarketingSlider = () => {
                                     <div
                                         className="text-left text-white relative flex flex-col w-full lg:w-[60%] z-20"
                                         style={{
-                                            marginTop: `${SLIDES[current].layout.paddingTop}px`,
+                                            marginTop: `${sliderSlides[activeIndex].layout.paddingTop}px`,
                                             textShadow: '0 2px 10px rgba(0,0,0,0.2)' // Subtle shadow for readability without darkening the image
                                         }}
                                     >
@@ -152,29 +116,29 @@ const MarketingSlider = () => {
                                             className="text-[34px] md:text-[48px] font-serif font-bold leading-[1.1] mb-5"
                                             style={{
                                                 fontFamily: '"Cormorant Garamond", serif',
-                                                maxWidth: `${SLIDES[current].layout.titleMaxWidth}px`
+                                                maxWidth: `${sliderSlides[activeIndex].layout.titleMaxWidth}px`
                                             }}
                                         >
-                                            {SLIDES[current].title}
+                                            {sliderSlides[activeIndex].title}
                                         </motion.h2>
                                         <motion.p
                                             variants={getVariants(-200, 1.2)}
                                             className="text-[14px] md:text-[16px] font-sans font-normal leading-[1.6] mb-8"
                                             style={{
                                                 fontFamily: '"Work Sans", sans-serif',
-                                                maxWidth: `${SLIDES[current].layout.descMaxWidth}px`
+                                                maxWidth: `${sliderSlides[activeIndex].layout.descMaxWidth}px`
                                             }}
                                         >
-                                            {SLIDES[current].description}
+                                            {sliderSlides[activeIndex].description}
                                         </motion.p>
                                         <motion.div
                                             variants={getVariants(-200, 1.4)}
                                         >
                                             <Link
-                                                href={SLIDES[current].link}
+                                                href={sliderSlides[activeIndex].link}
                                                 className="lumera-btn lumera-btn--light w-fit shadow-lg shadow-black/10"
                                             >
-                                                {SLIDES[current].button}
+                                                {sliderSlides[activeIndex].button}
                                             </Link>
                                         </motion.div>
                                     </div>
@@ -185,14 +149,14 @@ const MarketingSlider = () => {
                                             variants={getVariants(300, 0.8, 0.7)}
                                             className="absolute z-10"
                                             style={{
-                                                width: `${SLIDES[current].layout.img.w}px`,
-                                                height: `${SLIDES[current].layout.img.h}px`,
-                                                top: `${SLIDES[current].layout.img.top}px`,
-                                                right: `${SLIDES[current].layout.img.right}px`
+                                                width: `${sliderSlides[activeIndex].layout.img.w}px`,
+                                                height: `${sliderSlides[activeIndex].layout.img.h}px`,
+                                                top: `${sliderSlides[activeIndex].layout.img.top}px`,
+                                                right: `${sliderSlides[activeIndex].layout.img.right}px`
                                             }}
                                         >
                                             <Image
-                                                src={SLIDES[current].overlayImage}
+                                                src={sliderSlides[activeIndex].overlayImage}
                                                 alt=""
                                                 fill
                                                 className="object-contain"
@@ -232,14 +196,14 @@ const MarketingSlider = () => {
 
                         {/* Pagination Dots */}
                         <div className="absolute bottom-4 md:bottom-[20px] left-1/2 -translate-x-1/2 flex gap-[6px] z-20">
-                            {SLIDES.map((_, idx) => (
+                            {sliderSlides.map((_, idx) => (
                                 <button
                                     key={idx}
                                     onClick={() => {
                                         setDirection(idx > current ? 1 : -1);
                                         setCurrent(idx);
                                     }}
-                                    className={`w-[10px] h-[10px] rounded-full transition-all duration-300 ${current === idx ? 'bg-white scale-110' : 'bg-white/40 hover:bg-white/60'}`}
+                                    className={`w-[10px] h-[10px] rounded-full transition-all duration-300 ${activeIndex === idx ? 'bg-white scale-110' : 'bg-white/40 hover:bg-white/60'}`}
                                     aria-label={`Go to slide ${idx + 1}`}
                                 />
                             ))}

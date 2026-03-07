@@ -1,3 +1,10 @@
+export interface ProductFilterValue {
+    group: string;
+    option: string;
+    groupSlug?: string;
+    optionSlug?: string;
+}
+
 export interface Product {
     id: string;
     name: string;
@@ -9,6 +16,9 @@ export interface Product {
     description?: string;
     gallery?: string[];
     specifications?: Record<string, string>;
+    filterValues?: ProductFilterValue[];
+    isFeatured?: boolean;
+    isRecommended?: boolean;
 }
 
 export interface NavItem {

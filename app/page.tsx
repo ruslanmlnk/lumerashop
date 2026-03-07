@@ -8,20 +8,43 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { FEATURED_PRODUCTS, RECOMMENDED_PRODUCTS, TESTIMONIALS, BLOG_POSTS } from '@/data/site-data';
 import { getGlobal } from '@/lib/payload-data';
+import { fetchPayloadProducts } from '@/lib/payload-products';
 import type { Metadata } from 'next';
 
 export async function generateMetadata(): Promise<Metadata> {
   const homePageData = await getGlobal('home-page');
 
   return {
-    title: homePageData?.seo?.title || 'Lumera Shop | Italské kožené kabelky',
-    description: homePageData?.seo?.description || 'Objevte eleganci s Lumera. Italské kožené kabelky a doplňky přímo od výrobců.',
+    title: homePageData?.seo?.title || 'Lumera Shop | ItalskГ© koЕѕenГ© kabelky',
+    description: homePageData?.seo?.description || 'Objevte eleganci s Lumera. ItalskГ© koЕѕenГ© kabelky a doplЕ€ky pЕ™Г­mo od vГЅrobcЕЇ.',
   }
 }
 
 export default async function Home() {
   const homePageData = await getGlobal('home-page');
-  const mainTitle = homePageData?.title || 'O obchodě Lumera';
+  const products = await fetchPayloadProducts();
+  const featuredProducts = products.filter((product) => product.isFeatured);
+  const recommendedProducts = products.filter((product) => product.isRecommended);
+  const featuredForView = featuredProducts.length ? featuredProducts : FEATURED_PRODUCTS;
+  const recommendedForView = recommendedProducts.length ? recommendedProducts : RECOMMENDED_PRODUCTS;
+
+  const aboutSection = homePageData?.aboutSection;
+  const aboutTitle =
+    typeof aboutSection?.title === 'string' && aboutSection.title.length > 0
+      ? aboutSection.title
+      : 'O obchodě Lumera';
+  const aboutDescription =
+    typeof aboutSection?.description === 'string' && aboutSection.description.length > 0
+      ? aboutSection.description
+      : 'Lumera je český obchod s italskými koženými kabelkami a doplňky.\nSpolupracujeme s menšími výrobci z Itálie, kteří si zakládají na kvalitě a ručním zpracování. Každý model pečlivě vybíráme tak, aby spojoval eleganci, praktičnost a originalitu. Věříme, že krása je v detailu - stejně jako v každé kabelce, kterou nabízíme.';
+  const aboutButtonText =
+    typeof aboutSection?.buttonText === 'string' && aboutSection.buttonText.length > 0
+      ? aboutSection.buttonText
+      : 'Zjistit více o obchodě';
+  const aboutButtonLink =
+    typeof aboutSection?.buttonLink === 'string' && aboutSection.buttonLink.length > 0
+      ? aboutSection.buttonLink
+      : '/o-nas';
 
   return (
     <div className="min-h-screen font-sans text-[#111111] bg-white selection:bg-amber-100 italic-selection">
@@ -31,20 +54,20 @@ export default async function Home() {
 
         {/* Gap 20px created by mt-[20px] on block-4 */}
         <div className="mt-[20px]">
-          <MarketingSlider />
+          <MarketingSlider slides={homePageData?.marketingSlides} />
         </div>
 
         {/* Gap 20px created by mt-[20px] on block-5 */}
         <div className="mt-[20px]">
           <ProductGrid
-            title="Oblíbené modely"
-            products={FEATURED_PRODUCTS}
-            description="Nejoblíbenější kožené kabelky, peněženky a doplňky od italských výrobců."
+            title="OblГ­benГ© modely"
+            products={featuredForView}
+            description="NejoblГ­benД›jЕЎГ­ koЕѕenГ© kabelky, penД›Еѕenky a doplЕ€ky od italskГЅch vГЅrobcЕЇ."
             isSlider={true}
           />
         </div>
 
-        {/* Block 6: O obchodě Lumera */}
+        {/* Block 6: O obchodД› Lumera */}
         <section className="mt-[20px] bg-white overflow-hidden flex justify-center" id="block-6">
           <div className="lumera-container">
             <div className="flex flex-col lg:flex-row mt-[20px] mb-0 relative">
@@ -54,18 +77,17 @@ export default async function Home() {
                   className="text-[30px] md:text-[36px] lg:text-[48px] font-serif font-normal mb-0 text-[#111111] leading-[1.1]"
                   style={{ fontFamily: '"Cormorant Garamond", serif' }}
                 >
-                  {mainTitle}
+                  {aboutTitle}
                 </h2>
-                <p className="text-[#111111] text-[14px] md:text-[16px] font-normal leading-[1.6] mt-[20px] mb-0" style={{ fontFamily: '"Work Sans", sans-serif' }}>
-                  Lumera je český obchod s italskými koženými kabelkami a doplňky.<br />
-                  Spolupracujeme s menšími výrobci z Itálie, kteří si zakládají na kvalitě a ručním zpracování. Každý model pečlivě vybíráme tak, aby spojoval eleganci, praktičnost a originalitu. Věříme, že krása je v detailu – stejně jako v každé kabelce, kterou nabízíme.
+                <p className="mt-[20px] mb-0 whitespace-pre-line text-[14px] font-normal leading-[1.6] text-[#111111] md:text-[16px]" style={{ fontFamily: '"Work Sans", sans-serif' }}>
+                  {aboutDescription}
                 </p>
                 <div className="mt-[30px]">
                   <Link
-                    href="/o-nas"
+                    href={aboutButtonLink}
                     className="lumera-btn"
                   >
-                    Zjistit více o obchodě
+                    {aboutButtonText}
                   </Link>
                 </div>
               </div>
@@ -94,9 +116,9 @@ export default async function Home() {
 
         <div className="mt-[20px]">
           <ProductGrid
-            title="Naše doporučení"
-            products={RECOMMENDED_PRODUCTS}
-            description="Vybrali jsme pro vás několik oblíbených modelů z Itálie. Každý z nich spojuje kvalitu, styl a poctivou ruční práci."
+            title="NaЕЎe doporuДЌenГ­"
+            products={recommendedForView}
+            description="Vybrali jsme pro vГЎs nД›kolik oblГ­benГЅch modelЕЇ z ItГЎlie. KaЕѕdГЅ z nich spojuje kvalitu, styl a poctivou ruДЌnГ­ prГЎci."
           />
         </div>
 
@@ -107,7 +129,7 @@ export default async function Home() {
               className="text-[30px] md:text-[36px] font-serif font-bold mb-[30px] text-[#111111] leading-[1.1]"
               style={{ fontFamily: '"Cormorant Garamond", serif' }}
             >
-              Co o nás říkají naše zákaznice
+              Co o nГЎs Е™Г­kajГ­ naЕЎe zГЎkaznice
             </h2>
 
             <div className="max-w-[1140px] mx-auto relative group pt-2 pb-6">
@@ -120,7 +142,7 @@ export default async function Home() {
                     </svg>
                   </div>
                   <p className="text-[#111111] text-[18px] md:text-[24px] mb-[20px] max-w-3xl mx-auto leading-[1.6]" style={{ fontFamily: '"Work Sans", sans-serif' }}>
-                    "{TESTIMONIALS[0].text}"
+                    &quot;{TESTIMONIALS[0].text}&quot;
                   </p>
                   <p className="font-bold font-sans text-[20px] text-[#111111] m-0" style={{ fontFamily: '"Work Sans", sans-serif' }}>
                     {TESTIMONIALS[0].author}
@@ -146,7 +168,7 @@ export default async function Home() {
               Z blogu Lumera
             </h2>
             <p className="text-[#111111] mb-[30px] text-[14px] md:text-[16px] leading-[1.6]" style={{ fontFamily: '"Work Sans", sans-serif' }}>
-              Styl, inspirace a péče o vaše kožené doplňky.
+              Styl, inspirace a pГ©ДЌe o vaЕЎe koЕѕenГ© doplЕ€ky.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-[10px] mb-[40px]">
@@ -177,7 +199,7 @@ export default async function Home() {
                 href="/blog"
                 className="lumera-btn"
               >
-                Objevte více inspirace
+                Objevte vГ­ce inspirace
               </Link>
             </div>
           </div>
@@ -210,7 +232,7 @@ export default async function Home() {
                     className="text-[14px] md:text-[16px] lg:text-[18px] font-normal text-white mt-[15px] md:mt-[20px] mb-0"
                     style={{ fontFamily: '"Work Sans", sans-serif', textShadow: '2px 2px 8px rgba(0,0,0,0.4)' }}
                   >
-                    Najděte svůj dokonalý doplněk ještě dnes.
+                    NajdД›te svЕЇj dokonalГЅ doplnД›k jeЕЎtД› dnes.
                   </p>
                 </div>
 
@@ -219,7 +241,7 @@ export default async function Home() {
                     href="/shop"
                     className="lumera-btn lumera-btn--light inline-flex"
                   >
-                    Prohlédnout kolekci
+                    ProhlГ©dnout kolekci
                   </Link>
                 </div>
               </div>
@@ -232,4 +254,5 @@ export default async function Home() {
     </div>
   );
 }
+
 

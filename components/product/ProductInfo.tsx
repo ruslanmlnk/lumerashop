@@ -1,129 +1,204 @@
-'use client';
-import { useState } from 'react';
-import { Truck, RotateCcw, ShieldCheck, Heart } from 'lucide-react';
+"use client";
 
-interface ProductInfoProps {
-    name: string;
-    price: string;
-    oldPrice?: string;
-    sku: string;
-    category: string;
-    shortDescription?: string;
-    stockStatus?: 'in-stock' | 'low-stock' | 'out-of-stock';
-    variants?: { id: string, image: string, slug: string }[];
+import { useMemo, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+
+interface ProductVariant {
+  id: string;
+  image: string;
+  slug: string;
+  name: string;
 }
 
-const ProductInfo = ({ name, price, oldPrice, sku, category, shortDescription, stockStatus = 'in-stock', variants }: ProductInfoProps) => {
-    const [quantity, setQuantity] = useState(1);
+interface ProductInfoProps {
+  name: string;
+  price: string;
+  oldPrice?: string;
+  sku?: string;
+  shortDescription?: string;
+  fullDescription?: string;
+  specifications?: Record<string, string>;
+  stockStatus?: "in-stock" | "low-stock" | "out-of-stock";
+  variants?: ProductVariant[];
+  onAddToCart?: (quantity: number) => void;
+}
 
-    const getStockLabel = () => {
-        switch (stockStatus) {
-            case 'low-stock': return { label: 'Poslední kus', color: 'text-orange-500', dot: 'bg-orange-500' };
-            case 'out-of-stock': return { label: 'Vyprodáno', color: 'text-red-500', dot: 'bg-red-500' };
-            default: return { label: 'Skladem', color: 'text-green-600', dot: 'bg-green-600' };
-        }
-    };
+const stripHtml = (value: string) => value.replace(/<[^>]+>/g, "").trim();
 
-    const stock = getStockLabel();
+const ProductInfo = ({
+  name,
+  price,
+  oldPrice,
+  sku,
+  shortDescription,
+  fullDescription,
+  specifications,
+  stockStatus = "in-stock",
+  variants,
+  onAddToCart,
+}: ProductInfoProps) => {
+  const [quantity, setQuantity] = useState(1);
 
-    return (
-        <div className="flex flex-col">
-            <h1 className="text-[32px] md:text-[42px] font-serif font-bold text-[#111111] mb-2 leading-tight tracking-tight">
-                {name}
-            </h1>
+  const stock = useMemo(() => {
+    switch (stockStatus) {
+      case "low-stock":
+        return { label: "Poslední kus", color: "text-[#c9791d]" };
+      case "out-of-stock":
+        return { label: "Vyprodáno", color: "text-[#c40000]" };
+      default:
+        return { label: "Skladem", color: "text-[#008000]" };
+    }
+  }, [stockStatus]);
 
-            <p className="text-[12px] text-gray-400 font-sans tracking-[0.2em] mb-6 uppercase">Ref. {sku}</p>
+  const summaryItems = useMemo(() => {
+    const items: string[] = [];
 
-            <div className="flex items-baseline gap-4 mb-8">
-                <span className="text-[32px] font-sans font-black text-[#111111]">{price}</span>
-                {oldPrice && (
-                    <span className="text-[20px] font-sans text-gray-300 line-through">{oldPrice}</span>
-                )}
-            </div>
+    if (shortDescription) {
+      const cleanShortDescription = stripHtml(shortDescription);
+      if (cleanShortDescription) {
+        items.push(cleanShortDescription);
+      }
+    }
 
-            <div className="flex items-center gap-2 mb-8">
-                <span className={`w-2 h-2 rounded-full ${stock.dot} animate-pulse`}></span>
-                <span className={`text-[14px] font-bold uppercase tracking-wider ${stock.color}`}>
-                    {stock.label}
-                </span>
-            </div>
+    if (specifications) {
+      Object.entries(specifications).forEach(([key, value]) => {
+        items.push(`${key}: ${value}`);
+      });
+    }
 
-            {/* Variations / Upsells */}
-            {variants && variants.length > 0 && (
-                <div className="mb-10">
-                    <p className="text-[14px] font-bold text-[#111] mb-4 uppercase tracking-wider">Barevné varianty:</p>
-                    <div className="flex flex-wrap gap-3">
-                        {variants.map((v) => (
-                            <button
-                                key={v.id}
-                                className="w-16 h-16 border border-gray-100 hover:border-[#c8a16a] transition-all p-1 bg-white shadow-sm overflow-hidden"
-                            >
-                                <img src={v.image} alt="variant" className="w-full h-full object-cover" />
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )}
+    if (!shortDescription && fullDescription) {
+      const cleanDescription = stripHtml(fullDescription);
+      if (cleanDescription) {
+        items.push(cleanDescription);
+      }
+    }
 
-            <div className="flex flex-col sm:flex-row gap-4 mb-10">
-                <div className="flex items-center border border-gray-200 h-14 bg-white">
-                    <button
-                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                        className="px-5 h-full hover:bg-gray-50 text-gray-400 hover:text-black transition-colors"
-                    >
-                        -
-                    </button>
-                    <input
-                        type="text"
-                        value={quantity}
-                        readOnly
-                        className="w-12 text-center font-bold text-[16px] outline-none"
-                    />
-                    <button
-                        onClick={() => setQuantity(quantity + 1)}
-                        className="px-5 h-full hover:bg-gray-50 text-gray-400 hover:text-black transition-colors"
-                    >
-                        +
-                    </button>
-                </div>
+    if (sku) {
+      items.push(sku);
+    }
 
-                <button className="flex-1 h-14 bg-[#111] text-white text-[13px] font-bold uppercase tracking-[0.2em] hover:bg-[#c8a16a] transition-all duration-300 shadow-xl flex items-center justify-center gap-3">
-                    Přidat do košíku
-                </button>
+    return items;
+  }, [fullDescription, shortDescription, sku, specifications]);
 
-                <button className="h-14 w-14 border border-gray-200 flex items-center justify-center hover:bg-red-50 hover:border-red-100 group transition-all">
-                    <Heart size={20} className="text-gray-400 group-hover:text-red-500 transition-colors" />
-                </button>
-            </div>
+  return (
+    <div className="w-full pb-[36px] text-[#111111]">
+      <h1 className="mb-[20px] font-serif text-[36px] font-normal leading-[1.1] lg:text-[48px] lg:leading-[52.8px]">
+        {name}
+      </h1>
 
-            <div className="space-y-4 mb-10 pt-8 border-t border-gray-50">
-                <div className="flex items-center gap-4 text-[13px] text-gray-500 font-sans">
-                    <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center shrink-0">
-                        <Truck size={18} className="text-[#c8a16a]" />
-                    </div>
-                    <span>Doprava zdarma při nákupu nad 1500 Kč</span>
-                </div>
-                <div className="flex items-center gap-4 text-[13px] text-gray-500 font-sans">
-                    <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center shrink-0">
-                        <RotateCcw size={18} className="text-[#c8a16a]" />
-                    </div>
-                    <span>14 dní na vrácení</span>
-                </div>
-                <div className="flex items-center gap-4 text-[13px] text-gray-500 font-sans">
-                    <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center shrink-0">
-                        <ShieldCheck size={18} className="text-[#c8a16a]" />
-                    </div>
-                    <span>Garantujeme 100% kvalitu a italský původ</span>
-                </div>
-            </div>
+      {sku && <p className="mb-[20px] mt-[10px] text-[14px] text-[#999999]">{sku}</p>}
 
-            {shortDescription && (
-                <div className="text-gray-500 text-[15px] leading-relaxed font-sans border-l-2 border-[#c8a16a] pl-6 py-2 italic font-light">
-                    {shortDescription}
-                </div>
-            )}
+      <div className="mb-[20px] flex items-baseline gap-[10px]">
+        <span className="text-[20px] font-bold leading-[1.3]">{price}</span>
+        {oldPrice && <span className="text-[16px] text-[#9ca3af] line-through">{oldPrice}</span>}
+      </div>
+
+      <div className="mb-[26px] mt-[20px] flex items-center gap-[15px]">
+        <div className="flex h-[42px] w-[125px] items-center justify-between border border-[#e5e5e5] bg-white">
+          <button
+            type="button"
+            onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+            className="flex h-full w-[32px] items-center justify-center text-[#111111] transition hover:bg-[#f9f9f9]"
+            aria-label="Decrease quantity"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+              <path d="m 4 8 h 8" fill="none" stroke="currentColor" strokeWidth="1" fillRule="evenodd" />
+            </svg>
+          </button>
+
+          <input
+            type="text"
+            value={quantity}
+            readOnly
+            className="w-[59px] border-none bg-transparent text-center text-[16px] outline-none"
+            aria-label="Quantity"
+          />
+
+          <button
+            type="button"
+            onClick={() => setQuantity((prev) => prev + 1)}
+            className="flex h-full w-[32px] items-center justify-center text-[#111111] transition hover:bg-[#f9f9f9]"
+            aria-label="Increase quantity"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+              <path d="m 4 8 h 8 M 8 4 v 8" fill="none" stroke="currentColor" strokeWidth="1" fillRule="evenodd" />
+            </svg>
+          </button>
         </div>
-    );
+
+        <button
+          type="button"
+          onClick={() => onAddToCart?.(quantity)}
+          disabled={stockStatus === "out-of-stock"}
+          className="inline-flex h-[42px] items-center justify-center bg-black px-[30px] text-[15px] font-bold uppercase tracking-[0.02em] text-white transition hover:bg-[#222222] disabled:cursor-not-allowed disabled:bg-[#8e8e8e]"
+        >
+          Přidat do košíku
+        </button>
+      </div>
+
+      {variants && variants.length > 0 && (
+        <div className="mb-[14px]">
+          <p className="mb-[10px] text-[14px] font-bold">Barevné varianty:</p>
+          <div className="flex flex-wrap gap-[8px]">
+            {variants.map((variant) => (
+              <Link
+                key={variant.id}
+                href={`/product/${variant.slug}`}
+                title={variant.name}
+                className="relative block h-[70px] w-[70px] overflow-hidden border border-transparent transition hover:border-[#111111]"
+              >
+                <Image
+                  src={variant.image}
+                  alt={variant.name}
+                  fill
+                  className="object-contain p-[2px]"
+                />
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <p className={`mb-[18px] mt-[20px] text-[15px] font-bold ${stock.color}`}>{stock.label}</p>
+
+      <div className="mb-[20px] space-y-[8px]">
+        <div className="flex items-center gap-[10px]">
+          <Image
+            src="/images/icons/truck.png"
+            alt="Truck icon"
+            width={22}
+            height={22}
+            className="object-contain"
+          />
+          <span className="text-[14px] leading-[1.6] text-[#111111]">
+            Doprava zdarma při nákupu nad 1500 Kč
+          </span>
+        </div>
+
+        <div className="flex items-center gap-[10px]">
+          <Image
+            src="/images/icons/return.png"
+            alt="Return icon"
+            width={22}
+            height={22}
+            className="object-contain"
+          />
+          <span className="text-[14px] leading-[1.6] text-[#111111]">14 dní na vrácení</span>
+        </div>
+      </div>
+
+      {summaryItems.length > 0 && (
+        <div className="mt-[20px] text-[16px] leading-[1.6] text-[#111111]">
+          <ul className="list-disc space-y-[2px] pl-[20px]">
+            {summaryItems.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default ProductInfo;

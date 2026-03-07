@@ -1,91 +1,226 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CatalogHeader from '@/components/catalog/CatalogHeader';
 import ShopSidebar from '@/components/catalog/ShopSidebar';
 import ProductSort from '@/components/catalog/ProductSort';
 import ProductCard from '@/components/ProductCard';
-import { ALL_PRODUCTS } from '@/data/site-data';
+import { useProducts } from '@/lib/use-products';
+import { buildFilterGroups, getProductFilterValues, normalizeFilterKey, parseProductPrice } from '@/lib/catalog-filters';
+
+type ActiveChip = {
+    id: string;
+    label: string;
+};
+
+const DEFAULT_RANGE: [number, number] = [0, 10000];
 
 export default function ShopPage() {
+    const { products: catalogProducts } = useProducts();
+
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-    const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
+    const [priceRange, setPriceRange] = useState<[number, number]>(DEFAULT_RANGE);
     const [sortOrder, setSortOrder] = useState('popularity');
+    const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
 
     const categories = useMemo(() => {
-        const cats = new Set(ALL_PRODUCTS.map(p => p.category));
-        return Array.from(cats);
-    }, []);
+        const items = new Set(catalogProducts.map((product) => product.category));
+        return Array.from(items);
+    }, [catalogProducts]);
 
-    const filteredProducts = useMemo(() => {
-        let results = [...ALL_PRODUCTS];
+    const priceBounds = useMemo<[number, number]>(() => {
+        const values = catalogProducts.map((product) => parseProductPrice(product.price)).filter((value) => value > 0);
+        if (!values.length) return DEFAULT_RANGE;
+        return [Math.min(...values), Math.max(...values)];
+    }, [catalogProducts]);
+
+    useEffect(() => {
+        setPriceRange(priceBounds);
+    }, [priceBounds]);
+
+    const filterGroups = useMemo(() => buildFilterGroups(catalogProducts), [catalogProducts]);
+
+    useEffect(() => {
+        const validKeys = new Set(filterGroups.map((group) => group.key));
+        setSelectedFilters((prev) => {
+            const next: Record<string, string[]> = {};
+            for (const [key, values] of Object.entries(prev)) {
+                if (validKeys.has(key) && values.length > 0) {
+                    next[key] = values;
+                }
+            }
+            return next;
+        });
+    }, [filterGroups]);
+
+    const toggleFilterOption = (groupKey: string, value: string) => {
+        setSelectedFilters((prev) => {
+            const current = prev[groupKey] ?? [];
+            const nextValues = current.includes(value)
+                ? current.filter((item) => item !== value)
+                : [...current, value];
+
+            return {
+                ...prev,
+                [groupKey]: nextValues,
+            };
+        });
+    };
+
+    const clearAllFilters = () => {
+        setSelectedCategory(null);
+        setPriceRange(priceBounds);
+        setSelectedFilters({});
+    };
+
+    const activeFilters = useMemo<ActiveChip[]>(() => {
+        const chips: ActiveChip[] = [];
 
         if (selectedCategory) {
-            results = results.filter(p => p.category === selectedCategory);
+            chips.push({ id: `category:${selectedCategory}`, label: `Kategorie: ${selectedCategory}` });
         }
 
-        results = results.filter(p => {
-            const price = parseInt(p.price.replace(/[^\d]/g, ''));
-            return price >= priceRange[0] && price <= priceRange[1];
+        if (priceRange[0] !== priceBounds[0] || priceRange[1] !== priceBounds[1]) {
+            chips.push({ id: 'price:range', label: `Cena: ${priceRange[0]}-${priceRange[1]} Kč` });
+        }
+
+        for (const group of filterGroups) {
+            const selectedValues = selectedFilters[group.key] ?? [];
+            for (const value of selectedValues) {
+                chips.push({
+                    id: `filter:${group.key}:${value}`,
+                    label: `${group.title}: ${value}`,
+                });
+            }
+        }
+
+        return chips;
+    }, [selectedCategory, priceRange, priceBounds, selectedFilters, filterGroups]);
+
+    const removeFilter = (id: string) => {
+        const [type, groupKey, ...rest] = id.split(':');
+        const value = rest.join(':');
+
+        if (type === 'category') {
+            setSelectedCategory(null);
+            return;
+        }
+
+        if (type === 'price') {
+            setPriceRange(priceBounds);
+            return;
+        }
+
+        if (type === 'filter' && groupKey) {
+            setSelectedFilters((prev) => ({
+                ...prev,
+                [groupKey]: (prev[groupKey] ?? []).filter((item) => item !== value),
+            }));
+        }
+    };
+
+    const filteredProducts = useMemo(() => {
+        const results = catalogProducts.filter((product) => {
+            if (selectedCategory && product.category !== selectedCategory) {
+                return false;
+            }
+
+            const price = parseProductPrice(product.price);
+            if (price < priceRange[0] || price > priceRange[1]) {
+                return false;
+            }
+
+            const productFilterMap = new Map<string, Set<string>>();
+            for (const filter of getProductFilterValues(product)) {
+                const key = normalizeFilterKey(filter.group);
+                if (!key) continue;
+
+                if (!productFilterMap.has(key)) {
+                    productFilterMap.set(key, new Set());
+                }
+                productFilterMap.get(key)!.add(filter.option);
+            }
+
+            for (const [groupKey, selectedValues] of Object.entries(selectedFilters)) {
+                if (!selectedValues.length) continue;
+
+                const productValues = productFilterMap.get(groupKey);
+                if (!productValues) {
+                    return false;
+                }
+
+                const matches = selectedValues.some((value) => productValues.has(value));
+                if (!matches) {
+                    return false;
+                }
+            }
+
+            return true;
         });
 
         results.sort((a, b) => {
-            const priceA = parseInt(a.price.replace(/[^\d]/g, ''));
-            const priceB = parseInt(b.price.replace(/[^\d]/g, ''));
+            const priceA = parseProductPrice(a.price);
+            const priceB = parseProductPrice(b.price);
+            const idA = Number(a.id);
+            const idB = Number(b.id);
 
             if (sortOrder === 'price-low') return priceA - priceB;
             if (sortOrder === 'price-high') return priceB - priceA;
+            if (sortOrder === 'newest') return (Number.isFinite(idB) ? idB : 0) - (Number.isFinite(idA) ? idA : 0);
             return 0;
         });
 
         return results;
-    }, [selectedCategory, priceRange, sortOrder]);
+    }, [catalogProducts, priceRange, selectedCategory, selectedFilters, sortOrder]);
+
+    const sidebarFilterGroups = useMemo(
+        () =>
+            filterGroups.map((group) => ({
+                key: group.key,
+                title: group.title,
+                options: group.options,
+                selected: selectedFilters[group.key] ?? [],
+            })),
+        [filterGroups, selectedFilters],
+    );
 
     return (
-        <div className="min-h-screen font-sans text-[#111111] bg-white">
+        <div className="min-h-screen bg-white font-sans text-[#111111]">
             <Header />
 
             <main>
-                <CatalogHeader
-                    title="Obchod"
-                    breadcrumbs={[{ label: 'Obchod' }]}
-                />
+                <CatalogHeader title="Obchod" breadcrumbs={[{ label: 'Obchod' }]} />
 
-                <div className="max-w-[1140px] mx-auto px-4 lg:px-0 py-16">
-                    <div className="flex flex-col lg:flex-row gap-12">
-                        {/* Sidebar */}
+                <div className="mx-auto max-w-[1140px] px-4 py-16 lg:px-0">
+                    <div className="flex flex-col items-start gap-8 lg:flex-row lg:gap-10">
                         <ShopSidebar
                             categories={categories}
                             selectedCategory={selectedCategory}
                             onCategoryChange={setSelectedCategory}
+                            priceRange={priceRange}
+                            priceBounds={priceBounds}
                             onPriceChange={setPriceRange}
+                            filterGroups={sidebarFilterGroups}
+                            onToggleFilterOption={toggleFilterOption}
+                            activeFilters={activeFilters}
+                            onRemoveFilter={removeFilter}
+                            onClearFilters={clearAllFilters}
                         />
 
-                        {/* Main Content */}
-                        <div className="flex-1">
-                            <ProductSort
-                                value={sortOrder}
-                                onChange={setSortOrder}
-                                totalResults={filteredProducts.length}
-                            />
+                        <div className="min-w-0 flex-1">
+                            <ProductSort value={sortOrder} onChange={setSortOrder} totalResults={filteredProducts.length} />
 
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-5 gap-y-10">
+                            <div className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-3">
                                 {filteredProducts.map((product) => (
                                     <ProductCard key={product.id} product={product} />
                                 ))}
                             </div>
 
                             {filteredProducts.length === 0 && (
-                                <div className="text-center py-20">
-                                    <p className="text-gray-500 text-[18px]">Žádné produkty neodpovídají vašemu výběru.</p>
-                                    <button
-                                        onClick={() => {
-                                            setSelectedCategory(null);
-                                            setPriceRange([0, 10000]);
-                                        }}
-                                        className="mt-6 text-black border-b border-black font-medium"
-                                    >
+                                <div className="py-20 text-center">
+                                    <p className="text-[18px] text-gray-500">Zadne produkty neodpovidaji vasemu vyberu.</p>
+                                    <button onClick={clearAllFilters} className="mt-6 border-b border-black font-medium text-black">
                                         Vymazat filtry
                                     </button>
                                 </div>

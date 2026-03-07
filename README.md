@@ -16,6 +16,24 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Payments (HPP)
+
+The project includes checkout integration for:
+- Stripe Checkout (hosted)
+- Global Payments HPP (hosted payment page)
+
+Setup:
+
+1. Copy `.env.example` to `.env.local`
+2. Fill in your Stripe and Global Payments credentials
+3. Run the app: `npm run dev`
+4. Open `/checkout`
+
+Important routes:
+- `POST /api/payments/checkout` - creates payment session for selected provider
+- `POST /api/payments/global-payments/response` - Global Payments callback URL
+- `POST /api/payments/stripe/webhook` - Stripe webhook endpoint
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

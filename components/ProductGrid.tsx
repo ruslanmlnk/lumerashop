@@ -5,15 +5,46 @@ import { Product } from '../types/site';
 import Link from 'next/link';
 import ProductCard from './ProductCard';
 
-const ProductGrid = ({ title, products, description, isSlider = false }: { title: string, products: Product[], description?: string, isSlider?: boolean }) => {
+type ProductGridProps = {
+    title: string;
+    products: Product[];
+    description?: string;
+    isSlider?: boolean;
+    alignLeft?: boolean;
+    variant?: 'default' | 'novinky';
+    autoPlay?: boolean;
+};
+
+const ProductGrid = ({
+    title,
+    products,
+    description,
+    isSlider = false,
+    alignLeft = false,
+    variant = 'default',
+    autoPlay = true,
+}: ProductGridProps) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [visibleItems, setVisibleItems] = useState(4);
+    const isNovinky = variant === 'novinky';
 
     useEffect(() => {
         if (!isSlider) return;
 
         const updateVisibleItems = () => {
-            setVisibleItems(window.innerWidth < 768 ? 2 : 4);
+            const width = window.innerWidth;
+
+            if (width < 640) {
+                setVisibleItems(1);
+                return;
+            }
+
+            if (width < 768) {
+                setVisibleItems(2);
+                return;
+            }
+
+            setVisibleItems(4);
         };
 
         updateVisibleItems();
@@ -42,23 +73,23 @@ const ProductGrid = ({ title, products, description, isSlider = false }: { title
     }, [activeIndex, maxIndex]);
 
     useEffect(() => {
-        if (isSlider) {
+        if (isSlider && autoPlay) {
             const timer = setInterval(nextSlide, 7000);
             return () => clearInterval(timer);
         }
-    }, [isSlider, nextSlide]);
+    }, [isSlider, nextSlide, autoPlay]);
 
     const gridHeader = (
-        <div className="text-center mb-0">
+        <div className={`mb-0 ${alignLeft ? 'text-left' : 'text-center'}`}>
             <h2
-                className="text-[30px] md:text-[36px] font-serif font-bold text-[#111111] mb-0 leading-[1.1]"
+                className={`${isNovinky ? 'text-[36px] md:text-[48px] font-bold leading-[1.1]' : 'text-[30px] md:text-[36px] font-bold leading-[1.1]'} font-serif text-[#111111] mb-0`}
                 style={{ fontFamily: '"Cormorant Garamond", serif', marginTop: 0 }}
             >
                 {title}
             </h2>
             {description && (
                 <p
-                    className="text-[#111111] max-w-[578px] mx-auto mt-[20px] mb-0 text-[14px] md:text-[16px] font-sans font-normal leading-[1.6]"
+                    className={`text-[#111111] mt-[20px] mb-0 text-[14px] md:text-[16px] font-sans font-normal leading-[1.6] ${isNovinky ? 'max-w-[720px]' : 'max-w-[578px]'} ${alignLeft ? '' : 'mx-auto'}`}
                     style={{ fontFamily: '"Work Sans", sans-serif' }}
                 >
                     {description}
@@ -67,7 +98,7 @@ const ProductGrid = ({ title, products, description, isSlider = false }: { title
         </div>
     );
 
-    const shopButton = (
+    const shopButton = isNovinky ? null : (
         <div className="text-center mt-[30px] mb-[40px]">
             <Link
                 href="/shop"
@@ -80,15 +111,15 @@ const ProductGrid = ({ title, products, description, isSlider = false }: { title
 
     if (isSlider) {
         return (
-            <section className="py-12 md:py-20 bg-white text-center overflow-hidden" id="block-5">
+            <section className={`${isNovinky ? 'pt-[35px] pb-[10px]' : 'py-12 md:py-20'} bg-white text-center overflow-hidden`} id="block-5">
                 <div className="lumera-container relative">
                     {gridHeader}
 
-                    <div className="relative mt-[30px] mb-0 group">
+                    <div className={`relative ${isNovinky ? 'mt-[10px] mb-0' : 'mt-[30px] mb-0'} group`}>
                         {/* Navigation Arrows - Circular semi-transparent dark blocks */}
                         <button
                             onClick={prevSlide}
-                            className="absolute left-[10px] top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white w-[40px] h-[40px] rounded-full flex items-center justify-center transition-all disabled:opacity-50"
+                            className={`absolute left-[10px] top-1/2 -translate-y-1/2 z-20 text-white w-[40px] h-[40px] rounded-full flex items-center justify-center transition-all disabled:opacity-50 ${isNovinky ? 'bg-[#E3A651]/70 hover:bg-[#E3A651]' : 'bg-black/50 hover:bg-black/70'}`}
                             aria-label="Previous"
                         >
                             <svg className="w-5 h-5 fill-current" viewBox="0 0 451.847 451.847">
@@ -99,7 +130,7 @@ const ProductGrid = ({ title, products, description, isSlider = false }: { title
                         </button>
                         <button
                             onClick={nextSlide}
-                            className="absolute right-[10px] top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white w-[40px] h-[40px] rounded-full flex items-center justify-center transition-all disabled:opacity-50"
+                            className={`absolute right-[10px] top-1/2 -translate-y-1/2 z-20 text-white w-[40px] h-[40px] rounded-full flex items-center justify-center transition-all disabled:opacity-50 ${isNovinky ? 'bg-[#E3A651]/70 hover:bg-[#E3A651]' : 'bg-black/50 hover:bg-black/70'}`}
                             aria-label="Next"
                         >
                             <svg className="w-5 h-5 fill-current" viewBox="0 0 451.846 451.847">
@@ -116,8 +147,8 @@ const ProductGrid = ({ title, products, description, isSlider = false }: { title
                                 className="flex"
                             >
                                 {products.map((product) => (
-                                    <div key={product.id} className="min-w-[100%] sm:min-w-[50%] md:min-w-[25%] px-[10px]">
-                                        <ProductCard product={product} />
+                                    <div key={product.id} className={`min-w-[100%] sm:min-w-[50%] md:min-w-[25%] ${isNovinky ? 'px-0' : 'px-[10px]'}`}>
+                                        <ProductCard product={product} variant={isNovinky ? 'featured' : 'default'} />
                                     </div>
                                 ))}
                             </motion.div>

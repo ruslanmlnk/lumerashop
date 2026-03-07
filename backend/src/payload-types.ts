@@ -71,6 +71,8 @@ export interface Config {
     media: Media;
     categories: Category;
     subcategories: Subcategory;
+    'filter-groups': FilterGroup;
+    'filter-options': FilterOption;
     products: Product;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -83,6 +85,8 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     subcategories: SubcategoriesSelect<false> | SubcategoriesSelect<true>;
+    'filter-groups': FilterGroupsSelect<false> | FilterGroupsSelect<true>;
+    'filter-options': FilterOptionsSelect<false> | FilterOptionsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -203,6 +207,34 @@ export interface Subcategory {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "filter-groups".
+ */
+export interface FilterGroup {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string | null;
+  sortOrder?: number | null;
+  isActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "filter-options".
+ */
+export interface FilterOption {
+  id: number;
+  name: string;
+  slug: string;
+  group: number | FilterGroup;
+  sortOrder?: number | null;
+  isActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products".
  */
 export interface Product {
@@ -212,32 +244,35 @@ export interface Product {
   price: number;
   oldPrice?: number | null;
   sku?: string | null;
-  description?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  description?: string | null;
   category: number | Category;
   subcategories?: (number | Subcategory)[] | null;
-  mainImage: number | Media;
+  mainImage?: (number | null) | Media;
+  /**
+   * Use this when image is hosted externally or in frontend assets.
+   */
+  imageUrl?: string | null;
   gallery?:
     | {
         image?: (number | null) | Media;
+        imageUrl?: string | null;
         id?: string | null;
       }[]
     | null;
+  specifications?:
+    | {
+        key: string;
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Pick all filter options that apply to this product.
+   */
+  filterOptions?: (number | FilterOption)[] | null;
   status?: ('draft' | 'published') | null;
   isFeatured?: boolean | null;
+  isRecommended?: boolean | null;
   stockQuantity?: number | null;
   updatedAt: string;
   createdAt: string;
@@ -281,6 +316,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'subcategories';
         value: number | Subcategory;
+      } | null)
+    | ({
+        relationTo: 'filter-groups';
+        value: number | FilterGroup;
+      } | null)
+    | ({
+        relationTo: 'filter-options';
+        value: number | FilterOption;
       } | null)
     | ({
         relationTo: 'products';
@@ -398,6 +441,32 @@ export interface SubcategoriesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "filter-groups_select".
+ */
+export interface FilterGroupsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
+  sortOrder?: T;
+  isActive?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "filter-options_select".
+ */
+export interface FilterOptionsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  group?: T;
+  sortOrder?: T;
+  isActive?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products_select".
  */
 export interface ProductsSelect<T extends boolean = true> {
@@ -410,14 +479,25 @@ export interface ProductsSelect<T extends boolean = true> {
   category?: T;
   subcategories?: T;
   mainImage?: T;
+  imageUrl?: T;
   gallery?:
     | T
     | {
         image?: T;
+        imageUrl?: T;
         id?: T;
       };
+  specifications?:
+    | T
+    | {
+        key?: T;
+        value?: T;
+        id?: T;
+      };
+  filterOptions?: T;
   status?: T;
   isFeatured?: T;
+  isRecommended?: T;
   stockQuantity?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -468,7 +548,34 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface HomePage {
   id: number;
-  title: string;
+  aboutSection: {
+    title: string;
+    description: string;
+    buttonText: string;
+    buttonLink: string;
+  };
+  marketingSlides?:
+    | {
+        title: string;
+        description: string;
+        button: string;
+        link: string;
+        bg: string;
+        overlayImage: string;
+        layout: {
+          paddingTop: number;
+          titleMaxWidth: number;
+          descMaxWidth: number;
+          img: {
+            w: number;
+            h: number;
+            top: number;
+            right: number;
+          };
+        };
+        id?: string | null;
+      }[]
+    | null;
   seo?: {
     title?: string | null;
     description?: string | null;
@@ -481,7 +588,40 @@ export interface HomePage {
  * via the `definition` "home-page_select".
  */
 export interface HomePageSelect<T extends boolean = true> {
-  title?: T;
+  aboutSection?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        buttonText?: T;
+        buttonLink?: T;
+      };
+  marketingSlides?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        button?: T;
+        link?: T;
+        bg?: T;
+        overlayImage?: T;
+        layout?:
+          | T
+          | {
+              paddingTop?: T;
+              titleMaxWidth?: T;
+              descMaxWidth?: T;
+              img?:
+                | T
+                | {
+                    w?: T;
+                    h?: T;
+                    top?: T;
+                    right?: T;
+                  };
+            };
+        id?: T;
+      };
   seo?:
     | T
     | {
