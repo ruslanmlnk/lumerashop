@@ -1,8 +1,27 @@
 import 'dotenv/config'
+import fs from 'fs/promises'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import { getPayload } from 'payload'
+
 import config from '../payload.config'
 import { ALL_PRODUCTS, FEATURED_PRODUCTS, RECOMMENDED_PRODUCTS } from '../../../data/site-data'
+import { createLexicalRichTextFromText } from '../../../lib/payload-richtext'
 import type { Product as StaticProduct } from '../../../types/site'
+
+type PayloadInstance = Awaited<ReturnType<typeof getPayload>>
+
+type MediaUploadCreateArgs = Parameters<PayloadInstance['create']>[0] & {
+  file: {
+    data: Buffer
+    mimetype: string
+    name: string
+    size: number
+  }
+}
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const slugify = (value: string): string =>
   value
@@ -31,6 +50,59 @@ const toSpecificationsArray = (product: StaticProduct) =>
 const toShortDescription = (product: StaticProduct) => {
   const raw = product.description?.split('.').find((part) => part.trim())
   return raw ? `${raw.trim()}.` : undefined
+}
+
+const getMimeType = (filePath: string): string => {
+  const ext = path.extname(filePath).toLowerCase()
+
+  switch (ext) {
+    case '.jpg':
+    case '.jpeg':
+      return 'image/jpeg'
+    case '.png':
+      return 'image/png'
+    case '.webp':
+      return 'image/webp'
+    default:
+      return 'application/octet-stream'
+  }
+}
+
+const ensureMedia = async (payload: PayloadInstance, imagePath: string, alt: string): Promise<number> => {
+  const filename = path.basename(imagePath)
+  const existing = await payload.find({
+    collection: 'media',
+    where: {
+      filename: {
+        equals: filename,
+      },
+    },
+    limit: 1,
+    depth: 0,
+  })
+
+  if (existing.docs[0]) {
+    return Number(existing.docs[0].id)
+  }
+
+  const absolutePath = path.resolve(__dirname, '../../../public', imagePath.replace(/^\/+/, ''))
+  const stats = await fs.stat(absolutePath)
+  const buffer = await fs.readFile(absolutePath)
+
+  const created = await payload.create({
+    collection: 'media',
+    data: {
+      alt,
+    },
+    file: {
+      data: buffer,
+      mimetype: getMimeType(absolutePath),
+      name: filename,
+      size: stats.size,
+    },
+  } as MediaUploadCreateArgs)
+
+  return Number(created.id)
 }
 
 async function main() {
@@ -155,6 +227,7 @@ async function main() {
   for (const product of ALL_PRODUCTS) {
     const categoryId = await getOrCreateCategory(product.category)
     const specs = toSpecificationsArray(product)
+    const mainImage = await ensureMedia(payload, product.image, product.name)
 
     const filterOptionIds: number[] = []
     for (const spec of specs) {
@@ -162,9 +235,13 @@ async function main() {
       filterOptionIds.push(optionId)
     }
 
-    const galleryData = (product.gallery ?? [])
-      .filter((value): value is string => typeof value === 'string' && value.length > 0)
-      .map((imageUrl) => ({ imageUrl }))
+    const galleryData = []
+    for (const imagePath of (product.gallery ?? []).filter(
+      (value): value is string => typeof value === 'string' && value.length > 0,
+    )) {
+      const image = await ensureMedia(payload, imagePath, `${product.name} gallery image`)
+      galleryData.push({ image })
+    }
 
     const existing = await payload.find({
       collection: 'products',
@@ -181,8 +258,9 @@ async function main() {
       sku: product.sku ?? undefined,
       shortDescription: toShortDescription(product),
       description: product.description ?? undefined,
+      descriptionContent: createLexicalRichTextFromText(product.description),
       category: categoryId,
-      imageUrl: product.image,
+      mainImage,
       gallery: galleryData,
       specifications: specs,
       filterOptions: filterOptionIds,

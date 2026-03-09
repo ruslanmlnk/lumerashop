@@ -59,43 +59,12 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   }
 
   const gallery = product.gallery?.length ? product.gallery : [product.image];
-  const description =
-    product.description || 'Italska kabelka z prave kuze. Elegantni design a prakticke vnitrni usporadani.';
-
-  const shortDescription = product.shortDescription || (() => {
-    const firstSentence = description.split('.').find((part) => part.trim());
-    return firstSentence ? `${firstSentence.trim()}.` : undefined;
-  })();
-
-  const specifications = product.specifications || {
-    Material: 'Kuze',
-    'Zeme puvodu': 'Italie',
-  };
-
-  const relatedVariants = product.variants?.length
-    ? product.variants
-    : products
-        .filter((item) => item.category === product.category && item.slug !== product.slug)
-        .slice(0, 4)
-        .map((item) => ({
-          id: item.id,
-          image: item.gallery?.[0] || item.image,
-          slug: item.slug,
-          name: item.name,
-        }));
-  const fallbackVariants = products
-    .filter((item) => item.slug !== product.slug)
-    .slice(0, 4)
-    .map((item) => ({
-      id: item.id,
-      image: item.gallery?.[0] || item.image,
-      slug: item.slug,
-      name: item.name,
-    }));
-  const variants = relatedVariants.length ? relatedVariants : fallbackVariants;
-
-  const recommendedProducts = products.filter((item) => item.isRecommended).slice(0, 6);
-  const fallbackRecommended = products.slice(0, 6);
+  const descriptionHtml = product.descriptionHtml || '';
+  const specifications = product.specifications;
+  const variants = product.variants ?? [];
+  const recommendedProducts = products
+    .filter((item) => item.isRecommended && item.slug !== product.slug)
+    .slice(0, 6);
 
   const handleAddToCart = (quantity: number) => {
     addToCart({
@@ -115,17 +84,11 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
       <main className="pb-16 pt-[148px] lg:pt-[164px]">
         <div className="lumera-container">
-          <nav className="mb-8 flex items-center gap-2 text-[14px] text-[#7a7a7a]">
-            <Link href="/" className="transition-colors hover:text-black">
-              Domu
-            </Link>
-            <span>/</span>
-            <Link href="/shop" className="transition-colors hover:text-black">
-              Obchod
-            </Link>
-            <span>/</span>
-            <span className="text-[#999999]">{product.name}</span>
-          </nav>
+          <div className="mb-6 md:hidden">
+            <h1 className="font-serif text-[34px] font-normal leading-[1.08] text-[#111111]">
+              {product.name}
+            </h1>
+          </div>
 
           <section className="grid grid-cols-1 items-start gap-10 lg:grid-cols-2 lg:gap-[60px]">
             <div className="w-full">
@@ -138,36 +101,36 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 price={product.price}
                 oldPrice={product.oldPrice}
                 sku={product.sku}
-                shortDescription={shortDescription}
-                fullDescription={description}
-                specifications={specifications}
                 highlights={product.highlights}
                 stockStatus={product.stockStatus || 'in-stock'}
                 variants={variants}
                 onAddToCart={handleAddToCart}
+                showTitleOnMobile={false}
               />
             </div>
           </section>
 
           <section className="mb-16 mt-[36px]">
-            <ProductTabs title={product.name} description={description} specifications={specifications} />
+            <ProductTabs contentHtml={descriptionHtml} specifications={specifications} />
           </section>
 
           <div className="mt-[20px] hidden md:block">
             <Features />
           </div>
 
-          <div className="mt-[35px]">
-            <ProductGrid
-              title="Novinky"
-              products={recommendedProducts.length ? recommendedProducts : fallbackRecommended}
-              description="Podivejte se na nejnovejsi modely, ktere prave dorazily z Italie"
-              isSlider={true}
-              alignLeft={true}
-              variant="novinky"
-              autoPlay={false}
-            />
-          </div>
+          {recommendedProducts.length > 0 && (
+            <div className="mt-[35px]">
+              <ProductGrid
+                title="Novinky"
+                products={recommendedProducts}
+                description="Podivejte se na nejnovejsi modely, ktere prave dorazily z Italie"
+                isSlider={true}
+                alignLeft={true}
+                variant="novinky"
+                autoPlay={false}
+              />
+            </div>
+          )}
         </div>
       </main>
 

@@ -21,8 +21,11 @@ export interface Product {
     image: string;
     slug: string;
     category: string;
+    categorySlug?: string;
+    subcategorySlugs?: string[];
     sku?: string;
     description?: string;
+    descriptionHtml?: string;
     shortDescription?: string;
     gallery?: string[];
     specifications?: Record<string, string>;
@@ -45,6 +48,21 @@ export interface Category {
     bg: string;
     product?: string;
     href: string;
+}
+
+export interface CatalogSubcategoryNavItem {
+    id: string;
+    name: string;
+    slug: string;
+    href: string;
+}
+
+export interface CatalogCategoryNavItem {
+    id: string;
+    name: string;
+    slug: string;
+    href: string;
+    children?: CatalogSubcategoryNavItem[];
 }
 
 export interface Feature {

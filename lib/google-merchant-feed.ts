@@ -1,4 +1,3 @@
-import { ALL_PRODUCTS } from '../data/site-data';
 import type { Product } from '../types/site';
 import { DEFAULT_LOCAL_ASSET_FALLBACK, getLocalAssetPath, getRenderableAssetPath } from './local-assets';
 
@@ -20,6 +19,7 @@ export type PayloadFeedProductDoc = {
     name?: unknown;
     slug?: unknown;
     price?: unknown;
+    oldPrice?: unknown;
     sku?: unknown;
     description?: unknown;
     shortDescription?: unknown;
@@ -72,6 +72,15 @@ const toGooglePrice = (value: string) => {
     const numeric = Number(value.replace(/\s+/g, '').replace(',', '.').replace(/[^\d.]/g, ''));
     const safe = Number.isFinite(numeric) && numeric > 0 ? numeric : 0;
     return `${safe.toFixed(2)} CZK`;
+};
+
+const toNumericPrice = (value: string | undefined) => {
+    if (typeof value !== 'string' || value.trim().length === 0) {
+        return 0;
+    }
+
+    const numeric = Number(value.replace(/\s+/g, '').replace(',', '.').replace(/[^\d.]/g, ''));
+    return Number.isFinite(numeric) && numeric > 0 ? numeric : 0;
 };
 
 const resolvePayloadAssetUrl = (value: unknown, baseUrl: string): string | null => {
@@ -149,6 +158,13 @@ export const mapPayloadFeedProduct = (doc: PayloadFeedProductDoc, baseUrl: strin
         slug,
         image: resolvePrimaryImage(doc, baseUrl),
         price: `${new Intl.NumberFormat('cs-CZ').format(Math.max(0, Math.round(safePrice)))} Kc`,
+        oldPrice:
+            (() => {
+                const numericOldPrice = typeof doc.oldPrice === 'number' ? doc.oldPrice : Number(doc.oldPrice);
+                return Number.isFinite(numericOldPrice) && numericOldPrice > 0
+                    ? `${new Intl.NumberFormat('cs-CZ').format(Math.max(0, Math.round(numericOldPrice)))} Kc`
+                    : undefined;
+            })(),
         category,
         sku: typeof doc.sku === 'string' ? doc.sku : undefined,
         description: typeof doc.description === 'string' ? doc.description : undefined,
@@ -176,16 +192,16 @@ const fetchMerchantProducts = async (): Promise<Product[]> => {
         );
 
         if (!response.ok) {
-            return ALL_PRODUCTS;
+            return [];
         }
 
         const payload = (await response.json()) as PayloadListResponse<PayloadFeedProductDoc>;
         const docs = Array.isArray(payload.docs) ? payload.docs : [];
         const mapped = mapPayloadFeedProducts(docs, payloadApiUrl);
 
-        return mapped.length ? mapped : ALL_PRODUCTS;
+        return mapped;
     } catch {
-        return ALL_PRODUCTS;
+        return [];
     }
 };
 
@@ -194,6 +210,11 @@ const buildProductItemXml = (product: Product, siteUrl: string, populatedCategor
     const description = descriptionSource || product.name;
     const category = typeof product.category === 'string' ? product.category.trim() : '';
     const productType = populatedCategories.has(category) ? category : '';
+    const currentPrice = toNumericPrice(product.price);
+    const compareAtPrice = toNumericPrice(product.oldPrice);
+    const hasSalePrice = compareAtPrice > currentPrice && currentPrice > 0;
+    const price = hasSalePrice ? product.oldPrice || product.price : product.price;
+    const salePrice = hasSalePrice ? product.price : '';
     const gallery = Array.isArray(product.gallery) ? product.gallery.filter(Boolean) : [];
     const additionalImages = gallery
         .filter((image) => image !== product.image)
@@ -212,7 +233,8 @@ const buildProductItemXml = (product: Product, siteUrl: string, populatedCategor
         additionalImages,
         `    <g:availability>${toGoogleAvailability(product.stockStatus)}</g:availability>`,
         '    <g:condition>new</g:condition>',
-        `    <g:price>${toGooglePrice(product.price)}</g:price>`,
+        `    <g:price>${toGooglePrice(price)}</g:price>`,
+        salePrice ? `    <g:sale_price>${toGooglePrice(salePrice)}</g:sale_price>` : '',
         `    <g:brand>${DEFAULT_BRAND}</g:brand>`,
         `    <g:identifier_exists>${product.sku ? 'yes' : 'no'}</g:identifier_exists>`,
         productType ? `    <g:product_type>${escapeXml(productType)}</g:product_type>` : '',

@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { slugField } from 'payload'
 
 export const FilterGroups: CollectionConfig = {
   slug: 'filter-groups',
@@ -16,13 +17,9 @@ export const FilterGroups: CollectionConfig = {
       required: true,
       label: 'Group name',
     },
-    {
-      name: 'slug',
-      type: 'text',
-      required: true,
-      unique: true,
-      label: 'Slug',
-    },
+    slugField({
+      useAsSlug: 'name',
+    }),
     {
       name: 'description',
       type: 'textarea',

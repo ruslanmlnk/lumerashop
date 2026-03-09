@@ -1,4 +1,5 @@
 'use client';
+
 import Link from 'next/link';
 
 interface Breadcrumb {
@@ -13,31 +14,34 @@ interface CatalogHeaderProps {
 
 const CatalogHeader = ({ title, breadcrumbs }: CatalogHeaderProps) => {
     return (
-        <div className="bg-[#f9f9f9] py-8 border-b border-neutral-100">
-            <div className="max-w-[1140px] mx-auto px-4 lg:px-0">
-                <nav className="flex mb-4" aria-label="Breadcrumb">
-                    <ol className="flex items-center space-x-2 text-[13px] text-gray-400 font-sans">
+        <div className="border-b border-neutral-100 bg-[#f9f9f9] py-8">
+            <div className="mx-auto max-w-[1140px] px-4 lg:px-0">
+                <nav className="mb-4 flex" aria-label="Breadcrumb">
+                    <ol className="flex items-center space-x-2 font-sans text-[13px] text-gray-400">
                         <li>
-                            <Link href="/" className="hover:text-black transition-colors uppercase tracking-wider">
-                                Domů
+                            <Link href="/" className="uppercase tracking-wider transition-colors hover:text-black">
+                                {"Dom\u016f"}
                             </Link>
                         </li>
                         {breadcrumbs.map((crumb, index) => (
-                            <li key={index} className="flex items-center space-x-2">
+                            <li key={`${crumb.label}-${index}`} className="flex items-center space-x-2">
                                 <span className="text-gray-300">/</span>
                                 {crumb.href ? (
-                                    <Link href={crumb.href} className="hover:text-black transition-colors uppercase tracking-wider">
+                                    <Link
+                                        href={crumb.href}
+                                        className="uppercase tracking-wider transition-colors hover:text-black"
+                                    >
                                         {crumb.label}
                                     </Link>
                                 ) : (
-                                    <span className="text-black uppercase tracking-wider font-medium">{crumb.label}</span>
+                                    <span className="font-medium uppercase tracking-wider text-black">{crumb.label}</span>
                                 )}
                             </li>
                         ))}
                     </ol>
                 </nav>
                 <h1
-                    className="text-[42px] font-serif font-bold text-[#111111] leading-tight"
+                    className="font-serif text-[42px] font-bold leading-tight text-[#111111]"
                     style={{ fontFamily: '"Cormorant Garamond", serif' }}
                 >
                     {title}

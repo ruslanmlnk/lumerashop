@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { slugField } from 'payload'
 
 export const FilterOptions: CollectionConfig = {
   slug: 'filter-options',
@@ -16,12 +17,9 @@ export const FilterOptions: CollectionConfig = {
       required: true,
       label: 'Option name',
     },
-    {
-      name: 'slug',
-      type: 'text',
-      required: true,
-      label: 'Slug',
-    },
+    slugField({
+      useAsSlug: 'name',
+    }),
     {
       name: 'group',
       type: 'relationship',

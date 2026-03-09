@@ -31,6 +31,9 @@ export const sanitizeCheckoutItems = (items: CheckoutItemInput[]): CheckoutLineI
         sanitized.push({
             id: toSafeString(raw?.id, `item-${sanitized.length + 1}`),
             name: toSafeString(raw?.name, 'Produkt'),
+            slug: toSafeString(raw?.slug, ''),
+            sku: toSafeString(raw?.sku, ''),
+            variant: toSafeString(raw?.variant, ''),
             quantity,
             unitPrice,
             lineTotal: quantity * unitPrice,
@@ -40,12 +43,14 @@ export const sanitizeCheckoutItems = (items: CheckoutItemInput[]): CheckoutLineI
     return sanitized;
 };
 
-export const buildCheckoutTotals = (items: CheckoutLineItem[]): CheckoutTotals => {
+export const buildCheckoutTotals = (items: CheckoutLineItem[], shippingAmount = 0): CheckoutTotals => {
     const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
+    const shipping = Math.max(0, Math.round(toSafeNumber(shippingAmount)));
 
     return {
         subtotal,
-        total: subtotal,
+        shipping,
+        total: subtotal + shipping,
         currency: DEFAULT_CURRENCY,
     };
 };

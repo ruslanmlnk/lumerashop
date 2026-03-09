@@ -3,25 +3,38 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import type { NavItem } from '@/types/site';
 import { useCart } from '@/context/CartContext';
+import { useNavigation } from '@/context/NavigationContext';
 import { getRenderableAssetPath } from '@/lib/local-assets';
-import { Menu, X, Search, ChevronDown, ArrowRight, Phone, Mail, Facebook, Instagram, Tag } from 'lucide-react';
+import HeaderSearchForm from '@/components/header/HeaderSearchForm';
+import { Menu, X, ChevronDown, ArrowRight, Phone, Mail, Facebook, Instagram, Tag } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
-import { NAV_ITEMS } from '../data/site-data';
 
 const MENU_ARROW_DOWN_BG =
   'url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHdpZHRoPSIxNnB4IiBoZWlnaHQ9IjE2cHgiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZW5hYmxlLWJhY2tncm91bmQ9Im5ldyAwIDAgMTYgMTYiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPHBhdGggZmlsbD0iIzgwODA4MCIgZD0iTTIuMSw1LjJMMi4xLDUuMmMwLjMtMC4zLDAuOC0wLjMsMS4xLDBMOCwxMC4zbDQuNy01QzEzLDUsMTMuNSw1LDEzLjksNS4zbDAsMGMwLjMsMC4zLDAuMSwwLjctMC4yLDENCglsLTUsNS40Yy0wLjMsMC4zLTAuOCwwLjMtMS4xLDBMMi40LDYuNEMyLjEsNi4xLDEuOCw1LjUsMi4xLDUuMnoiLz4NCjwvc3ZnPg0K)';
 
 const formatPrice = (value: number) => `${value.toLocaleString('cs-CZ')} K\u010d`;
 
+const HOME_MENU_ITEM: NavItem = { label: 'Dom\u016f', href: '/' };
+
+const STATIC_PAGE_ITEMS: NavItem[] = [
+  { label: 'O obchod\u011b', href: '/o-nas' },
+  { label: 'Blog', href: '/blog' },
+  { label: 'Kontakt', href: '/kontakt' },
+];
+
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMiniCartCouponOpen, setIsMiniCartCouponOpen] = useState(false);
   const { cartItems, removeFromCart, updateQuantity, totalPrice, totalItems } = useCart();
+  const { menuItems } = useNavigation();
   const [scrolled, setScrolled] = useState(false);
   const { scrollY } = useScroll();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const desktopMenuItems = [HOME_MENU_ITEM, ...menuItems, ...STATIC_PAGE_ITEMS];
+  const mobileMenuItems = [HOME_MENU_ITEM, ...menuItems, ...STATIC_PAGE_ITEMS];
   const hasCartItems = cartItems.length > 0;
   const vatAmount = Number((totalPrice * 0.21).toFixed(2));
   const hasFreeShipping = totalPrice >= 1500;
@@ -32,9 +45,9 @@ const Header = () => {
     setIsMiniCartCouponOpen(false);
   };
 
-  const toggleExpand = (label: string) => {
+  const toggleExpand = (itemKey: string) => {
     setExpandedItems((prev) =>
-      prev.includes(label) ? prev.filter((item) => item !== label) : [...prev, label],
+      prev.includes(itemKey) ? prev.filter((item) => item !== itemKey) : [...prev, itemKey],
     );
   };
 
@@ -66,14 +79,14 @@ const Header = () => {
           <div className="relative mx-auto flex h-[82px] max-w-[1140px] items-center justify-between px-4 md:h-[81px] md:items-start lg:px-0">
             <div className="flex flex-1 items-center md:items-start">
               <div className="hidden items-center pt-0 md:flex md:pt-[34px]">
-                <div className="relative flex h-[38px] w-[200px] items-center border-[0.8px] border-[#B3B3B3] bg-white">
-                  <input
-                    type="text"
-                    placeholder="Hledat"
-                    className="h-full w-full bg-transparent pl-[13px] pr-[35px] font-sans text-[16px] text-[#111111] placeholder:text-[#808080] focus:outline-none"
-                  />
-                  <Search size={16} className="pointer-events-none absolute right-[10px] text-[#111111]" />
-                </div>
+                <HeaderSearchForm
+                  placeholder="Hledat"
+                  wrapperClassName="relative flex h-[38px] w-[200px] items-center border-[0.8px] border-[#B3B3B3] bg-white"
+                  inputClassName="h-full w-full bg-transparent pl-[13px] pr-[35px] font-sans text-[16px] text-[#111111] placeholder:text-[#808080] focus:outline-none"
+                  iconClassName="text-[#111111]"
+                  iconSize={16}
+                  buttonClassName="absolute right-0 top-0 h-full px-[10px] text-[#111111]"
+                />
               </div>
 
               <button
@@ -122,20 +135,21 @@ const Header = () => {
         </div>
 
         <div className="border-b border-gray-100 bg-white px-4 py-3 md:hidden">
-          <div className="relative flex h-[44px] w-full items-center border-[0.8px] border-[#B3B3B3] bg-white">
-            <input
-              type="text"
-              placeholder="Hledat"
-              className="h-full w-full bg-transparent pl-[15px] pr-[40px] font-sans text-[16px] text-[#111111] placeholder:text-[#808080] focus:outline-none"
-            />
-            <Search size={20} className="pointer-events-none absolute right-[12px] text-[#111111]" />
-          </div>
+          <HeaderSearchForm
+            placeholder="Hledat"
+            wrapperClassName="relative flex h-[44px] w-full items-center border-[0.8px] border-[#B3B3B3] bg-white"
+            inputClassName="h-full w-full bg-transparent pl-[15px] pr-[40px] font-sans text-[16px] text-[#111111] placeholder:text-[#808080] focus:outline-none"
+            iconClassName="text-[#111111]"
+            iconSize={20}
+            buttonClassName="absolute right-0 top-0 h-full px-[12px] text-[#111111]"
+          />
         </div>
 
+        {desktopMenuItems.length > 0 ? (
         <nav className="mx-auto hidden h-[53px] max-w-[1140px] px-4 md:block lg:px-0">
           <ul className="flex h-full items-center justify-center gap-[52px] font-sans text-[#111111]">
-            {NAV_ITEMS.map((item, idx) => (
-              <li key={idx} className="group relative flex h-full items-center">
+            {desktopMenuItems.map((item) => (
+              <li key={item.href} className="group relative flex h-full items-center">
                 <Link
                   href={item.href}
                   className="flex h-full items-center whitespace-nowrap py-[10px] text-[15px] font-[400] leading-[1] tracking-[0.04em] transition-colors hover:text-[#C8A16A]"
@@ -153,9 +167,9 @@ const Header = () => {
                 {item.dropdown && (
                   <div className="invisible absolute left-0 top-full z-50 w-[170px] border border-[#e8d0ab] bg-[#C8A16A] opacity-0 transition-all duration-300 group-hover:visible group-hover:opacity-100">
                     <div className="py-1">
-                      {item.dropdown.map((sub, subIdx) => (
+                      {item.dropdown.map((sub) => (
                         <Link
-                          key={subIdx}
+                          key={sub.href}
                           href={sub.href}
                           className="block px-4 py-2.5 text-[16px] font-medium text-white transition-colors hover:bg-[#b99159]"
                         >
@@ -169,6 +183,7 @@ const Header = () => {
             ))}
           </ul>
         </nav>
+        ) : null}
 
         <AnimatePresence>
           {isOpen && (
@@ -203,11 +218,11 @@ const Header = () => {
                 </div>
 
                 <nav className="mb-10 flex flex-col space-y-1 px-[30px]">
-                  {NAV_ITEMS.map((item, idx) => {
-                    const isExpanded = expandedItems.includes(item.label);
+                  {mobileMenuItems.map((item) => {
+                    const isExpanded = expandedItems.includes(item.href);
 
                     return (
-                      <div key={idx} className="group border-b border-white/5 last:border-0">
+                      <div key={item.href} className="group border-b border-white/5 last:border-0">
                         <div className="flex items-center justify-between py-[10px]">
                           <Link
                             href={item.href}
@@ -221,7 +236,7 @@ const Header = () => {
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                toggleExpand(item.label);
+                                toggleExpand(item.href);
                               }}
                               className="flex h-10 w-12 items-center justify-end text-white/40 transition-colors hover:text-white"
                             >
@@ -235,9 +250,9 @@ const Header = () => {
 
                         {item.dropdown && isExpanded && (
                           <div className="space-y-4 pb-4 pl-4 pt-2">
-                            {item.dropdown.map((sub, subIdx) => (
+                            {item.dropdown.map((sub) => (
                               <Link
-                                key={subIdx}
+                                key={sub.href}
                                 href={sub.href}
                                 onClick={() => setIsOpen(false)}
                                 className="block text-[18px] font-light text-white/60 transition-colors hover:text-[#c8a16a]"
@@ -253,14 +268,15 @@ const Header = () => {
                 </nav>
 
                 <div className="mb-10 px-[30px]">
-                  <div className="group relative">
-                    <input
-                      type="text"
-                      placeholder="Search"
-                      className="h-10 w-full rounded-full border border-white/20 bg-transparent pl-5 pr-12 text-[14px] text-white placeholder:text-white/40 transition-colors focus:border-[#c8a16a] focus:outline-none"
-                    />
-                    <Search size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 transition-colors group-focus-within:text-[#c8a16a]" />
-                  </div>
+                  <HeaderSearchForm
+                    placeholder="Hledat"
+                    wrapperClassName="group relative"
+                    inputClassName="h-10 w-full rounded-full border border-white/20 bg-transparent pl-5 pr-12 text-[14px] text-white placeholder:text-white/40 transition-colors focus:border-[#c8a16a] focus:outline-none"
+                    iconClassName="text-white/40 transition-colors group-focus-within:text-[#c8a16a]"
+                    iconSize={18}
+                    buttonClassName="absolute right-0 top-0 h-full px-4 text-white/40 transition-colors group-focus-within:text-[#c8a16a]"
+                    onSubmitComplete={() => setIsOpen(false)}
+                  />
                 </div>
 
                 <div className="mb-12 space-y-5 px-[30px]">

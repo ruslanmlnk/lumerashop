@@ -1,10 +1,11 @@
 import 'server-only';
-import { BLOG_POSTS } from '@/data/site-data';
 import {
     DEFAULT_LOCAL_ASSET_FALLBACK,
     getLocalAssetPath,
+    getPayloadMediaProxyPath,
     getRenderableAssetPath,
 } from '@/lib/local-assets';
+import { renderLexicalToHTML } from '@/lib/payload-richtext';
 import type { BlogPost } from '@/types/site';
 
 const DEFAULT_PAYLOAD_API_URL = 'http://127.0.0.1:3001';
@@ -18,7 +19,7 @@ type PayloadArticleDoc = {
     title?: unknown;
     mainImage?: PayloadMediaDoc | number | null;
     description?: unknown;
-    content?: any;
+    content?: unknown;
     updatedAt?: unknown;
 };
 
@@ -42,16 +43,16 @@ const resolveUrl = (value: unknown, baseUrl: string): string => {
 
     if (normalizedValue.startsWith('http://') || normalizedValue.startsWith('https://')) {
         if (normalizedValue.startsWith(baseUrl)) {
-            return normalizedValue;
+            return getPayloadMediaProxyPath(normalizedValue);
         }
         return getRenderableAssetPath(normalizedValue, DEFAULT_LOCAL_ASSET_FALLBACK);
     }
 
     if (normalizedValue.startsWith('/')) {
-        return `${baseUrl}${normalizedValue}`;
+        return getPayloadMediaProxyPath(`${baseUrl}${normalizedValue}`);
     }
 
-    return `${baseUrl}/${normalizedValue}`;
+    return getPayloadMediaProxyPath(`${baseUrl}/${normalizedValue}`);
 };
 
 const resolveArticleImage = (doc: PayloadArticleDoc, baseUrl: string): string => {
@@ -61,63 +62,6 @@ const resolveArticleImage = (doc: PayloadArticleDoc, baseUrl: string): string =>
     }
     return DEFAULT_LOCAL_ASSET_FALLBACK;
 };
-
-function renderLexicalToHTML(node: any): string {
-    if (!node) return '';
-
-    if (typeof node === 'string') return node;
-
-    if (Array.isArray(node)) {
-        return node.map(renderLexicalToHTML).join('');
-    }
-
-    if (node.type === 'root') {
-        return renderLexicalToHTML(node.children);
-    }
-
-    if (node.type === 'paragraph') {
-        return `<p>${renderLexicalToHTML(node.children)}</p>`;
-    }
-
-    if (node.type === 'heading') {
-        const tag = `h${node.tag ? node.tag.replace('h', '') : '2'}`;
-        return `<${tag}>${renderLexicalToHTML(node.children)}</${tag}>`;
-    }
-
-    if (node.type === 'list') {
-        const tag = node.listType === 'number' ? 'ol' : 'ul';
-        return `<${tag}>${renderLexicalToHTML(node.children)}</${tag}>`;
-    }
-
-    if (node.type === 'listitem') {
-        return `<li>${renderLexicalToHTML(node.children)}</li>`;
-    }
-
-    if (node.type === 'quote') {
-        return `<blockquote>${renderLexicalToHTML(node.children)}</blockquote>`;
-    }
-
-    if (node.type === 'link') {
-        const url = node.fields?.url || '#';
-        return `<a href="${url}">${renderLexicalToHTML(node.children)}</a>`;
-    }
-
-    if (node.type === 'text') {
-        let text = node.text || '';
-        if (node.format & 1) text = `<strong>${text}</strong>`; // bold
-        if (node.format & 2) text = `<em>${text}</em>`; // italic
-        if (node.format & 8) text = `<u>${text}</u>`; // underline
-        if (node.format & 16) text = `<code>${text}</code>`; // code
-        return text;
-    }
-
-    // fallback for unknown types that have children
-    if (node.children) {
-        return renderLexicalToHTML(node.children);
-    }
-
-    return '';
-}
 
 const mapPayloadArticle = (doc: PayloadArticleDoc, baseUrl: string): BlogPost | null => {
     const title = typeof doc.title === 'string' ? doc.title.trim() : '';
@@ -168,7 +112,7 @@ export async function fetchPayloadArticles(): Promise<BlogPost[]> {
         });
 
         if (!response.ok) {
-            return BLOG_POSTS;
+            return [];
         }
 
         const payload = (await response.json()) as PayloadListResponse<PayloadArticleDoc>;
@@ -177,8 +121,8 @@ export async function fetchPayloadArticles(): Promise<BlogPost[]> {
             .map((doc) => mapPayloadArticle(doc, baseUrl))
             .filter((post): post is BlogPost => Boolean(post));
 
-        return mapped.length ? mapped : BLOG_POSTS;
+        return mapped;
     } catch {
-        return BLOG_POSTS; // fallback to hardcoded
+        return [];
     }
 }

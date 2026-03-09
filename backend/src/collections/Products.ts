@@ -1,19 +1,12 @@
 import type { CollectionConfig, Validate } from 'payload'
+import { slugField } from 'payload'
 
-const requireImageSource: Validate<string | null | undefined, unknown, unknown, unknown> = (value, { siblingData }) => {
-  if (value || siblingData?.mainImage) {
+const requireUploadedImage: Validate<number | null | undefined, unknown, unknown, unknown> = (value) => {
+  if (value) {
     return true
   }
 
-  return 'Add a main image upload or external image URL.'
-}
-
-const requireMainImage: Validate<number | null | undefined, unknown, unknown, unknown> = (value, { siblingData }) => {
-  if (value || siblingData?.imageUrl) {
-    return true
-  }
-
-  return 'Add a main image upload or external image URL.'
+  return 'Upload an image.'
 }
 
 export const Products: CollectionConfig = {
@@ -32,13 +25,9 @@ export const Products: CollectionConfig = {
       required: true,
       label: 'Product name',
     },
-    {
-      name: 'slug',
-      type: 'text',
-      required: true,
-      unique: true,
-      label: 'Slug (URL)',
-    },
+    slugField({
+      useAsSlug: 'name',
+    }),
     {
       type: 'row',
       fields: [
@@ -120,7 +109,18 @@ export const Products: CollectionConfig = {
     {
       name: 'description',
       type: 'textarea',
-      label: 'Description',
+      label: 'Plain description',
+      admin: {
+        description: 'Plain text used for summaries, fallbacks and feeds.',
+      },
+    },
+    {
+      name: 'descriptionContent',
+      type: 'richText',
+      label: 'Popis tab content',
+      admin: {
+        description: 'Fully editable content for the first "Popis" tab on the product page.',
+      },
     },
     {
       name: 'category',
@@ -148,29 +148,11 @@ export const Products: CollectionConfig = {
       },
     },
     {
-      type: 'row',
-      fields: [
-        {
-          name: 'mainImage',
-          type: 'upload',
-          relationTo: 'media',
-          label: 'Main image (upload)',
-          validate: requireMainImage,
-          admin: {
-            width: '50%',
-          },
-        },
-        {
-          name: 'imageUrl',
-          type: 'text',
-          label: 'Main image URL',
-          validate: requireImageSource,
-          admin: {
-            description: 'Use this for CDN, external or frontend asset images.',
-            width: '50%',
-          },
-        },
-      ],
+      name: 'mainImage',
+      type: 'upload',
+      relationTo: 'media',
+      label: 'Main image',
+      validate: requireUploadedImage,
     },
     {
       name: 'gallery',
@@ -178,35 +160,20 @@ export const Products: CollectionConfig = {
       label: 'Gallery',
       fields: [
         {
-          type: 'row',
-          fields: [
-            {
-              name: 'image',
-              type: 'upload',
-              relationTo: 'media',
-              label: 'Upload image',
-              admin: {
-                width: '50%',
-              },
-            },
-            {
-              name: 'imageUrl',
-              type: 'text',
-              label: 'Image URL',
-              admin: {
-                width: '50%',
-              },
-            },
-          ],
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+          label: 'Image',
+          validate: requireUploadedImage,
         },
       ],
     },
     {
       name: 'highlights',
       type: 'array',
-      label: 'Highlights block',
+      label: 'Top bullet list',
       admin: {
-        description: 'Short bullets shown on the product page.',
+        description: 'Bullets shown under shipping/returns on the product page. Separate from the "Specifications / Další informace" tab.',
       },
       fields: [
         {

@@ -12,7 +12,8 @@
     <g:image_link>http://localhost:3000/assets/products/pasek-tmavo-hnedy.webp</g:image_link>
     <g:availability>in stock</g:availability>
     <g:condition>new</g:condition>
-    <g:price>890.00 CZK</g:price>
+    <g:price>900.00 CZK</g:price>
+    <g:sale_price>890.00 CZK</g:sale_price>
     <g:brand>Lumera</g:brand>
     <g:identifier_exists>no</g:identifier_exists>
     <g:product_type>Doplňky</g:product_type>

@@ -2,10 +2,9 @@
 
 import { createContext, useContext, ReactNode } from 'react';
 import type { Product } from '@/types/site';
-import { ALL_PRODUCTS } from '@/data/site-data';
 
 export const ProductsContext = createContext<{ products: Product[], loading: boolean }>({
-    products: ALL_PRODUCTS,
+    products: [],
     loading: false
 });
 

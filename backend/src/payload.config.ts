@@ -13,6 +13,8 @@ import { Products } from './collections/Products'
 import { FilterGroups } from './collections/FilterGroups'
 import { FilterOptions } from './collections/FilterOptions'
 import { Article } from './collections/Article'
+import { Orders } from './collections/Orders'
+import { ShippingMethods } from './collections/ShippingMethods'
 
 import { HomePage } from './globals/HomePage'
 
@@ -27,7 +29,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Categories, Subcategories, FilterGroups, FilterOptions, Products, Article],
+  collections: [Users, Media, Categories, Subcategories, FilterGroups, FilterOptions, Products, Article, Orders, ShippingMethods],
   globals: [HomePage],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

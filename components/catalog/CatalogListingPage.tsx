@@ -1,59 +1,94 @@
 'use client';
-import { use, useEffect, useMemo, useState } from 'react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import CatalogHeader from '@/components/catalog/CatalogHeader';
-import ShopSidebar from '@/components/catalog/ShopSidebar';
-import ProductSort from '@/components/catalog/ProductSort';
+
+import { useEffect, useMemo, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import ProductCard from '@/components/ProductCard';
-import { useProducts } from '@/lib/use-products';
+import CatalogHeader from '@/components/catalog/CatalogHeader';
+import ProductSort from '@/components/catalog/ProductSort';
+import ShopSidebar from '@/components/catalog/ShopSidebar';
 import { buildFilterGroups, getProductFilterValues, normalizeFilterKey, parseProductPrice } from '@/lib/catalog-filters';
 import { compareProductsByPopularity } from '@/lib/product-sorting';
+import { matchesProductSearch } from '@/lib/product-search';
+import type { CatalogCategoryNavItem, Product } from '@/types/site';
 
 type ActiveChip = {
     id: string;
     label: string;
 };
 
-const DEFAULT_RANGE: [number, number] = [0, 10000];
-
-const categoryMap: Record<string, string> = {
-    kabelky: 'Kabelky',
-    'panske-tasky': 'Pánské tašky',
-    batohy: 'Batohy',
-    doplnky: 'Doplňky',
+type Breadcrumb = {
+    label: string;
+    href?: string;
 };
 
-export default function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
-    const { slug } = use(params);
-    const mappedCategory = categoryMap[slug] || slug.charAt(0).toUpperCase() + slug.slice(1);
-    const { products: catalogProducts } = useProducts();
+type CatalogListingPageProps = {
+    title: string;
+    breadcrumbs: Breadcrumb[];
+    products: Product[];
+    categoryItems: CatalogCategoryNavItem[];
+    initialCategorySlug?: string | null;
+    initialSubcategorySlug?: string | null;
+    searchQuery?: string | null;
+};
 
-    const [selectedCategory, setSelectedCategory] = useState<string | null>(mappedCategory);
+const DEFAULT_RANGE: [number, number] = [0, 10000];
+
+export default function CatalogListingPage({
+    title,
+    breadcrumbs,
+    products,
+    categoryItems,
+    initialCategorySlug = null,
+    initialSubcategorySlug = null,
+    searchQuery = null,
+}: CatalogListingPageProps) {
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const [isReady, setIsReady] = useState(false);
     const [priceRange, setPriceRange] = useState<[number, number]>(DEFAULT_RANGE);
     const [sortOrder, setSortOrder] = useState('popularity');
     const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
-
-    const categories = useMemo(() => {
-        const items = new Set(catalogProducts.map((product) => product.category));
-        return Array.from(items);
-    }, [catalogProducts]);
-
-    const priceBounds = useMemo<[number, number]>(() => {
-        const values = catalogProducts.map((product) => parseProductPrice(product.price)).filter((value) => value > 0);
-        if (!values.length) return DEFAULT_RANGE;
-        return [Math.min(...values), Math.max(...values)];
-    }, [catalogProducts]);
+    const selectedCategorySlug = initialCategorySlug ?? null;
+    const selectedSubcategorySlug = initialSubcategorySlug ?? null;
+    const normalizedSearchQuery = searchQuery?.trim() || '';
 
     useEffect(() => {
-        setSelectedCategory(mappedCategory);
-    }, [mappedCategory]);
+        setIsReady(false);
+        const frame = window.requestAnimationFrame(() => setIsReady(true));
+        return () => window.cancelAnimationFrame(frame);
+    }, [title, selectedCategorySlug, selectedSubcategorySlug]);
+
+    const scopedProducts = useMemo(() => {
+        return products.filter((product) => {
+            if (selectedCategorySlug && product.categorySlug !== selectedCategorySlug) {
+                return false;
+            }
+
+            if (selectedSubcategorySlug && !product.subcategorySlugs?.includes(selectedSubcategorySlug)) {
+                return false;
+            }
+
+            return true;
+        });
+    }, [products, selectedCategorySlug, selectedSubcategorySlug]);
+
+    const searchedProducts = useMemo(
+        () => scopedProducts.filter((product) => matchesProductSearch(product, normalizedSearchQuery)),
+        [normalizedSearchQuery, scopedProducts],
+    );
+
+    const priceBounds = useMemo<[number, number]>(() => {
+        const values = searchedProducts.map((product) => parseProductPrice(product.price)).filter((value) => value > 0);
+        if (!values.length) return DEFAULT_RANGE;
+        return [Math.min(...values), Math.max(...values)];
+    }, [searchedProducts]);
 
     useEffect(() => {
         setPriceRange(priceBounds);
     }, [priceBounds]);
 
-    const filterGroups = useMemo(() => buildFilterGroups(catalogProducts), [catalogProducts]);
+    const filterGroups = useMemo(() => buildFilterGroups(searchedProducts), [searchedProducts]);
 
     useEffect(() => {
         const validKeys = new Set(filterGroups.map((group) => group.key));
@@ -83,7 +118,6 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
     };
 
     const clearAllFilters = () => {
-        setSelectedCategory(mappedCategory);
         setPriceRange(priceBounds);
         setSelectedFilters({});
     };
@@ -91,12 +125,8 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
     const activeFilters = useMemo<ActiveChip[]>(() => {
         const chips: ActiveChip[] = [];
 
-        if (selectedCategory) {
-            chips.push({ id: `category:${selectedCategory}`, label: `Kategorie: ${selectedCategory}` });
-        }
-
         if (priceRange[0] !== priceBounds[0] || priceRange[1] !== priceBounds[1]) {
-            chips.push({ id: 'price:range', label: `Cena: ${priceRange[0]}-${priceRange[1]} Kč` });
+            chips.push({ id: 'price:range', label: `Cena: ${priceRange[0]}-${priceRange[1]} K\u010d` });
         }
 
         for (const group of filterGroups) {
@@ -110,16 +140,11 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
         }
 
         return chips;
-    }, [selectedCategory, priceRange, priceBounds, selectedFilters, filterGroups]);
+    }, [filterGroups, priceBounds, priceRange, selectedFilters]);
 
     const removeFilter = (id: string) => {
         const [type, groupKey, ...rest] = id.split(':');
         const value = rest.join(':');
-
-        if (type === 'category') {
-            setSelectedCategory(null);
-            return;
-        }
 
         if (type === 'price') {
             setPriceRange(priceBounds);
@@ -135,11 +160,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
     };
 
     const filteredProducts = useMemo(() => {
-        const results = catalogProducts.filter((product) => {
-            if (selectedCategory && product.category !== selectedCategory) {
-                return false;
-            }
-
+        const results = searchedProducts.filter((product) => {
             const price = parseProductPrice(product.price);
             if (price < priceRange[0] || price > priceRange[1]) {
                 return false;
@@ -153,7 +174,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
                 if (!productFilterMap.has(key)) {
                     productFilterMap.set(key, new Set());
                 }
-                productFilterMap.get(key)!.add(filter.option);
+                productFilterMap.get(key)?.add(filter.option);
             }
 
             for (const [groupKey, selectedValues] of Object.entries(selectedFilters)) {
@@ -187,7 +208,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
         });
 
         return results;
-    }, [catalogProducts, priceRange, selectedCategory, selectedFilters, sortOrder]);
+    }, [priceRange, searchedProducts, selectedFilters, sortOrder]);
 
     const sidebarFilterGroups = useMemo(
         () =>
@@ -200,19 +221,34 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
         [filterGroups, selectedFilters],
     );
 
-    return (
-        <div className="min-h-screen bg-white font-sans text-[#111111]">
-            <Header />
+    const handleResetListing = () => {
+        clearAllFilters();
 
-            <main>
-                <CatalogHeader title={mappedCategory} breadcrumbs={[{ label: 'Obchod', href: '/shop' }, { label: mappedCategory }]} />
+        if (!normalizedSearchQuery) {
+            return;
+        }
+
+        const nextParams = new URLSearchParams(searchParams.toString());
+        nextParams.delete('q');
+        const nextUrl = nextParams.toString() ? `${pathname}?${nextParams.toString()}` : pathname;
+        router.push(nextUrl, { scroll: false });
+    };
+
+    return (
+        <main className="min-h-[calc(100vh-220px)] bg-white font-sans text-[#111111]">
+            <div
+                className={`transition-all duration-300 ease-out motion-reduce:transform-none motion-reduce:transition-none ${
+                    isReady ? 'translate-y-0 opacity-100' : 'translate-y-1 opacity-0'
+                }`}
+            >
+                <CatalogHeader title={title} breadcrumbs={breadcrumbs} />
 
                 <div className="mx-auto max-w-[1140px] px-4 py-16 lg:px-0">
                     <div className="flex flex-col items-start gap-8 lg:flex-row lg:gap-10">
                         <ShopSidebar
-                            categories={categories}
-                            selectedCategory={selectedCategory}
-                            onCategoryChange={setSelectedCategory}
+                            categoryItems={categoryItems}
+                            selectedCategorySlug={selectedCategorySlug}
+                            selectedSubcategorySlug={selectedSubcategorySlug}
                             priceRange={priceRange}
                             priceBounds={priceBounds}
                             onPriceChange={setPriceRange}
@@ -226,26 +262,37 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
                         <div className="min-w-0 flex-1">
                             <ProductSort value={sortOrder} onChange={setSortOrder} totalResults={filteredProducts.length} />
 
-                            <div className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-3">
-                                {filteredProducts.map((product) => (
-                                    <ProductCard key={product.id} product={product} />
-                                ))}
-                            </div>
-
-                            {filteredProducts.length === 0 && (
-                                <div className="py-20 text-center">
-                                    <p className="text-[18px] text-gray-500">Zadne produkty neodpovidaji vasemu vyberu.</p>
-                                    <button onClick={clearAllFilters} className="mt-6 border-b border-black font-medium text-black">
-                                        Vymazat filtry
+                            {filteredProducts.length > 0 ? (
+                                <div className="grid min-h-[780px] grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-3">
+                                    {filteredProducts.map((product) => (
+                                        <ProductCard key={product.id} product={product} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="flex min-h-[320px] flex-col items-center justify-start pt-14 text-center">
+                                    {normalizedSearchQuery ? (
+                                        <p className="mb-3 text-[13px] uppercase tracking-[0.12em] text-[#8a837a]">
+                                            V\u00fdsledky pro: <span className="text-[#111111]">{normalizedSearchQuery}</span>
+                                        </p>
+                                    ) : null}
+                                    <p className="text-[18px] text-gray-500">
+                                        {normalizedSearchQuery
+                                            ? '\u017d\u00e1dn\u00e9 produkty neodpov\u00eddaj\u00ed va\u0161emu hled\u00e1n\u00ed.'
+                                            : '\u017d\u00e1dn\u00e9 produkty neodpov\u00eddaj\u00ed va\u0161emu v\u00fdb\u011bru.'}
+                                    </p>
+                                    <button
+                                        type="button"
+                                        onClick={handleResetListing}
+                                        className="mt-6 border-b border-black font-medium text-black"
+                                    >
+                                        {normalizedSearchQuery ? 'Vymazat filtry a hled\u00e1n\u00ed' : 'Vymazat filtry'}
                                     </button>
                                 </div>
                             )}
                         </div>
                     </div>
                 </div>
-            </main>
-
-            <Footer />
-        </div>
+            </div>
+        </main>
     );
 }

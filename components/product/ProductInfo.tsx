@@ -10,13 +10,11 @@ interface ProductInfoProps {
   price: string;
   oldPrice?: string;
   sku?: string;
-  shortDescription?: string;
-  fullDescription?: string;
-  specifications?: Record<string, string>;
   highlights?: string[];
   stockStatus?: "in-stock" | "low-stock" | "out-of-stock";
   variants?: ProductVariant[];
   onAddToCart?: (quantity: number) => void;
+  showTitleOnMobile?: boolean;
 }
 
 const stripHtml = (value: string) => value.replace(/<[^>]+>/g, "").trim();
@@ -26,13 +24,11 @@ const ProductInfo = ({
   price,
   oldPrice,
   sku,
-  shortDescription,
-  fullDescription,
-  specifications,
   highlights,
   stockStatus = "in-stock",
   variants,
   onAddToCart,
+  showTitleOnMobile = true,
 }: ProductInfoProps) => {
   const [quantity, setQuantity] = useState(1);
 
@@ -59,36 +55,14 @@ const ProductInfo = ({
       });
     }
 
-    if (items.length === 0 && shortDescription) {
-      const cleanShortDescription = stripHtml(shortDescription);
-      if (cleanShortDescription) {
-        items.push(cleanShortDescription);
-      }
-    }
-
-    if (specifications) {
-      Object.entries(specifications).forEach(([key, value]) => {
-        items.push(`${key}: ${value}`);
-      });
-    }
-
-    if (items.length === 0 && !shortDescription && fullDescription) {
-      const cleanDescription = stripHtml(fullDescription);
-      if (cleanDescription) {
-        items.push(cleanDescription);
-      }
-    }
-
-    if (sku) {
-      items.push(sku);
-    }
-
     return Array.from(new Set(items));
-  }, [fullDescription, highlights, shortDescription, sku, specifications]);
+  }, [highlights]);
 
   return (
     <div className="w-full pb-[36px] text-[#111111]">
-      <h1 className="mb-[20px] font-serif text-[36px] font-normal leading-[1.1] lg:text-[48px] lg:leading-[52.8px]">
+      <h1
+        className={`${showTitleOnMobile ? "block" : "hidden md:block"} mb-[20px] font-serif text-[36px] font-normal leading-[1.1] lg:text-[48px] lg:leading-[52.8px]`}
+      >
         {name}
       </h1>
 

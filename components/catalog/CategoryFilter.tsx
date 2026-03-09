@@ -1,61 +1,54 @@
 'use client';
-import { useState } from 'react';
+
+import { memo, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import type { CatalogCategoryNavItem } from '@/types/site';
 
 interface CategoryFilterProps {
     title?: string;
-    categories: string[];
-    selectedCategory: string | null;
-    onSelect: (category: string | null) => void;
+    items: CatalogCategoryNavItem[];
+    selectedCategorySlug: string | null;
+    selectedSubcategorySlug?: string | null;
 }
 
-interface CategoryNavItem {
-    label: string;
-    href: string;
-    value?: string | null;
-    children?: Array<{ label: string; href: string }>;
-}
+const STORAGE_KEY = 'lumera:catalog-expanded-categories';
 
-const CATEGORY_MENU: CategoryNavItem[] = [
-    { label: 'Dámské kabelky', href: '/product-category/kabelky', value: 'Kabelky' },
-    { label: 'Pánské tašky', href: '/product-category/panske-tasky', value: 'Pánské tašky' },
-    {
-        label: 'Batohy',
-        href: '/product-category/batohy',
-        value: 'Batohy',
-        children: [
-            { label: 'Kožené batohy', href: '/product-category/batohy?type=kozene' },
-            { label: 'Městské batohy', href: '/product-category/batohy?type=mestske' },
-        ],
-    },
-    {
-        label: 'Doplňky',
-        href: '/product-category/doplnky',
-        value: 'Doplňky',
-        children: [
-            { label: 'Peněženky', href: '/product-category/doplnky?type=penezenky' },
-            { label: 'Pásky', href: '/product-category/doplnky?type=pasky' },
-        ],
-    },
-    {
-        label: 'Dárkové poukazy',
-        href: '/shop',
-        children: [{ label: 'Všechny poukazy', href: '/shop' }],
-    },
-    { label: 'DAVID JONES', href: '/shop' },
-    { label: 'ENRICO COVERI', href: '/shop' },
-    { label: 'Akce', href: '/shop' },
-];
+const readExpandedState = (): string[] => {
+    if (typeof window === 'undefined') {
+        return [];
+    }
 
-const stripQuery = (href: string) => href.split('?')[0];
+    try {
+        const raw = window.sessionStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+            return [];
+        }
 
-const CategoryFilter = ({ title = 'Kategorie produktu', selectedCategory, onSelect }: CategoryFilterProps) => {
-    const pathname = usePathname();
-    const [expanded, setExpanded] = useState<string[]>([]);
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : [];
+    } catch {
+        return [];
+    }
+};
 
-    const toggleExpand = (label: string) => {
-        setExpanded((prev) => (prev.includes(label) ? prev.filter((item) => item !== label) : [...prev, label]));
+const CategoryFilterComponent = ({
+    title = 'Kategorie produktu',
+    items,
+    selectedCategorySlug,
+    selectedSubcategorySlug = null,
+}: CategoryFilterProps) => {
+    const [expanded, setExpanded] = useState<string[]>(readExpandedState);
+
+    useEffect(() => {
+        try {
+            window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(expanded));
+        } catch {
+            // Ignore storage failures. The filter still works without persisted state.
+        }
+    }, [expanded]);
+
+    const toggleExpand = (slug: string) => {
+        setExpanded((prev) => (prev.includes(slug) ? prev.filter((item) => item !== slug) : [...prev, slug]));
     };
 
     return (
@@ -68,32 +61,31 @@ const CategoryFilter = ({ title = 'Kategorie produktu', selectedCategory, onSele
             </h3>
 
             <ul className="space-y-[6px]">
-                {CATEGORY_MENU.map((item) => {
-                    const isExpanded = expanded.includes(item.label);
-                    const isActive =
-                        stripQuery(item.href) === pathname ||
-                        (item.value ? selectedCategory === item.value : false);
+                {items.map((item) => {
                     const hasChildren = Boolean(item.children?.length);
+                    const hasActiveChild = item.children?.some((child) => child.slug === selectedSubcategorySlug) ?? false;
+                    const isExpanded = expanded.includes(item.slug) || selectedCategorySlug === item.slug || hasActiveChild;
+                    const isActive = selectedCategorySlug === item.slug;
 
                     return (
-                        <li key={item.label}>
+                        <li key={item.id}>
                             <div className="flex items-center gap-[5px] py-[10px]">
                                 {hasChildren ? (
                                     <button
                                         type="button"
-                                        aria-label={`Toggle ${item.label}`}
-                                        onClick={() => toggleExpand(item.label)}
+                                        aria-label={`Toggle ${item.name}`}
+                                        onClick={() => toggleExpand(item.slug)}
                                         className="flex h-[14px] w-[14px] items-center justify-center"
                                     >
                                         <svg
-                                            className={`transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                                            className={`transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}
                                             width="10"
                                             height="10"
                                             viewBox="0 0 10 10"
                                             fill="none"
                                             aria-hidden="true"
                                         >
-                                            <path d="M3 2 7 5 3 8V2Z" fill={isActive ? '#111111' : '#777777'} />
+                                            <path d="M3 2 7 5 3 8V2Z" fill={isActive || hasActiveChild ? '#111111' : '#777777'} />
                                         </svg>
                                     </button>
                                 ) : (
@@ -102,29 +94,37 @@ const CategoryFilter = ({ title = 'Kategorie produktu', selectedCategory, onSele
 
                                 <Link
                                     href={item.href}
-                                    onClick={() => onSelect(item.value ?? null)}
-                                    className={`text-[14px] leading-[14px] ${
-                                        isActive ? 'font-medium text-black' : 'font-normal text-black'
+                                    scroll={false}
+                                    className={`text-[14px] leading-[14px] transition-colors duration-200 ${
+                                        isActive ? 'font-medium text-black' : 'font-normal text-black hover:text-[#6f5640]'
                                     }`}
                                     style={{ fontFamily: '"Work Sans", sans-serif' }}
                                 >
-                                    {item.label}
+                                    {item.name}
                                 </Link>
                             </div>
 
                             {hasChildren && isExpanded && (
                                 <ul className="ml-[19px] space-y-[2px] pb-[6px]">
-                                    {item.children?.map((child) => (
-                                        <li key={child.href}>
-                                            <Link
-                                                href={child.href}
-                                                onClick={() => onSelect(item.value ?? null)}
-                                                className="block py-[6px] text-[13px] leading-[18px] text-[#3f3f3f] hover:text-black"
-                                            >
-                                                {child.label}
-                                            </Link>
-                                        </li>
-                                    ))}
+                                    {item.children?.map((child) => {
+                                        const isChildActive = child.slug === selectedSubcategorySlug;
+
+                                        return (
+                                            <li key={child.id}>
+                                                <Link
+                                                    href={child.href}
+                                                    scroll={false}
+                                                    className={`block py-[6px] text-[13px] leading-[18px] transition-colors duration-200 ${
+                                                        isChildActive
+                                                            ? 'font-medium text-black'
+                                                            : 'text-[#3f3f3f] hover:text-[#6f5640]'
+                                                    }`}
+                                                >
+                                                    {child.name}
+                                                </Link>
+                                            </li>
+                                        );
+                                    })}
                                 </ul>
                             )}
                         </li>
@@ -134,5 +134,7 @@ const CategoryFilter = ({ title = 'Kategorie produktu', selectedCategory, onSele
         </div>
     );
 };
+
+const CategoryFilter = memo(CategoryFilterComponent);
 
 export default CategoryFilter;

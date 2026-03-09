@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { updatePaymentOrder } from '@/lib/payments/internal-orders';
 import { parseGlobalPaymentsResponse } from '@/lib/payments/global-payments';
 import { getBaseUrl } from '@/lib/payments/checkout-utils';
 
@@ -37,9 +38,30 @@ export async function POST(request: NextRequest) {
         const orderId = parsed.transactionReference?.orderId || payload.ORDER_ID || '';
 
         if (parsed.responseCode === '00') {
+            if (orderId) {
+                await updatePaymentOrder(orderId, {
+                    paymentStatus: 'paid',
+                    globalTransactionId: parsed.transactionReference.transactionId,
+                    globalAuthCode: parsed.transactionReference.authCode,
+                    lastEvent: 'global-payments.response.post.success',
+                    providerResponse: payload,
+                });
+            }
+
             return redirectToResult(request, '/checkout/success', {
                 provider: 'global-payments',
                 orderId,
+            });
+        }
+
+        if (orderId) {
+            await updatePaymentOrder(orderId, {
+                paymentStatus: 'failed',
+                globalTransactionId: parsed.transactionReference.transactionId,
+                globalAuthCode: parsed.transactionReference.authCode,
+                lastEvent: 'global-payments.response.post.failed',
+                lastError: parsed.responseMessage,
+                providerResponse: payload,
             });
         }
 
@@ -67,9 +89,30 @@ export async function GET(request: NextRequest) {
         const orderId = parsed.transactionReference?.orderId || params.ORDER_ID || '';
 
         if (parsed.responseCode === '00') {
+            if (orderId) {
+                await updatePaymentOrder(orderId, {
+                    paymentStatus: 'paid',
+                    globalTransactionId: parsed.transactionReference.transactionId,
+                    globalAuthCode: parsed.transactionReference.authCode,
+                    lastEvent: 'global-payments.response.get.success',
+                    providerResponse: params,
+                });
+            }
+
             return redirectToResult(request, '/checkout/success', {
                 provider: 'global-payments',
                 orderId,
+            });
+        }
+
+        if (orderId) {
+            await updatePaymentOrder(orderId, {
+                paymentStatus: 'failed',
+                globalTransactionId: parsed.transactionReference.transactionId,
+                globalAuthCode: parsed.transactionReference.authCode,
+                lastEvent: 'global-payments.response.get.failed',
+                lastError: parsed.responseMessage,
+                providerResponse: params,
             });
         }
 

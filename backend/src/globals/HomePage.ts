@@ -1,5 +1,6 @@
 import type { GlobalConfig } from 'payload'
 import { seo } from '../fields/seo'
+import { DEFAULT_HOME_TESTIMONIALS, DEFAULT_HOME_TESTIMONIALS_TITLE } from '../../../data/home-page-defaults'
 
 export const HomePage: GlobalConfig = {
     slug: 'home-page',
@@ -144,6 +145,79 @@ export const HomePage: GlobalConfig = {
                             ],
                         },
                     ],
+                },
+            ],
+        },
+        {
+            name: 'testimonialsSection',
+            type: 'group',
+            label: 'Testimonials section',
+            fields: [
+                {
+                    name: 'title',
+                    type: 'text',
+                    label: 'Section title',
+                    required: true,
+                    defaultValue: DEFAULT_HOME_TESTIMONIALS_TITLE,
+                },
+                {
+                    name: 'items',
+                    type: 'array',
+                    label: 'Testimonials',
+                    labels: {
+                        singular: 'Testimonial',
+                        plural: 'Testimonials',
+                    },
+                    defaultValue: DEFAULT_HOME_TESTIMONIALS,
+                    fields: [
+                        {
+                            name: 'text',
+                            type: 'textarea',
+                            label: 'Comment',
+                            required: true,
+                        },
+                        {
+                            name: 'author',
+                            type: 'text',
+                            label: 'Author',
+                            required: true,
+                        },
+                        {
+                            name: 'location',
+                            type: 'text',
+                            label: 'Location',
+                            required: true,
+                        },
+                    ],
+                },
+            ],
+        },
+        {
+            name: 'blogSection',
+            type: 'group',
+            label: 'Blog section',
+            fields: [
+                {
+                    name: 'title',
+                    type: 'text',
+                    label: 'Section title',
+                    defaultValue: 'Z blogu Lumera',
+                },
+                {
+                    name: 'description',
+                    type: 'textarea',
+                    label: 'Section description',
+                    defaultValue: 'Styl, inspirace a péče o vaše kožené doplňky.',
+                },
+                {
+                    name: 'featuredArticles',
+                    type: 'relationship',
+                    relationTo: 'article',
+                    hasMany: true,
+                    label: 'Articles to show on homepage',
+                    admin: {
+                        description: 'Choose and order the articles for the homepage blog section. Leave empty to hide the block.',
+                    },
                 },
             ],
         },

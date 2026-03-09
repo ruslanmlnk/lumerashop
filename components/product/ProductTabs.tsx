@@ -5,17 +5,12 @@ import { useMemo, useState } from "react";
 type TabKey = "description" | "additional" | "reviews";
 
 interface ProductTabsProps {
-  title: string;
-  description: string;
+  contentHtml?: string;
   specifications?: Record<string, string>;
 }
 
-const stripHtml = (value: string) => value.replace(/<[^>]+>/g, "").trim();
-
-const ProductTabs = ({ title, description, specifications }: ProductTabsProps) => {
+const ProductTabs = ({ contentHtml, specifications }: ProductTabsProps) => {
   const [activeTab, setActiveTab] = useState<TabKey>("description");
-
-  const cleanDescription = useMemo(() => stripHtml(description), [description]);
   const specEntries = useMemo(() => Object.entries(specifications ?? {}), [specifications]);
 
   return (
@@ -23,8 +18,8 @@ const ProductTabs = ({ title, description, specifications }: ProductTabsProps) =
       <div className="no-scrollbar flex w-full overflow-x-auto border-b border-[#d4d4d4] pt-[10px]">
         {[
           { key: "description", label: "Popis" },
-          { key: "additional", label: "Další informace" },
-          { key: "reviews", label: "Hodnocení (0)" },
+          { key: "additional", label: "Dal\u0161\u00ed informace" },
+          { key: "reviews", label: "Hodnocen\u00ed (0)" },
         ].map((tab) => {
           const isActive = activeTab === tab.key;
 
@@ -47,21 +42,16 @@ const ProductTabs = ({ title, description, specifications }: ProductTabsProps) =
 
       <div className="py-[40px]">
         {activeTab === "description" && (
-          <div className="animate-fadeIn">
-            <h2 className="mb-[20px] font-serif text-[34px] font-normal leading-[1.1] lg:text-[42px]">Popis</h2>
-            <div className="space-y-3 text-[16px] leading-[1.6] text-[#111111]">
-              <p>
-                Módní kožený model <strong>{title}</strong> zaujme svým vzhledem i funkčností.
-              </p>
-              <p>{cleanDescription || "Popis produktu je aktuálně připraven k doplnění."}</p>
-            </div>
-          </div>
+          <div
+            className="animate-fadeIn text-[#111111] [&_blockquote]:border-l-[3px] [&_blockquote]:border-[#111111]/12 [&_blockquote]:pl-4 [&_blockquote]:italic [&_h1]:mb-5 [&_h1]:font-serif [&_h1]:text-[34px] [&_h1]:font-normal [&_h1]:leading-[1.1] [&_h1]:lg:text-[42px] [&_h2]:mb-4 [&_h2]:font-serif [&_h2]:text-[28px] [&_h2]:font-normal [&_h2]:leading-[1.15] [&_h3]:mb-3 [&_h3]:font-serif [&_h3]:text-[22px] [&_h3]:font-normal [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-5 [&_p]:my-0 [&_p]:text-[16px] [&_p]:leading-[1.7] [&_p:not(:last-child)]:mb-4 [&_strong]:font-semibold [&_ul]:my-4 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-5"
+            dangerouslySetInnerHTML={{ __html: contentHtml || "" }}
+          />
         )}
 
         {activeTab === "additional" && (
           <div className="animate-fadeIn">
             <h2 className="mb-[20px] font-serif text-[34px] font-normal leading-[1.1] lg:text-[42px]">
-              Další informace
+              {"Dal\u0161\u00ed informace"}
             </h2>
             {specEntries.length > 0 ? (
               <div className="overflow-hidden border border-[#ececec]">
@@ -79,7 +69,7 @@ const ProductTabs = ({ title, description, specifications }: ProductTabsProps) =
               </div>
             ) : (
               <p className="text-[16px] leading-[1.6] text-[#111111]">
-                Žádné další informace nejsou k dispozici.
+                {"\u017d\u00e1dn\u00e9 dal\u0161\u00ed informace nejsou k dispozici."}
               </p>
             )}
           </div>
@@ -88,9 +78,11 @@ const ProductTabs = ({ title, description, specifications }: ProductTabsProps) =
         {activeTab === "reviews" && (
           <div className="animate-fadeIn">
             <h2 className="mb-[20px] font-serif text-[34px] font-normal leading-[1.1] lg:text-[42px]">
-              Hodnocení
+              {"Hodnocen\u00ed"}
             </h2>
-            <p className="text-[16px] leading-[1.6] text-[#111111]">Zatím zde nejsou žádné recenze.</p>
+            <p className="text-[16px] leading-[1.6] text-[#111111]">
+              {"Zat\u00edm zde nejsou \u017e\u00e1dn\u00e9 recenze."}
+            </p>
           </div>
         )}
       </div>

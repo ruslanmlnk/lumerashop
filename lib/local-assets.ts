@@ -69,3 +69,6 @@ export const getRenderableAssetPath = (
 
   return normalized;
 };
+
+export const getPayloadMediaProxyPath = (value: string): string =>
+  `/api/payload-media/${encodeURIComponent(value)}`;

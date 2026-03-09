@@ -75,6 +75,8 @@ export interface Config {
     'filter-options': FilterOption;
     products: Product;
     article: Article;
+    orders: Order;
+    'shipping-methods': ShippingMethod;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -90,6 +92,8 @@ export interface Config {
     'filter-options': FilterOptionsSelect<false> | FilterOptionsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     article: ArticleSelect<false> | ArticleSelect<true>;
+    orders: OrdersSelect<false> | OrdersSelect<true>;
+    'shipping-methods': ShippingMethodsSelect<false> | ShippingMethodsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -185,9 +189,14 @@ export interface Category {
   id: number;
   name: string;
   /**
-   * Коротке ім'я для URL-адреси (наприклад, "damske-kabelky")
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
+  generateSlug?: boolean | null;
   slug: string;
+  /**
+   * Display this category in the main header category menu.
+   */
+  showInMenu?: boolean | null;
   description?: string | null;
   image?: (number | null) | Media;
   updatedAt: string;
@@ -200,7 +209,15 @@ export interface Category {
 export interface Subcategory {
   id: number;
   name: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
   slug: string;
+  /**
+   * Display this subcategory in the header dropdown under its parent category.
+   */
+  showInMenu?: boolean | null;
   category: number | Category;
   description?: string | null;
   image?: (number | null) | Media;
@@ -214,6 +231,10 @@ export interface Subcategory {
 export interface FilterGroup {
   id: number;
   name: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
   slug: string;
   description?: string | null;
   sortOrder?: number | null;
@@ -228,6 +249,10 @@ export interface FilterGroup {
 export interface FilterOption {
   id: number;
   name: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
   slug: string;
   group: number | FilterGroup;
   sortOrder?: number | null;
@@ -242,6 +267,10 @@ export interface FilterOption {
 export interface Product {
   id: number;
   name: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
   slug: string;
   price: number;
   oldPrice?: number | null;
@@ -259,23 +288,39 @@ export interface Product {
    * Compact intro shown next to the product title.
    */
   shortDescription?: string | null;
+  /**
+   * Plain text used for summaries, fallbacks and feeds.
+   */
   description?: string | null;
+  /**
+   * Fully editable content for the first "Popis" tab on the product page.
+   */
+  descriptionContent?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   category: number | Category;
   subcategories?: (number | Subcategory)[] | null;
   mainImage?: (number | null) | Media;
-  /**
-   * Use this for CDN, external or frontend asset images.
-   */
-  imageUrl?: string | null;
   gallery?:
     | {
         image?: (number | null) | Media;
-        imageUrl?: string | null;
         id?: string | null;
       }[]
     | null;
   /**
-   * Short bullets shown on the product page.
+   * Bullets shown under shipping/returns on the product page. Separate from the "Specifications / Další informace" tab.
    */
   highlights?:
     | {
@@ -338,6 +383,100 @@ export interface Article {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders".
+ */
+export interface Order {
+  id: number;
+  orderId: string;
+  provider: 'stripe' | 'global-payments';
+  paymentStatus: 'pending' | 'paid' | 'failed' | 'canceled';
+  customerEmail: string;
+  customerPhone?: string | null;
+  customerFirstName?: string | null;
+  customerLastName?: string | null;
+  currency: string;
+  subtotal: number;
+  shippingTotal: number;
+  total: number;
+  shippingAddress?: {
+    country?: string | null;
+    address?: string | null;
+    city?: string | null;
+    zip?: string | null;
+    notes?: string | null;
+  };
+  billing?: {
+    sameAsShipping?: boolean | null;
+    isCompany?: boolean | null;
+    firstName?: string | null;
+    lastName?: string | null;
+    address?: string | null;
+    city?: string | null;
+    zip?: string | null;
+    country?: string | null;
+    companyName?: string | null;
+    companyId?: string | null;
+    vatId?: string | null;
+  };
+  shipping?: {
+    methodId?: string | null;
+    label?: string | null;
+    price?: number | null;
+    pickupCarrier?: string | null;
+    pickupPointId?: string | null;
+    pickupPointCode?: string | null;
+    pickupPointName?: string | null;
+    pickupPointAddress?: string | null;
+  };
+  items?:
+    | {
+        product?: (number | null) | Product;
+        productSnapshotId?: string | null;
+        slug?: string | null;
+        sku?: string | null;
+        variant?: string | null;
+        name: string;
+        quantity: number;
+        unitPrice: number;
+        lineTotal: number;
+        id?: string | null;
+      }[]
+    | null;
+  providerData?: {
+    stripeSessionId?: string | null;
+    stripePaymentIntentId?: string | null;
+    globalTransactionId?: string | null;
+    globalAuthCode?: string | null;
+    lastEvent?: string | null;
+    lastError?: string | null;
+    providerResponse?: string | null;
+  };
+  purchaseCountRecorded?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "shipping-methods".
+ */
+export interface ShippingMethod {
+  id: number;
+  methodId:
+    | 'ppl-courier-cod'
+    | 'ppl-pickup-cod'
+    | 'ppl-courier'
+    | 'ppl-pickup'
+    | 'zasilkovna-courier'
+    | 'zasilkovna-pickup'
+    | 'personal-pickup';
+  price: number;
+  isActive?: boolean | null;
+  sortOrder?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -391,6 +530,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'article';
         value: number | Article;
+      } | null)
+    | ({
+        relationTo: 'orders';
+        value: number | Order;
+      } | null)
+    | ({
+        relationTo: 'shipping-methods';
+        value: number | ShippingMethod;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -483,7 +630,9 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface CategoriesSelect<T extends boolean = true> {
   name?: T;
+  generateSlug?: T;
   slug?: T;
+  showInMenu?: T;
   description?: T;
   image?: T;
   updatedAt?: T;
@@ -495,7 +644,9 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface SubcategoriesSelect<T extends boolean = true> {
   name?: T;
+  generateSlug?: T;
   slug?: T;
+  showInMenu?: T;
   category?: T;
   description?: T;
   image?: T;
@@ -508,6 +659,7 @@ export interface SubcategoriesSelect<T extends boolean = true> {
  */
 export interface FilterGroupsSelect<T extends boolean = true> {
   name?: T;
+  generateSlug?: T;
   slug?: T;
   description?: T;
   sortOrder?: T;
@@ -521,6 +673,7 @@ export interface FilterGroupsSelect<T extends boolean = true> {
  */
 export interface FilterOptionsSelect<T extends boolean = true> {
   name?: T;
+  generateSlug?: T;
   slug?: T;
   group?: T;
   sortOrder?: T;
@@ -534,6 +687,7 @@ export interface FilterOptionsSelect<T extends boolean = true> {
  */
 export interface ProductsSelect<T extends boolean = true> {
   name?: T;
+  generateSlug?: T;
   slug?: T;
   price?: T;
   oldPrice?: T;
@@ -543,15 +697,14 @@ export interface ProductsSelect<T extends boolean = true> {
   stockStatus?: T;
   shortDescription?: T;
   description?: T;
+  descriptionContent?: T;
   category?: T;
   subcategories?: T;
   mainImage?: T;
-  imageUrl?: T;
   gallery?:
     | T
     | {
         image?: T;
-        imageUrl?: T;
         id?: T;
       };
   highlights?:
@@ -586,6 +739,99 @@ export interface ArticleSelect<T extends boolean = true> {
   mainImage?: T;
   description?: T;
   content?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders_select".
+ */
+export interface OrdersSelect<T extends boolean = true> {
+  orderId?: T;
+  provider?: T;
+  paymentStatus?: T;
+  customerEmail?: T;
+  customerPhone?: T;
+  customerFirstName?: T;
+  customerLastName?: T;
+  currency?: T;
+  subtotal?: T;
+  shippingTotal?: T;
+  total?: T;
+  shippingAddress?:
+    | T
+    | {
+        country?: T;
+        address?: T;
+        city?: T;
+        zip?: T;
+        notes?: T;
+      };
+  billing?:
+    | T
+    | {
+        sameAsShipping?: T;
+        isCompany?: T;
+        firstName?: T;
+        lastName?: T;
+        address?: T;
+        city?: T;
+        zip?: T;
+        country?: T;
+        companyName?: T;
+        companyId?: T;
+        vatId?: T;
+      };
+  shipping?:
+    | T
+    | {
+        methodId?: T;
+        label?: T;
+        price?: T;
+        pickupCarrier?: T;
+        pickupPointId?: T;
+        pickupPointCode?: T;
+        pickupPointName?: T;
+        pickupPointAddress?: T;
+      };
+  items?:
+    | T
+    | {
+        product?: T;
+        productSnapshotId?: T;
+        slug?: T;
+        sku?: T;
+        variant?: T;
+        name?: T;
+        quantity?: T;
+        unitPrice?: T;
+        lineTotal?: T;
+        id?: T;
+      };
+  providerData?:
+    | T
+    | {
+        stripeSessionId?: T;
+        stripePaymentIntentId?: T;
+        globalTransactionId?: T;
+        globalAuthCode?: T;
+        lastEvent?: T;
+        lastError?: T;
+        providerResponse?: T;
+      };
+  purchaseCountRecorded?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "shipping-methods_select".
+ */
+export interface ShippingMethodsSelect<T extends boolean = true> {
+  methodId?: T;
+  price?: T;
+  isActive?: T;
+  sortOrder?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -663,6 +909,25 @@ export interface HomePage {
         id?: string | null;
       }[]
     | null;
+  testimonialsSection: {
+    title: string;
+    items?:
+      | {
+          text: string;
+          author: string;
+          location: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  blogSection?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Choose and order the articles for the homepage blog section. Leave empty to hide the block.
+     */
+    featuredArticles?: (number | Article)[] | null;
+  };
   seo?: {
     title?: string | null;
     description?: string | null;
@@ -708,6 +973,26 @@ export interface HomePageSelect<T extends boolean = true> {
                   };
             };
         id?: T;
+      };
+  testimonialsSection?:
+    | T
+    | {
+        title?: T;
+        items?:
+          | T
+          | {
+              text?: T;
+              author?: T;
+              location?: T;
+              id?: T;
+            };
+      };
+  blogSection?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        featuredArticles?: T;
       };
   seo?:
     | T

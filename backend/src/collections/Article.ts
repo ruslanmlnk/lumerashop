@@ -11,7 +11,9 @@ export const Article: CollectionConfig = {
         read: () => true,
     },
     fields: [
-        slugField(),
+        slugField({
+            useAsSlug: 'title',
+        }),
         {
             name: 'title',
             type: 'text',

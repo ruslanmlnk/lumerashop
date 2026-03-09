@@ -27,6 +27,12 @@
 }
 
 @layer base {
+  html {
+    background: var(--background);
+    overflow-y: scroll;
+    scrollbar-gutter: stable both-edges;
+  }
+
   ::selection {
     @apply bg-amber-100 text-amber-900;
   }
@@ -37,6 +43,9 @@
 }
 
 body {
+  min-height: 100%;
+  overflow-y: scroll;
+  scrollbar-gutter: stable both-edges;
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);

@@ -1,4 +1,4 @@
-import { NavItem, Category, Product, Feature, Testimonial, BlogPost } from '../types/site';
+import { NavItem, Category, Product, Feature, BlogPost } from '../types/site';
 
 export const NAV_ITEMS: NavItem[] = [
     { label: 'Domů', href: '/' },
@@ -88,7 +88,7 @@ export const FEATURES_DATA: Feature[] = [
     { id: '4', title: 'Osobní přístup', description: 'Malý obchod, velká vášeň pro krásu a design.', icon: '/assets/icons/features/personal-touch.png' }
 ];
 
-export const TESTIMONIALS: Testimonial[] = [
+export const TESTIMONIALS = [
     { text: "Stylové, originální a precizně zpracované produkty. Doporučuji!", author: "Marie N.", location: "Praha" },
     { text: "Kabelka přišla nádherně zabalená, kvalita mě mile překvapila.", author: "Jana S.", location: "Brno" },
     { text: "Rychlé doručení a perfektní komunikace. Kabelka je nádherná.", author: "Lucie B.", location: "Ostrava" }

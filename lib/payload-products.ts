@@ -1,9 +1,10 @@
-import { ALL_PRODUCTS } from '@/data/site-data';
 import {
     DEFAULT_LOCAL_ASSET_FALLBACK,
     getLocalAssetPath,
+    getPayloadMediaProxyPath,
     getRenderableAssetPath,
 } from '@/lib/local-assets';
+import { createLexicalRichTextFromText, renderLexicalToHTML } from '@/lib/payload-richtext';
 import type { Product, ProductFilterValue, ProductVariant } from '@/types/site';
 
 type PayloadListResponse<T> = {
@@ -28,6 +29,15 @@ type PayloadFilterOption = {
     } | null;
 };
 
+type PayloadCategoryRelation = {
+    name?: unknown;
+    slug?: unknown;
+};
+
+type PayloadSubcategoryRelation = {
+    slug?: unknown;
+};
+
 type PayloadVariantDoc = {
     id?: unknown;
     name?: unknown;
@@ -43,10 +53,10 @@ type PayloadProductDoc = PayloadVariantDoc & {
     purchaseCount?: unknown;
     sku?: unknown;
     description?: unknown;
+    descriptionContent?: unknown;
     shortDescription?: unknown;
-    category?: {
-        name?: unknown;
-    } | number | null;
+    category?: PayloadCategoryRelation | number | null;
+    subcategories?: Array<PayloadSubcategoryRelation | number> | null;
     specifications?: Array<{
         key?: unknown;
         value?: unknown;
@@ -64,7 +74,7 @@ type PayloadProductDoc = PayloadVariantDoc & {
 
 const DEFAULT_PAYLOAD_API_URL = 'http://127.0.0.1:3001';
 
-const formatPrice = (value: number) => `${new Intl.NumberFormat('cs-CZ').format(value)} Kč`;
+const formatPrice = (value: number) => `${new Intl.NumberFormat('cs-CZ').format(value)} K\u010d`;
 
 const resolveUrl = (value: unknown, baseUrl: string): string | null => {
     if (typeof value !== 'string' || value.length === 0) {
@@ -82,17 +92,17 @@ const resolveUrl = (value: unknown, baseUrl: string): string | null => {
 
     if (normalizedValue.startsWith('http://') || normalizedValue.startsWith('https://')) {
         if (normalizedValue.startsWith(baseUrl)) {
-            return normalizedValue;
+            return getPayloadMediaProxyPath(normalizedValue);
         }
 
         return getRenderableAssetPath(normalizedValue, DEFAULT_LOCAL_ASSET_FALLBACK);
     }
 
     if (normalizedValue.startsWith('/')) {
-        return `${baseUrl}${normalizedValue}`;
+        return getPayloadMediaProxyPath(`${baseUrl}${normalizedValue}`);
     }
 
-    return `${baseUrl}/${normalizedValue}`;
+    return getPayloadMediaProxyPath(`${baseUrl}/${normalizedValue}`);
 };
 
 const resolveGallery = (gallery: PayloadGalleryItem[] | null | undefined, baseUrl: string): string[] => {
@@ -119,10 +129,7 @@ const resolvePrimaryImage = (doc: PayloadVariantDoc, baseUrl: string): string =>
     return mainUploadUrl || imageUrl || galleryImage || DEFAULT_LOCAL_ASSET_FALLBACK;
 };
 
-const normalizeStockStatus = (
-    value: unknown,
-    quantity: unknown,
-): Product['stockStatus'] => {
+const normalizeStockStatus = (value: unknown, quantity: unknown): Product['stockStatus'] => {
     if (value === 'in-stock' || value === 'low-stock' || value === 'out-of-stock') {
         return value;
     }
@@ -209,25 +216,42 @@ const mapPayloadProduct = (doc: PayloadProductDoc, baseUrl: string): Product | n
     const id = doc.id != null ? String(doc.id) : '';
     const category =
         typeof doc.category === 'object' && doc.category && typeof doc.category.name === 'string'
-            ? doc.category.name
-            : 'Nezařazené';
+            ? doc.category.name.trim()
+            : 'Neza\u0159azen\u00e9';
+    const categorySlug =
+        typeof doc.category === 'object' && doc.category && typeof doc.category.slug === 'string'
+            ? doc.category.slug.trim()
+            : undefined;
+    const subcategorySlugs = Array.isArray(doc.subcategories)
+        ? doc.subcategories
+              .map((subcategory) =>
+                  subcategory && typeof subcategory === 'object' && typeof subcategory.slug === 'string'
+                      ? subcategory.slug.trim()
+                      : '',
+              )
+              .filter((value): value is string => Boolean(value))
+        : undefined;
 
     if (!id || !name || !slug) {
         return null;
     }
 
     const numericPrice = typeof doc.price === 'number' ? doc.price : Number(doc.price);
-    const price = Number.isFinite(numericPrice) ? formatPrice(Math.round(numericPrice)) : '0 Kč';
+    const price = Number.isFinite(numericPrice) ? formatPrice(Math.round(numericPrice)) : '0 K\u010d';
 
     const numericOldPrice = typeof doc.oldPrice === 'number' ? doc.oldPrice : Number(doc.oldPrice);
-    const oldPrice = Number.isFinite(numericOldPrice) && numericOldPrice > 0
-        ? formatPrice(Math.round(numericOldPrice))
-        : undefined;
+    const oldPrice =
+        Number.isFinite(numericOldPrice) && numericOldPrice > 0
+            ? formatPrice(Math.round(numericOldPrice))
+            : undefined;
     const numericPurchaseCount =
         typeof doc.purchaseCount === 'number' ? doc.purchaseCount : Number(doc.purchaseCount);
 
     const image = resolvePrimaryImage(doc, baseUrl);
     const gallery = resolveGallery(doc.gallery, baseUrl);
+    const descriptionHtml =
+        renderLexicalToHTML(doc.descriptionContent) ||
+        renderLexicalToHTML(createLexicalRichTextFromText(typeof doc.description === 'string' ? doc.description : ''));
 
     const variants = Array.isArray(doc.variantProducts)
         ? doc.variantProducts
@@ -242,14 +266,18 @@ const mapPayloadProduct = (doc: PayloadProductDoc, baseUrl: string): Product | n
         name,
         price,
         oldPrice,
-        purchaseCount: Number.isFinite(numericPurchaseCount) && numericPurchaseCount > 0
-            ? Math.max(0, Math.floor(numericPurchaseCount))
-            : 0,
+        purchaseCount:
+            Number.isFinite(numericPurchaseCount) && numericPurchaseCount > 0
+                ? Math.max(0, Math.floor(numericPurchaseCount))
+                : 0,
         image,
         slug,
         category,
+        categorySlug,
+        subcategorySlugs: subcategorySlugs?.length ? subcategorySlugs : undefined,
         sku: typeof doc.sku === 'string' ? doc.sku : undefined,
         description: typeof doc.description === 'string' ? doc.description : undefined,
+        descriptionHtml: descriptionHtml || undefined,
         shortDescription: typeof doc.shortDescription === 'string' ? doc.shortDescription : undefined,
         gallery: gallery.length ? gallery : [image],
         specifications: toSpecificationsObject(doc.specifications),
@@ -276,17 +304,15 @@ export async function fetchPayloadProducts(): Promise<Product[]> {
         );
 
         if (!response.ok) {
-            return ALL_PRODUCTS;
+            return [];
         }
 
         const payload = (await response.json()) as PayloadListResponse<PayloadProductDoc>;
         const docs = Array.isArray(payload.docs) ? payload.docs : [];
-        const mapped = docs
+        return docs
             .map((doc) => mapPayloadProduct(doc, baseUrl))
             .filter((product): product is Product => Boolean(product));
-
-        return mapped.length ? mapped : ALL_PRODUCTS;
     } catch {
-        return ALL_PRODUCTS;
+        return [];
     }
 }

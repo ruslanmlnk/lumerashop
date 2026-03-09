@@ -1,6 +1,39 @@
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import {
+    fetchPaymentOrder,
+    type PaymentOrderStatus,
+    updatePaymentOrder,
+} from '@/lib/payments/internal-orders';
+
+const getProviderLabel = (provider?: string) => {
+    if (provider === 'global-payments') {
+        return 'Global Payments';
+    }
+
+    if (provider === 'stripe') {
+        return 'Stripe';
+    }
+
+    return provider || '';
+};
+
+const getPaymentStatusLabel = (status?: PaymentOrderStatus) => {
+    if (status === 'paid') {
+        return 'Zaplaceno';
+    }
+
+    if (status === 'failed') {
+        return 'Platba selhala';
+    }
+
+    if (status === 'canceled') {
+        return 'Zru\u0161eno';
+    }
+
+    return '\u010Cek\u00E1 na potvrzen\u00ED';
+};
 
 export default async function CheckoutCancelPage({
     searchParams,
@@ -8,42 +41,79 @@ export default async function CheckoutCancelPage({
     searchParams: Promise<{ provider?: string; orderId?: string; code?: string; reason?: string }>;
 }) {
     const params = await searchParams;
+    const order =
+        params.orderId && params.provider === 'stripe'
+            ? await updatePaymentOrder(params.orderId, {
+                  paymentStatus: 'canceled',
+                  lastEvent: 'stripe.checkout.cancel_page',
+              }).catch(() => null)
+            : params.orderId
+              ? await fetchPaymentOrder(params.orderId).catch(() => null)
+              : null;
+    const providerLabel = getProviderLabel(order?.provider || params.provider);
+    const paymentStatus = order?.paymentStatus || 'canceled';
+    const displayOrderId = order?.orderId || params.orderId || '';
 
     return (
         <div className="flex min-h-screen flex-col bg-white">
             <Header />
 
-            <main className="flex-1 pt-[180px] md:pt-[220px] pb-20">
+            <main className="flex flex-1 items-start pt-[180px] pb-20 md:pt-[220px]">
                 <div className="mx-auto w-full max-w-[820px] px-4 lg:px-0">
                     <div className="border border-[#111111]/10 bg-white p-8 md:p-12">
                         <h1
                             className="text-[40px] leading-[1.05] text-[#111111] md:text-[52px]"
                             style={{ fontFamily: '"Cormorant Garamond", serif' }}
                         >
-                            Platba nebyla dokončena
+                            {'Platba nebyla dokon\u010Dena'}
                         </h1>
 
                         <p className="mt-4 text-[16px] leading-[1.6] text-[#444444]">
-                            Transakce byla zrušena nebo se nepodařila dokončit. Můžete to zkusit znovu.
+                            {'Transakce byla zru\u0161ena nebo se nepoda\u0159ila dokon\u010Dit. M\u016F\u017Eete to zkusit znovu.'}
                         </p>
 
-                        {params.orderId && (
+                        {displayOrderId ? (
                             <p className="mt-2 text-[14px] text-[#666666]">
-                                Číslo objednávky: <span className="font-semibold text-[#111111]">{params.orderId}</span>
+                                {'\u010C\u00EDslo objedn\u00E1vky:'}{' '}
+                                <span className="font-semibold text-[#111111]">{displayOrderId}</span>
                             </p>
-                        )}
+                        ) : null}
 
-                        {params.provider && (
+                        {providerLabel ? (
                             <p className="mt-1 text-[14px] text-[#666666]">
-                                Platební brána: <span className="font-semibold text-[#111111]">{params.provider}</span>
+                                {'Platebn\u00ED br\u00E1na:'}{' '}
+                                <span className="font-semibold text-[#111111]">{providerLabel}</span>
                             </p>
-                        )}
+                        ) : null}
 
-                        {(params.code || params.reason) && (
+                        <p className="mt-1 text-[14px] text-[#666666]">
+                            {'Stav platby:'}{' '}
+                            <span className="font-semibold text-[#111111]">
+                                {getPaymentStatusLabel(paymentStatus)}
+                            </span>
+                        </p>
+
+                        {order?.total ? (
                             <p className="mt-1 text-[14px] text-[#666666]">
-                                Kód: <span className="font-semibold text-[#111111]">{params.code || params.reason}</span>
+                                Celkem:{' '}
+                                <span className="font-semibold text-[#111111]">
+                                    {new Intl.NumberFormat('cs-CZ', {
+                                        style: 'currency',
+                                        currency: order.currency || 'CZK',
+                                        maximumFractionDigits: 0,
+                                    }).format(order.total)}
+                                </span>
                             </p>
-                        )}
+                        ) : null}
+
+                        {params.code || params.reason ? (
+                            <p className="mt-1 text-[14px] text-[#666666]">
+                                {'K\u00F3d:'}{' '}
+                                <span className="font-semibold text-[#111111]">
+                                    {params.code || params.reason}
+                                </span>
+                            </p>
+                        ) : null}
 
                         <div className="mt-8 flex flex-wrap gap-4">
                             <Link
@@ -57,7 +127,7 @@ export default async function CheckoutCancelPage({
                                 href="/cart"
                                 className="inline-flex h-[46px] items-center justify-center border border-[#111111]/20 px-6 text-[13px] font-semibold uppercase tracking-[0.08em] text-black"
                             >
-                                Zpět do košíku
+                                {'Zp\u011Bt do ko\u0161\u00EDku'}
                             </Link>
                         </div>
                     </div>
